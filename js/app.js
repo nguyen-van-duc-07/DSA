@@ -109,6 +109,47 @@ function initSlideEngine() {
     }
   });
 
+  // Mouse Wheel Navigation (600ms debounce with conflict prevention)
+  let lastWheelTime = 0;
+  const WHEEL_COOLDOWN = 600;
+
+  window.addEventListener("wheel", (e) => {
+    // If modal or timeline drawer is open, let user scroll inside it
+    const helpModal = document.getElementById("help-modal");
+    const timelineDrawer = document.getElementById("timeline-drawer");
+    if (helpModal?.classList.contains("open") || timelineDrawer?.classList.contains("open")) {
+      return;
+    }
+
+    // If cursor is inside a scrollable container (e.g. pre, code block), allow native scrolling
+    const scrollable = e.target.closest("pre, #timeline-slide-list, .terminal-window");
+    if (scrollable) {
+      const canScrollDown = scrollable.scrollTop + scrollable.clientHeight < scrollable.scrollHeight - 2;
+      const canScrollUp = scrollable.scrollTop > 2;
+      if ((e.deltaY > 0 && canScrollDown) || (e.deltaY < 0 && canScrollUp)) {
+        return;
+      }
+    }
+
+    if (Math.abs(e.deltaY) < 25) return;
+
+    const now = Date.now();
+    if (now - lastWheelTime < WHEEL_COOLDOWN) {
+      e.preventDefault();
+      return;
+    }
+
+    if (e.deltaY > 25) {
+      e.preventDefault();
+      lastWheelTime = now;
+      nextSlide();
+    } else if (e.deltaY < -25) {
+      e.preventDefault();
+      lastWheelTime = now;
+      prevSlide();
+    }
+  }, { passive: false });
+
   // Start button on Hero Cover
   const heroBtn = document.getElementById("hero-start-btn");
   if (heroBtn) {
@@ -366,6 +407,48 @@ const DIJKSTRA_HUMAN_DESCRIPTIONS = [
   "Bước 8: Ta lấy ra bản ghi (11, E). Giá trị này cũ hơn 10 nên ta bỏ qua. Lúc này Min-Heap đã rỗng, thuật toán hoàn tất trọn vẹn!"
 ];
 
+function computeEdgeGeometry(sNode, tNode, curve, rStart, rEnd) {
+  const dx = tNode.x - sNode.x;
+  const dy = tNode.y - sNode.y;
+  const len = Math.sqrt(dx * dx + dy * dy) || 1;
+  const ux = dx / len;
+  const uy = dy / len;
+  const nx = -uy;
+  const ny = ux;
+
+  if (!curve || curve === 0) {
+    const startX = sNode.x + ux * rStart;
+    const startY = sNode.y + uy * rStart;
+    const endX = tNode.x - ux * (rEnd + 6);
+    const endY = tNode.y - uy * (rEnd + 6);
+    const dStr = `M ${startX.toFixed(1)} ${startY.toFixed(1)} L ${endX.toFixed(1)} ${endY.toFixed(1)}`;
+    const midX = (sNode.x + tNode.x) / 2 + nx * 16;
+    const midY = (sNode.y + tNode.y) / 2 + ny * 16;
+    return { dStr, midX, midY, nx, ny };
+  } else {
+    const ctrlX = (sNode.x + tNode.x) / 2 - dy * curve;
+    const ctrlY = (sNode.y + tNode.y) / 2 + dx * curve;
+
+    const dx1 = ctrlX - sNode.x;
+    const dy1 = ctrlY - sNode.y;
+    const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) || 1;
+    const startX = sNode.x + (dx1 / len1) * rStart;
+    const startY = sNode.y + (dy1 / len1) * rStart;
+
+    const dx2 = tNode.x - ctrlX;
+    const dy2 = tNode.y - ctrlY;
+    const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 1;
+    const endX = tNode.x - (dx2 / len2) * (rEnd + 6);
+    const endY = tNode.y - (dy2 / len2) * (rEnd + 6);
+
+    const dStr = `M ${startX.toFixed(1)} ${startY.toFixed(1)} Q ${ctrlX.toFixed(1)} ${ctrlY.toFixed(1)} ${endX.toFixed(1)} ${endY.toFixed(1)}`;
+    const curveSign = curve > 0 ? 1 : -1;
+    const midX = 0.25 * sNode.x + 0.5 * ctrlX + 0.25 * tNode.x + nx * (16 * curveSign);
+    const midY = 0.25 * sNode.y + 0.5 * ctrlY + 0.25 * tNode.y + ny * (16 * curveSign);
+    return { dStr, midX, midY, nx, ny };
+  }
+}
+
 function initDijkstraSim() {
   const data = window.PRESENTATION_DATA;
   if (!data || !data.sample_graph_5) return;
@@ -386,36 +469,42 @@ function initDijkstraSim() {
       const tNode = nodes.find((n) => n.id === edge.target);
       if (!sNode || !tNode) return;
 
+      const geom = computeEdgeGeometry(sNode, tNode, edge.curve || 0, 34, 34);
+
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("id", `s9-edge-${edge.id}`);
+      path.setAttribute("d", geom.dStr);
       path.setAttribute("stroke", "#94A3B8");
       path.setAttribute("stroke-width", "3");
       path.setAttribute("fill", "none");
       path.setAttribute("marker-end", "url(#s9-arrowhead)");
-
-      const dx = tNode.x - sNode.x;
-      const dy = tNode.y - sNode.y;
-      const curve = edge.curve || 0;
-
-      let dStr = curve !== 0
-        ? `M ${sNode.x} ${sNode.y} Q ${(sNode.x + tNode.x) / 2 - dy * curve} ${(sNode.y + tNode.y) / 2 + dx * curve} ${tNode.x} ${tNode.y}`
-        : `M ${sNode.x} ${sNode.y} L ${tNode.x} ${tNode.y}`;
-
-      path.setAttribute("d", dStr);
       edgesLayer.appendChild(path);
 
-      const midX = (sNode.x + tNode.x) / 2 - dy * (curve * 0.5);
-      const midY = (sNode.y + tNode.y) / 2 + dx * (curve * 0.5);
+      // Weight Label with white background box to prevent line crossing
+      const labelG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", geom.midX - 18);
+      rect.setAttribute("y", geom.midY - 12);
+      rect.setAttribute("width", "36");
+      rect.setAttribute("height", "24");
+      rect.setAttribute("rx", "6");
+      rect.setAttribute("fill", "#FFFFFF");
+      rect.setAttribute("stroke", "#CBD5E1");
+      rect.setAttribute("stroke-width", "1.5");
+      labelG.appendChild(rect);
+
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", midX);
-      text.setAttribute("y", midY - 8);
+      text.setAttribute("x", geom.midX);
+      text.setAttribute("y", geom.midY + 5);
       text.setAttribute("fill", "#2563EB");
-      text.setAttribute("font-size", "17");
-      text.setAttribute("font-family", "JetBrains Mono");
+      text.setAttribute("font-size", "14");
       text.setAttribute("font-weight", "bold");
       text.setAttribute("text-anchor", "middle");
       text.textContent = edge.weight;
-      edgesLayer.appendChild(text);
+      labelG.appendChild(text);
+
+      edgesLayer.appendChild(labelG);
     });
 
     nodes.forEach((node) => {
@@ -558,6 +647,23 @@ window.s9_renderStep = function(stepIdx) {
     }
   });
 
+  // Highlight tree edges in SVG
+  const edges = data.sample_graph_5.edges;
+  edges.forEach((edge) => {
+    const path = document.getElementById(`s9-edge-${edge.id}`);
+    if (!path) return;
+    const isTreeEdge = frame.parent_snapshot && frame.parent_snapshot[edge.target] === edge.source;
+    if (isTreeEdge) {
+      path.setAttribute("stroke", "#059669");
+      path.setAttribute("stroke-width", "4");
+      path.setAttribute("marker-end", "url(#s9-arrowhead-active)");
+    } else {
+      path.setAttribute("stroke", "#CBD5E1");
+      path.setAttribute("stroke-width", "2.5");
+      path.setAttribute("marker-end", "url(#s9-arrowhead)");
+    }
+  });
+
   // Update Heap Badges
   if (heapBox) {
     heapBox.innerHTML = "";
@@ -638,35 +744,42 @@ function initFloydSim() {
       const tNode = nodes.find((n) => n.id === edge.target);
       if (!sNode || !tNode) return;
 
+      const geom = computeEdgeGeometry(sNode, tNode, edge.curve || 0, 34, 34);
+
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
       path.setAttribute("id", `s10-edge-${edge.id}`);
+      path.setAttribute("d", geom.dStr);
       path.setAttribute("stroke", "#94A3B8");
       path.setAttribute("stroke-width", "3");
       path.setAttribute("fill", "none");
-
-      const dx = tNode.x - sNode.x;
-      const dy = tNode.y - sNode.y;
-      const curve = edge.curve || 0;
-
-      let dStr = curve !== 0
-        ? `M ${sNode.x} ${sNode.y} Q ${(sNode.x + tNode.x) / 2 - dy * curve} ${(sNode.y + tNode.y) / 2 + dx * curve} ${tNode.x} ${tNode.y}`
-        : `M ${sNode.x} ${sNode.y} L ${tNode.x} ${tNode.y}`;
-
-      path.setAttribute("d", dStr);
+      path.setAttribute("marker-end", "url(#s10-arrowhead)");
       edgesLayer.appendChild(path);
 
-      const midX = (sNode.x + tNode.x) / 2 - dy * (curve * 0.5);
-      const midY = (sNode.y + tNode.y) / 2 + dx * (curve * 0.5);
+      // Weight Label with white background box to prevent line crossing
+      const labelG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+      const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", geom.midX - 18);
+      rect.setAttribute("y", geom.midY - 12);
+      rect.setAttribute("width", "36");
+      rect.setAttribute("height", "24");
+      rect.setAttribute("rx", "6");
+      rect.setAttribute("fill", "#FFFFFF");
+      rect.setAttribute("stroke", "#CBD5E1");
+      rect.setAttribute("stroke-width", "1.5");
+      labelG.appendChild(rect);
+
       const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-      text.setAttribute("x", midX);
-      text.setAttribute("y", midY - 8);
+      text.setAttribute("x", geom.midX);
+      text.setAttribute("y", geom.midY + 5);
       text.setAttribute("fill", "#4F46E5");
-      text.setAttribute("font-size", "17");
-      text.setAttribute("font-family", "JetBrains Mono");
+      text.setAttribute("font-size", "14");
       text.setAttribute("font-weight", "bold");
       text.setAttribute("text-anchor", "middle");
       text.textContent = edge.weight;
-      edgesLayer.appendChild(text);
+      labelG.appendChild(text);
+
+      edgesLayer.appendChild(labelG);
     });
 
     nodes.forEach((node) => {
@@ -799,6 +912,23 @@ window.s10_renderStep = function(kIdx) {
     }
   });
 
+  // Highlight intermediate node k and adjacent edges in SVG
+  const edges = data.sample_graph_5.edges;
+  edges.forEach((edge) => {
+    const path = document.getElementById(`s10-edge-${edge.id}`);
+    if (!path) return;
+    const isConnToK = frame.k_vertex && (edge.source === frame.k_vertex || edge.target === frame.k_vertex);
+    if (isConnToK) {
+      path.setAttribute("stroke", "#4F46E5");
+      path.setAttribute("stroke-width", "3.5");
+      path.setAttribute("marker-end", "url(#s10-arrowhead-active)");
+    } else {
+      path.setAttribute("stroke", "#CBD5E1");
+      path.setAttribute("stroke-width", "2.5");
+      path.setAttribute("marker-end", "url(#s10-arrowhead)");
+    }
+  });
+
   // Render Matrix Table using clean D<sup>(k)</sup>
   if (container) {
     const vertices = ["A", "B", "C", "D", "E"];
@@ -881,10 +1011,10 @@ function renderEmergencyMap() {
 
   mapSvg.innerHTML = `
     <defs>
-      <marker id="em-arrowhead" markerWidth="9" markerHeight="7" refX="28" refY="3.5" orient="auto">
+      <marker id="em-arrowhead" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
         <polygon points="0 0, 9 3.5, 0 7" fill="#64748B" />
       </marker>
-      <marker id="em-arrowhead-green" markerWidth="9" markerHeight="7" refX="28" refY="3.5" orient="auto">
+      <marker id="em-arrowhead-green" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
         <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
       </marker>
     </defs>
@@ -896,26 +1026,43 @@ function renderEmergencyMap() {
     if (!s || !t) return;
 
     const isWinnerRoute = (e.source === "H2" && e.target === "R4");
+    const rStart = s.type === "hospital" ? 30 : 26;
+    const rEnd = t.type === "hospital" ? 30 : 26;
+    const geom = computeEdgeGeometry(s, t, 0, rStart, rEnd);
+
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", `M ${s.x} ${s.y} L ${t.x} ${t.y}`);
+    path.setAttribute("d", geom.dStr);
     path.setAttribute("stroke", isWinnerRoute ? "#059669" : "#CBD5E1");
     path.setAttribute("stroke-width", isWinnerRoute ? "4.5" : "2.5");
     path.setAttribute("fill", "none");
     path.setAttribute("marker-end", isWinnerRoute ? "url(#em-arrowhead-green)" : "url(#em-arrowhead)");
     mapSvg.appendChild(path);
 
-    const midX = (s.x + t.x) / 2;
-    const midY = (s.y + t.y) / 2;
+    // Label wrapped in white rounded box
+    const labelG = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rect.setAttribute("x", geom.midX - 22);
+    rect.setAttribute("y", geom.midY - 12);
+    rect.setAttribute("width", "44");
+    rect.setAttribute("height", "24");
+    rect.setAttribute("rx", "6");
+    rect.setAttribute("fill", "#FFFFFF");
+    rect.setAttribute("stroke", isWinnerRoute ? "#A7F3D0" : "#CBD5E1");
+    rect.setAttribute("stroke-width", "1.5");
+    labelG.appendChild(rect);
+
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", midX);
-    text.setAttribute("y", midY - 8);
+    text.setAttribute("x", geom.midX);
+    text.setAttribute("y", geom.midY + 5);
     text.setAttribute("fill", isWinnerRoute ? "#047857" : "#475569");
-    text.setAttribute("font-size", "14");
-    text.setAttribute("font-family", "JetBrains Mono");
+    text.setAttribute("font-size", "13");
     text.setAttribute("font-weight", "bold");
     text.setAttribute("text-anchor", "middle");
     text.textContent = `${e.weight}m`;
-    mapSvg.appendChild(text);
+    labelG.appendChild(text);
+
+    mapSvg.appendChild(labelG);
   });
 
   nodes.forEach((n) => {
@@ -941,12 +1088,14 @@ function renderEmergencyMap() {
     text.textContent = n.id;
     g.appendChild(text);
 
+    // Location name: top row (y < 200) places label ABOVE node (n.y - 40)
+    // bottom row places label BELOW node (n.y + 46) to never cut through edges
+    const labelY = n.y < 200 ? n.y - 40 : n.y + 46;
     const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
     label.setAttribute("x", n.x);
-    label.setAttribute("y", n.y + 44);
-    label.setAttribute("fill", "#1E293B");
+    label.setAttribute("y", labelY);
+    label.setAttribute("fill", "#0F172A");
     label.setAttribute("font-size", "13");
-    label.setAttribute("font-family", "Be Vietnam Pro, sans-serif");
     label.setAttribute("font-weight", "600");
     label.setAttribute("text-anchor", "middle");
     label.textContent = n.label;

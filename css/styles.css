@@ -59,13 +59,29 @@ html, body {
   user-select: none;
 }
 
-h1, h2, h3, h4, .font-heading {
+h1, .slide-title {
   font-family: 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.025em;
 }
 
+h2, h3, h4, th, .slide-tag, .spec-badge {
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
 code, pre, .font-mono {
   font-family: 'JetBrains Mono', monospace;
+}
+
+svg text {
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  user-select: none;
+}
+
+.svg-label-protected {
+  paint-order: stroke fill;
+  stroke: #FFFFFF;
+  stroke-width: 8px;
+  stroke-linejoin: round;
 }
 
 /* Hiệu ứng chuyển màu Pastel thật nhẹ ở góc */
@@ -121,8 +137,8 @@ code, pre, .font-mono {
   justify-content: flex-start;
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.985) translateY(10px);
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.985) translateY(12px);
+  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   overflow: hidden;
   z-index: 10;
@@ -135,6 +151,29 @@ code, pre, .font-mono {
   pointer-events: auto;
   z-index: 20;
 }
+
+/* Staggered Fade-Up for Cards inside Active Slide */
+@keyframes cardFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide.active .spec-card,
+.slide.active .bento-box {
+  animation: cardFadeUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide.active .slide-col:first-child .spec-card:nth-child(1) { animation-delay: 0.04s; }
+.slide.active .slide-col:first-child .spec-card:nth-child(2) { animation-delay: 0.08s; }
+.slide.active .slide-col:first-child .spec-card:nth-child(3) { animation-delay: 0.12s; }
+.slide.active .slide-col:first-child .spec-card:nth-child(4) { animation-delay: 0.16s; }
+.slide.active .slide-col:last-child > * { animation-delay: 0.10s; }
 
 /* Slide Container */
 .slide-container {
@@ -159,10 +198,10 @@ code, pre, .font-mono {
   gap: 0.5rem;
   padding: 0.3rem 0.85rem;
   border-radius: 9999px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   margin-bottom: 0.45rem;
 }
@@ -237,10 +276,10 @@ code, pre, .font-mono {
 
 .spec-badge {
   display: inline-block;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
   padding: 0.25rem 0.65rem;
   border-radius: 0.45rem;
   margin-bottom: 0.45rem;
