@@ -145,12 +145,15 @@ $$\delta(s, v) \le \delta(s, u) + w(u, v)$$
 **Thuật toán nới lỏng cạnh $(u, v)$:**
 $$\text{Relax}(u, v, w): \quad \text{if } dist[u] + w(u, v) < dist[v] \text{ then } \begin{cases} dist[v] \leftarrow dist[u] + w(u, v) \\ parent[v] \leftarrow u \end{cases}$$
 
-#### 3. Vai trò của Hàng đợi ưu tiên (Priority Queue / Min-Heap)
+#### 3. Cấu trúc Hàng đợi ưu tiên định chỉ mục (IndexMinPQ)
 - Nếu dùng mảng tuyến tính để tìm $\arg\min_{v \in Q} dist[v]$, mỗi lần trích xuất tốn $O(V)$, tổng chi phí tìm kiếm cho $V$ bước là $O(V^2)$.
-- Khi sử dụng **Min-Heap (Binary Heap)**:
-  - Thao tác trích xuất đỉnh nhỏ nhất `extract-min`: tốn thời gian $O(\log |V|)$.
-  - Thao tác cập nhật khoảng cách (thực hiện qua việc đẩy bản sao mới vào Heap - Lazy Insertion): tốn thời gian $O(\log |V|)$ cho mỗi cạnh được nới lỏng.
-  - Tổng thời gian thực thi giảm từ $O(V^2)$ xuống $O((V + E) \log V)$, tạo nên bước nhảy vọt về hiệu năng trên đồ thị thưa.
+- Thay vì sử dụng kỹ thuật trễ (Lazy Deletion) đẩy nhiều bản sao rác vào Min-Heap thông thường làm phình bộ nhớ tới $O(E)$, ta sử dụng cấu trúc **Hàng đợi ưu tiên định chỉ mục (IndexMinPQ)** chuẩn học thuật:
+  - **Mảng `keys[i]`:** Lưu giá trị khoảng cách/độ ưu tiên hiện tại của đỉnh $i$.
+  - **Mảng nhị phân `pq[k]`:** Heap 1-indexed lưu định danh chỉ số đỉnh, thỏa mãn tính chất Heap: `keys[pq[k]] <= keys[pq[2k]]` và `keys[pq[k]] <= keys[pq[2k+1]]`.
+  - **Mảng chỉ mục ngược `qp[i]`:** Lưu vị trí hiện tại của đỉnh $i$ trong mảng `pq` (thỏa mãn quan hệ song ánh `qp[pq[k]] = k`, và `qp[i] = -1` nếu đỉnh $i$ không có trong Heap). Nhờ `qp`, thao tác kiểm tra đỉnh tồn tại `contains(i)` đạt độ phức tạp $O(1)$.
+  - **Thao tác `decrease_key(i, new_dist)`:** Cập nhật trực tiếp `keys[i] = new_dist`, sau đó kích hoạt thao tác bơi lên `_swim(qp[i])` để phục hồi cấu trúc Min-Heap trong thời gian $O(\log V)$. Không sinh bất kỳ đỉnh rác nào, kích thước heap luôn $\le V$.
+  - **Thao tác `del_min()`:** Trích xuất đỉnh có khoảng cách nhỏ nhất ở gốc `pq[1]`, hoán đổi với phần tử cuối và chìm xuống qua `_sink(1)` trong thời gian $O(\log V)$.
+  - **Tổng độ phức tạp thời gian:** $V \times \text{del\_min}() + E \times \text{decrease\_key}() = O(V \log V + E \log V) = O((V + E) \log V)$ với bộ nhớ cố định $O(V)$.
 
 ---
 
@@ -210,6 +213,17 @@ $$D^{(k)}[i][k] = \min(D^{(k-1)}[i][k], D^{(k-1)}[i][k] + 0) = D^{(k-1)}[i][k]$$
 Tương tự:
 $$D^{(k)}[k][j] = D^{(k-1)}[k][j]$$
 Điều này chứng minh rằng các giá trị trên hàng $k$ và cột $k$ **hoàn toàn không thay đổi** trong suốt quá trình tính toán của bước $k$. Do đó, việc ghi đè trực tiếp $D[i][j] \leftarrow \min(D[i][j], D[i][k] + D[k][j])$ trên cùng một ma trận 2 chiều là an toàn tuyệt đối, giúp giảm độ phức tạp không gian từ $O(V^3)$ xuống $O(V^2)$.
+
+#### 5. Cơ chế Tái tạo Lộ trình qua Ma trận Đỉnh đứng trước (_parent)
+Để phục hồi đường đi ngắn nhất giữa hai đỉnh $u$ và $v$, Floyd-Warshall duy trì song song ma trận tiền nhiệm $\_parent[i][j]$ kích thước $|V| \times |V|$:
+- **Ý nghĩa:** $\_parent[i][j]$ lưu đỉnh đứng ngay trước $j$ trên đường đi ngắn nhất xuất phát từ $i$.
+- **Khởi tạo ($k = 0$):**
+  - $\_parent[i][j] = i$ nếu tồn tại cạnh nối trực tiếp có hướng từ $i$ đến $j$ ($i \ne j$).
+  - $\_parent[i][j] = -1$ nếu không có cạnh trực tiếp hoặc $i = j$.
+- **Cập nhật tại bước $k$:** Khi phát hiện đường đi qua đỉnh $k$ ngắn hơn ($D[i][k] + D[k][j] < D[i][j]$):
+  $$\_parent[i][j] = \_parent[k][j]$$
+  *(Đỉnh đứng ngay trước $j$ trên đường đi từ $i$ qua $k$ chính là đỉnh đứng ngay trước $j$ trên chặng đường từ $k$ đến $j$)*.
+- **Thuật toán truy ngược:** Xuất phát từ đích $curr = v$, lặp $curr \leftarrow \_parent[u][curr]$ và đẩy vào danh sách cho đến khi gặp nguồn $u$, sau đó đảo ngược danh sách để thu được lộ trình hoàn chỉnh $u \to \dots \to v$.
 
 ---
 
@@ -398,436 +412,341 @@ $\implies$ Kết quả hoàn toàn trùng khớp với Thuật toán Dijkstra!
 
 ---
 
-## PHẦN 4. CÀI ĐẶT BẰNG PYTHON (THIẾT KẾ HƯỚNG ĐỐI TƯỢNG VỚI 2 CLASS)
+## PHẦN 4. CÀI ĐẶT BẰNG PYTHON (THIẾT KẾ HƯỚNG ĐỐI TƯỢNG VỚI 4 MODULE CHUẨN HỌC THUẬT)
 
-Dưới đây là mã nguồn Python hoàn chỉnh, được thiết kế theo chuẩn kỹ thuật phần mềm cao cấp: tuân thủ PEP 8, PEP 257 (Docstrings chi tiết), sử dụng Type Hints đầy đủ, lưu trữ toàn bộ lịch sử các bước (`trace_steps`) phục vụ cho việc xuất dữ liệu trực quan hóa Web ở Phần 5.
+Hệ thống mã nguồn được tổ chức thành 4 module chuẩn mực theo kiến trúc hướng đối tượng (OOP) kinh điển của Algorithms (Robert Sedgewick & Kevin Wayne):
+1. **`edge.py`**: Định nghĩa lớp cạnh có hướng có trọng số `DirectedEdge` và lớp đồ thị `EdgeWeightedDigraph`.
+2. **`minpq.py`**: Hàng đợi ưu tiên định chỉ mục `IndexMinPQ` hỗ trợ `insert`, `del_min`, `decrease_key` qua hai thao tác tái cân bằng Heap `_swim` và `_sink`.
+3. **`dijkstra_v2.py`**: Lớp giải thuật toán Dijkstra `DijkstraSP` dựa trên `IndexMinPQ`.
+4. **`floyd_v2.py`**: Lớp giải thuật toán Floyd-Warshall `FloydWarshall` với ma trận khoảng cách `_dist` và ma trận tiền nhiệm `_parent` phục vụ truy vết lộ trình.
+
+---
+
+### 4.1. Module `edge.py` (DirectedEdge & EdgeWeightedDigraph)
 
 ```python
-"""
-shortest_path_solvers.py
-Module cung cấp các bộ giải thuật toán tìm đường đi ngắn nhất chuẩn mực:
-- DijkstraSolver: Giải bài toán Single-Source Shortest Path (SSSP).
-- FloydWarshallSolver: Giải bài toán All-Pairs Shortest Path (APSP).
+class DirectedEdge:
+    def __init__(self, v: int, w: int, weight: float):
+        self._v = v
+        self._w = w
+        self._weight = weight
 
-Tác giả: Nhóm Nghiên cứu & Giảng dạy Cấu trúc Dữ liệu & Giải thuật
-Phiên bản: 2.0.0
-"""
+    def from_vertex(self) -> int:
+        return self._v
 
-from typing import List, Dict, Tuple, Optional, Any
-import heapq
-import math
+    def to_vertex(self) -> int:
+        return self._w
+
+    def weight(self) -> float:
+        return self._weight
+
+    def __str__(self) -> str:
+        return f"{self._v} -> {self._w} {self._weight:.2f}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
-class DijkstraSolver:
-    """
-    Bộ giải thuật toán Dijkstra sử dụng Hàng đợi ưu tiên (Min-Heap)
-    kết hợp kỹ thuật Lazy Deletion.
-    
-    Phù hợp cho đồ thị có trọng số cạnh không âm.
-    Hỗ trợ lưu lại toàn bộ các bước thực thi để trực quan hóa động.
-    """
+class EdgeWeightedDigraph:
+    def __init__(self, V: int):
+        self.V = V
+        self._adj = [[] for _ in range(V)]
 
-    def __init__(self, vertices: List[str]) -> None:
-        """
-        Khởi tạo đối tượng DijkstraSolver.
+    def add_edge(self, e: DirectedEdge):
+        v = e.from_vertex()
+        self._adj[v].append(e)
 
-        :param vertices: Danh sách định danh các đỉnh trong đồ thị.
-        """
-        self.vertices: List[str] = list(vertices)
-        # Danh sách kề: {u: [(v, weight), ...]}
-        self.adj: Dict[str, List[Tuple[str, float]]] = {v: [] for v in self.vertices}
-        self.dist: Dict[str, float] = {}
-        self.parent: Dict[str, Optional[str]] = {}
-        self.trace_steps: List[Dict[str, Any]] = []
+    def adj(self, v: int) -> list[DirectedEdge]:
+        return self._adj[v]
 
-    def add_edge(self, u: str, v: str, weight: float) -> None:
-        """
-        Thêm một cạnh có hướng từ u đến v với trọng số xác định.
+    def edges(self) -> list[DirectedEdge]:
+        all_edges = []
+        for v in range(self.V):
+            all_edges.extend(self._adj[v])
+        return all_edges
+```
 
-        :param u: Đỉnh xuất phát.
-        :param v: Đỉnh kết thúc.
-        :param weight: Trọng số không âm của cạnh.
-        :raises ValueError: Nếu trọng số cạnh âm.
-        """
-        if weight < 0:
-            raise ValueError(f"Dijkstra không hỗ trợ cạnh có trọng số âm: ({u} -> {v}, {weight})")
-        self.adj[u].append((v, float(weight)))
+---
 
-    def solve(self, start_node: str) -> Dict[str, float]:
-        """
-        Thực thi thuật toán Dijkstra xuất phát từ đỉnh start_node.
+### 4.2. Module `minpq.py` (IndexMinPQ)
 
-        :param start_node: Đỉnh nguồn.
-        :return: Từ điển chứa khoảng cách ngắn nhất từ start_node tới mọi đỉnh.
-        """
-        if start_node not in self.adj:
-            raise KeyError(f"Đỉnh nguồn '{start_node}' không tồn tại trong đồ thị.")
+```python
+class IndexMinPQ:
+    def __init__(self, max_n: int):
+        self.max_n = max_n
+        self.n = 0
+        self.keys = [None] * (max_n + 1)   # keys[i] = độ ưu tiên của đỉnh i
+        self.pq = [0] * (max_n + 1)        # Binary heap chứa các chỉ số đỉnh (1-indexed)
+        self.qp = [-1] * (max_n + 1)       # qp[i] = vị trí của đỉnh i trong mảng pq (-1 nếu không có)
 
-        self.dist = {v: math.inf for v in self.vertices}
-        self.parent = {v: None for v in self.vertices}
-        self.trace_steps = []
+    def is_empty(self) -> bool:
+        return self.n == 0
 
-        self.dist[start_node] = 0.0
-        # Min-Heap lưu trữ các tuple: (khoảng_cách_tạm_thời, tên_đỉnh)
-        pq: List[Tuple[float, str]] = [(0.0, start_node)]
+    def contains(self, i: int) -> bool:
+        return self.qp[i] != -1
 
-        step_counter = 0
-        self.trace_steps.append({
-            "step": step_counter,
-            "action": "INIT",
-            "current_node": start_node,
-            "current_dist": 0.0,
-            "heap_snapshot": list(pq),
-            "dist_snapshot": dict(self.dist),
-            "parent_snapshot": dict(self.parent),
-            "relaxed_edges": []
-        })
+    def insert(self, i: int, key: float):
+        if self.contains(i):
+            raise ValueError(f"Đỉnh {i} đã tồn tại trong PQ")
+        self.n += 1
+        self.qp[i] = self.n
+        self.pq[self.n] = i
+        self.keys[i] = key
+        self._swim(self.n)
 
-        while pq:
-            current_dist, u = heapq.heappop(pq)
-            step_counter += 1
+    def del_min(self) -> int:
+        if self.n == 0:
+            raise IndexError("Priority Queue rỗng")
+        min_idx = self.pq[1]
+        self._exch(1, self.n)
+        self.n -= 1
+        self._sink(1)
+        self.qp[min_idx] = -1
+        self.keys[min_idx] = None
+        return min_idx
 
-            # Kỹ thuật Lazy Deletion: Bỏ qua các bản ghi lỗi thời đã có đường đi tốt hơn
-            if current_dist > self.dist[u]:
-                self.trace_steps.append({
-                    "step": step_counter,
-                    "action": "LAZY_SKIP",
-                    "current_node": u,
-                    "current_dist": current_dist,
-                    "best_known_dist": self.dist[u],
-                    "heap_snapshot": list(pq),
-                    "dist_snapshot": dict(self.dist),
-                    "parent_snapshot": dict(self.parent),
-                    "relaxed_edges": []
-                })
-                continue
+    def decrease_key(self, i: int, key: float):
+        if not self.contains(i):
+            raise IndexError(f"Đỉnh {i} không có trong PQ")
+        if self.keys[i] <= key:
+            return
+        self.keys[i] = key
+        self._swim(self.qp[i])
 
-            relaxed_edges: List[Dict[str, Any]] = []
+    # --- Helper methods cho Heap ---
+    def _greater(self, i: int, j: int) -> bool:
+        return self.keys[self.pq[i]] > self.keys[self.pq[j]]
 
-            # Nới lỏng tất cả các cạnh kề của u
-            for v, weight in self.adj[u]:
-                new_dist = self.dist[u] + weight
-                if new_dist < self.dist[v]:
-                    old_dist = self.dist[v]
-                    self.dist[v] = new_dist
-                    self.parent[v] = u
-                    heapq.heappush(pq, (new_dist, v))
-                    relaxed_edges.append({
-                        "from": u,
-                        "to": v,
-                        "weight": weight,
-                        "old_dist": old_dist,
-                        "new_dist": new_dist
-                    })
+    def _exch(self, i: int, j: int):
+        self.pq[i], self.pq[j] = self.pq[j], self.pq[i]
+        self.qp[self.pq[i]] = i
+        self.qp[self.pq[j]] = j
 
-            self.trace_steps.append({
-                "step": step_counter,
-                "action": "SETTLE_AND_RELAX",
-                "current_node": u,
-                "current_dist": current_dist,
-                "heap_snapshot": list(pq),
-                "dist_snapshot": dict(self.dist),
-                "parent_snapshot": dict(self.parent),
-                "relaxed_edges": relaxed_edges
-            })
+    def _swim(self, k: int):
+        while k > 1 and self._greater(k // 2, k):
+            self._exch(k, k // 2)
+            k = k // 2
 
-        return self.dist
-
-    def get_path(self, start_node: str, end_node: str) -> List[str]:
-        """
-        Khôi phục lộ trình ngắn nhất từ start_node đến end_node.
-
-        :param start_node: Đỉnh xuất phát.
-        :param end_node: Đỉnh đích.
-        :return: Danh sách các đỉnh biểu diễn thứ tự di chuyển. Trả về [] nếu không tới được.
-        """
-        if end_node not in self.dist or self.dist[end_node] == math.inf:
-            return []
-
-        path: List[str] = []
-        curr: Optional[str] = end_node
-        while curr is not None:
-            path.append(curr)
-            if curr == start_node:
+    def _sink(self, k: int):
+        while 2 * k <= self.n:
+            j = 2 * k
+            if j < self.n and self._greater(j, j + 1):
+                j += 1
+            if not self._greater(k, j):
                 break
-            curr = self.parent.get(curr)
+            self._exch(k, j)
+            k = j
+```
 
-        if not path or path[-1] != start_node:
-            return []
+---
 
+### 4.3. Module `dijkstra_v2.py` (DijkstraSP)
+
+```python
+from edge import DirectedEdge, EdgeWeightedDigraph
+from minpq import IndexMinPQ
+
+class DijkstraSP:
+    def __init__(self, G: EdgeWeightedDigraph, s: int):
+        self._s = s
+        self._edge_to = [None] * G.V
+        self._dist_to = [float('inf')] * G.V
+        self._pq = IndexMinPQ(G.V)
+
+        # Khởi tạo khoảng cách ban đầu
+        self._dist_to[s] = 0.0
+        self._pq.insert(s, 0.0)
+
+        # Lặp rút đỉnh có khoảng cách nhỏ nhất và relax các cạnh liên kề
+        while not self._pq.is_empty():
+            v = self._pq.del_min()
+            for e in G.adj(v):
+                self._relax(e)
+
+    def _relax(self, e: DirectedEdge):
+        v = e.from_vertex()
+        w = e.to_vertex()
+        new_dist = self._dist_to[v] + e.weight()
+        if new_dist < self._dist_to[w]:
+            self._dist_to[w] = new_dist
+            self._edge_to[w] = e
+            if self._pq.contains(w):
+                self._pq.decrease_key(w, self._dist_to[w])
+            else:
+                self._pq.insert(w, self._dist_to[w])
+
+    def dist_to(self, v: int) -> float:
+        return self._dist_to[v]
+
+    def has_path_to(self, v: int) -> bool:
+        return self._dist_to[v] < float('inf')
+
+    def path_to(self, v: int) -> list[DirectedEdge] | None:
+        if not self.has_path_to(v):
+            return None
+        path = []
+        e = self._edge_to[v]
+        while e is not None:
+            path.append(e)
+            e = self._edge_to[e.from_vertex()]
         path.reverse()
         return path
+```
 
+---
 
-class FloydWarshallSolver:
-    """
-    Bộ giải thuật toán Floyd-Warshall sử dụng Quy hoạch động để giải quyết
-    bài toán All-Pairs Shortest Path (APSP).
-    
-    Hỗ trợ phát hiện chu trình âm và khôi phục lộ trình qua ma trận Next.
-    """
+### 4.4. Module `floyd_v2.py` (FloydWarshall)
 
-    def __init__(self, vertices: List[str]) -> None:
-        """
-        Khởi tạo đối tượng FloydWarshallSolver.
+```python
+from edge import DirectedEdge, EdgeWeightedDigraph
 
-        :param vertices: Danh sách các đỉnh trong đồ thị.
-        """
-        self.vertices: List[str] = list(vertices)
-        self.V: int = len(vertices)
-        self.v_to_idx: Dict[str, int] = {v: i for i, v in enumerate(vertices)}
-        self.idx_to_v: Dict[int, str] = {i: v for i, v in enumerate(vertices)}
+class FloydWarshall:
+    def __init__(self, G: EdgeWeightedDigraph):
+        self.V = G.V
+        
+        # 1. Khởi tạo ma trận khoảng cách _dist và ma trận truy ngược _parent
+        self._dist = [[float('inf')] * self.V for _ in range(self.V)]
+        self._parent = [[-1] * self.V for _ in range(self.V)]
 
-        # Ma trận khoảng cách D kích thước V x V
-        self.dist: List[List[float]] = [[math.inf] * self.V for _ in range(self.V)]
-        # Ma trận đỉnh kế tiếp Next kích thước V x V
-        self.next_node: List[List[Optional[int]]] = [[None] * self.V for _ in range(self.V)]
-        self.trace_steps: List[Dict[str, Any]] = []
-
-        # Khoảng cách từ đỉnh đến chính nó bằng 0
         for i in range(self.V):
-            self.dist[i][i] = 0.0
+            self._dist[i][i] = 0.0
 
-    def add_edge(self, u: str, v: str, weight: float) -> None:
-        """
-        Thêm cạnh có hướng từ u tới v. Cho phép cập nhật nếu có đa cạnh (chọn trọng số nhỏ nhất).
+        for u in range(self.V):
+            for e in G.adj(u):
+                v = e.to_vertex()
+                w = e.weight()
+                if w < self._dist[u][v]:
+                    self._dist[u][v] = w
+                    self._parent[u][v] = u
 
-        :param u: Đỉnh nguồn.
-        :param v: Đỉnh đích.
-        :param weight: Trọng số của cạnh.
-        """
-        ui, vi = self.v_to_idx[u], self.v_to_idx[v]
-        if weight < self.dist[ui][vi]:
-            self.dist[ui][vi] = float(weight)
-            self.next_node[ui][vi] = vi
-
-    def solve(self) -> Tuple[List[List[float]], List[List[Optional[int]]]]:
-        """
-        Thực thi thuật toán Floyd-Warshall với 3 vòng lặp lồng nhau k, i, j.
-
-        :return: Bộ đôi (ma trận khoảng cách, ma trận đỉnh kế tiếp).
-        """
-        self.trace_steps = []
-
-        # Lưu trạng thái khởi tạo k = 0
-        self.trace_steps.append({
-            "k_step": 0,
-            "k_vertex": None,
-            "dist_matrix": [row[:] for row in self.dist],
-            "next_matrix": [row[:] for row in self.next_node],
-            "updated_cells": []
-        })
-
+        # 2. THUẬT TOÁN FLOYD-WARSHALL (Quy hoạch động)
         for k in range(self.V):
-            k_v = self.idx_to_v[k]
-            updated_cells: List[Dict[str, Any]] = []
-
             for i in range(self.V):
                 for j in range(self.V):
-                    # Tránh tràn số với math.inf
-                    if self.dist[i][k] != math.inf and self.dist[k][j] != math.inf:
-                        new_candidate_dist = self.dist[i][k] + self.dist[k][j]
-                        if new_candidate_dist < self.dist[i][j]:
-                            old_val = self.dist[i][j]
-                            self.dist[i][j] = new_candidate_dist
-                            self.next_node[i][j] = self.next_node[i][k]
-                            updated_cells.append({
-                                "from": self.idx_to_v[i],
-                                "to": self.idx_to_v[j],
-                                "old_dist": old_val,
-                                "new_dist": new_candidate_dist,
-                                "via": k_v
-                            })
+                    if self._dist[i][k] != float('inf') and self._dist[k][j] != float('inf'):
+                        new_dist = self._dist[i][k] + self._dist[k][j]
+                        if new_dist < self._dist[i][j]:
+                            self._dist[i][j] = new_dist
+                            self._parent[i][j] = self._parent[k][j]
 
-            self.trace_steps.append({
-                "k_step": k + 1,
-                "k_vertex": k_v,
-                "dist_matrix": [row[:] for row in self.dist],
-                "next_matrix": [row[:] for row in self.next_node],
-                "updated_cells": updated_cells
-            })
-
-        return self.dist, self.next_node
-
-    def detect_negative_cycle(self) -> bool:
-        """
-        Kiểm tra xem đồ thị có chứa chu trình trọng số âm hay không.
-        Nguyên lý: Nếu tồn tại đỉnh i mà dist[i][i] < 0, thì i thuộc một chu trình âm.
-
-        :return: True nếu có chu trình âm, ngược lại False.
-        """
+    def has_negative_cycle(self) -> bool:
         for i in range(self.V):
-            if self.dist[i][i] < 0:
+            if self._dist[i][i] < 0:
                 return True
         return False
 
-    def get_path(self, u: str, v: str) -> List[str]:
-        """
-        Khôi phục lộ trình ngắn nhất từ đỉnh u đến đỉnh v dựa trên ma trận next_node.
+    def dist(self, u: int, v: int) -> float:
+        return self._dist[u][v]
 
-        :param u: Đỉnh xuất phát.
-        :param v: Đỉnh đích.
-        :return: Danh sách thứ tự các đỉnh trên lộ trình. Trả về [] nếu không có đường đi.
-        """
-        ui, vi = self.v_to_idx[u], self.v_to_idx[v]
-        if self.dist[ui][vi] == math.inf:
-            return []
-        if ui == vi:
+    def has_path(self, u: int, v: int) -> bool:
+        return self._dist[u][v] < float('inf')
+
+    def path_to(self, u: int, v: int) -> list[int] | None:
+        if not self.has_path(u, v):
+            return None
+        if u == v:
             return [u]
-
-        path: List[str] = [u]
-        curr = ui
-        visited_count = 0
-
-        while curr != vi:
-            curr = self.next_node[curr][vi]
-            if curr is None:
-                return []
-            path.append(self.idx_to_v[curr])
-            visited_count += 1
-            # Ngăn ngừa lặp vô tận nếu tồn tại chu trình âm
-            if visited_count > self.V:
-                return []
-
+        path = []
+        curr = v
+        while curr != -1:
+            path.append(curr)
+            if curr == u:
+                break
+            curr = self._parent[u][curr]
+        if path[-1] != u:
+            return None
+        path.reverse()
         return path
+
+    def print_tables(self):
+        v_range = range(self.V)
+        print("\n" + "═" * 55)
+        print(" BẢNG KHOẢNG CÁCH NGẮN NHẤT (_dist) ".center(55, "═"))
+        print("═" * 55)
+        header = " From \\ To │ " + " ".join(f"{j:>7}" for j in v_range)
+        print(header)
+        print("─" * len(header))
+        for i in v_range:
+            row_cells = []
+            for j in v_range:
+                if self._dist[i][j] == float('inf'):
+                    row_cells.append(f"{'∞':>7}")
+                else:
+                    row_cells.append(f"{self._dist[i][j]:>7.1f}")
+            print(f"    {i:<7} │ " + " ".join(row_cells))
+            
+        print("\n" + "═" * 55)
+        print(" BẢNG ĐỈNH ĐỨNG TRƯỚC ĐỂ TRUY VẾT (_parent) ".center(55, "═"))
+        print("═" * 55)
+        print(header)
+        print("─" * len(header))
+        for i in v_range:
+            row_cells = []
+            for j in v_range:
+                val = self._parent[i][j]
+                val_str = "-" if val == -1 else str(val)
+                row_cells.append(f"{val_str:>7}")
+            print(f"    {i:<7} │ " + " ".join(row_cells))
+        print("═" * 55 + "\n")
 ```
 
 ---
 
-### 4.2. Mã Chạy Thử Nghiệm (Driver Code) và Kết Quả Console Output
+### 4.5. Kết Quả Chạy Thực Tế Trên Console
 
-Đoạn mã sau khởi tạo chính xác đồ thị $5$ đỉnh ở Phần 3 và thực thi cả hai solver:
-
-```python
-def main() -> None:
-    print("=" * 80)
-    print("CHƯƠNG TRÌNH KIỂM THỬ SO SÁNH: DIJKSTRA vs. FLOYD-WARSHALL")
-    print("=" * 80)
-
-    vertices = ["A", "B", "C", "D", "E"]
-    edges = [
-        ("A", "B", 5.0),
-        ("A", "C", 2.0),
-        ("C", "B", 1.0),
-        ("B", "D", 4.0),
-        ("C", "D", 7.0),
-        ("C", "E", 9.0),
-        ("D", "E", 3.0),
-        ("B", "E", 8.0),
-    ]
-
-    # 1. Thực thi Dijkstra từ nguồn A
-    dijkstra = DijkstraSolver(vertices)
-    for u, v, w in edges:
-        dijkstra.add_edge(u, v, w)
-
-    dijkstra_dist = dijkstra.solve("A")
-
-    print("\n--- KẾT QUẢ DIJKSTRA (Nguồn: A) ---")
-    for v in vertices:
-        path = dijkstra.get_path("A", v)
-        print(f"  Khoảng cách A -> {v}: {dijkstra_dist[v]:4.1f} | Lộ trình: {' -> '.join(path)}")
-
-    # 2. Thực thi Floyd-Warshall
-    fw = FloydWarshallSolver(vertices)
-    for u, v, w in edges:
-        fw.add_edge(u, v, w)
-
-    fw.solve()
-
-    print("\n--- KẾT QUẢ FLOYD-WARSHALL (Toàn bộ ma trận khoảng cách D) ---")
-    header = "       " + "   ".join([f"{v:>4}" for v in vertices])
-    print(header)
-    for i, u in enumerate(vertices):
-        row_str = f"  {u:>3}: "
-        for j, v in enumerate(vertices):
-            val = fw.dist[i][j]
-            row_str += f"{val:4.1f}   " if val != math.inf else "  inf   "
-        print(row_str)
-
-    print("\n--- PHÁT HIỆN CHU TRÌNH ÂM ---")
-    has_neg_cycle = fw.detect_negative_cycle()
-    print(f"  Đồ thị có chu trình âm không? {'CÓ (CẢNH BÁO)' if has_neg_cycle else 'KHÔNG (HỢP LỆ)'}")
-
-    print("\n--- ĐỐI CHIẾU LỘ TRÌNH ĐIỂM-ĐIỂM TỪ CẢ HAI THUẬT TOÁN (A -> E) ---")
-    path_dijkstra = dijkstra.get_path("A", "E")
-    path_fw = fw.get_path("A", "E")
-    print(f"  Lộ trình theo Dijkstra      : {' -> '.join(path_dijkstra)} (Chi phí: {dijkstra_dist['E']})")
-    print(f"  Lộ trình theo Floyd-Warshall: {' -> '.join(path_fw)} (Chi phí: {fw.dist[fw.v_to_idx['A']][fw.v_to_idx['E']]})")
-    assert path_dijkstra == path_fw, "Cảnh báo: Hai thuật toán cho lộ trình khác nhau!"
-    print("  => KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI!")
-
-
-if __name__ == "__main__":
-    main()
-```
-
-#### Console Output Thực Tế Khi Thực Thi:
 ```text
-================================================================================
-CHƯƠNG TRÌNH KIỂM THỬ SO SÁNH: DIJKSTRA vs. FLOYD-WARSHALL
-================================================================================
+=====================================================================================
+HỆ THỐNG ĐIỀU PHỐI CẤP CỨU & QUY HOẠCH TRẠM Y TẾ THÔNG MINH
+Sử dụng EdgeWeightedDigraph, DijkstraSP (IndexMinPQ) & FloydWarshall (_parent)
+=====================================================================================
 
---- KẾT QUẢ DIJKSTRA (Nguồn: A) ---
-  Khoảng cách A -> A:  0.0 | Lộ trình: A
-  Khoảng cách A -> B:  3.0 | Lộ trình: A -> C -> B
-  Khoảng cách A -> C:  2.0 | Lộ trình: A -> C
-  Khoảng cách A -> D:  7.0 | Lộ trình: A -> C -> B -> D
-  Khoảng cách A -> E: 10.0 | Lộ trình: A -> C -> B -> D -> E
+[BÀI TOÁN 1: ĐIỀU PHỐI KHẨN CẤP ĐẾN KHU R4 & LAN TRUYỀN TÍN HIỆU]
+  Thời gian từ H1 đến R4: 15.0 phút | Lộ trình: H1 -> R2 -> R3 -> R4
+  Thời gian từ H2 đến R4: 7.0 phút | Lộ trình: H2 -> R4
+  => QUYẾT ĐỊNH ĐIỀU PHỐI: Kích hoạt xe từ Trạm H2 (nhanh hơn 8.0 phút!).
 
---- KẾT QUẢ FLOYD-WARSHALL (Toàn bộ ma trận khoảng cách D) ---
-          A      B      C      D      E
-    A:   0.0    3.0    2.0    7.0   10.0   
-    B:   inf    0.0    inf    4.0    7.0   
-    C:   inf    1.0    0.0    5.0    8.0   
-    D:   inf    inf    inf    0.0    3.0   
-    E:   inf    inf    inf    inf    0.0   
+  Thời gian để tín hiệu từ H1 bao phủ toàn bộ 4 khu dân cư: 15.0 phút.
 
---- PHÁT HIỆN CHU TRÌNH ÂM ---
-  Đồ thị có chu trình âm không? KHÔNG (HỢP LỆ)
+[BÀI TOÁN 2: QUY HOẠCH TRẠM CẤP CỨU VÀ TÌM VỊ TRÍ TỐI ƯU]
 
---- ĐỐI CHIẾU LỘ TRÌNH ĐIỂM-ĐIỂM TỪ CẢ HAI THUẬT TOÁN (A -> E) ---
-  Lộ trình theo Dijkstra      : A -> C -> B -> D -> E (Chi phí: 10.0)
-  Lộ trình theo Floyd-Warshall: A -> C -> B -> D -> E (Chi phí: 10.0)
-  => KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI!
+═══════════════════════════════════════════════════════
+══════════ BẢNG KHOẢNG CÁCH NGẮN NHẤT (_dist) ═════════
+═══════════════════════════════════════════════════════
+ From \ To │       0       1       2       3       4       5
+────────────────────────────────────────────────────────────
+    0       │     0.0       ∞     4.0     6.0    10.0    15.0
+    1       │       ∞     0.0    22.0    25.0     6.0     7.0
+    2       │       ∞       ∞     0.0     3.0     7.0    12.0
+    3       │       ∞       ∞    24.0     0.0     4.0     9.0
+    4       │       ∞       ∞    20.0    23.0     0.0     5.0
+    5       │       ∞       ∞    15.0    18.0    22.0     0.0
+
+═══════════════════════════════════════════════════════
+══════ BẢNG ĐỈNH ĐỨNG TRƯỚC ĐỂ TRUY VẾT (_parent) ═════
+═══════════════════════════════════════════════════════
+ From \ To │       0       1       2       3       4       5
+────────────────────────────────────────────────────────────
+    0       │       -       -       0       0       3       4
+    1       │       -       -       5       2       1       1
+    2       │       -       -       -       2       3       4
+    3       │       -       -       5       -       3       4
+    4       │       -       -       5       2       -       4
+    5       │       -       -       5       2       3       -
+═══════════════════════════════════════════════════════
+
+  Đánh giá Khả năng Tiếp cận trong 'Thời gian vàng' (<= 15.0 phút):
+  Ứng viên 'H1': Phủ 4/4 khu dân cư | Thời gian tiếp cận xa nhất: 15.0 phút
+  Ứng viên 'H2': Phủ 2/4 khu dân cư | Thời gian tiếp cận xa nhất: 25.0 phút
+  Ứng viên 'R1': Phủ 4/4 khu dân cư | Thời gian tiếp cận xa nhất: 12.0 phút
+  Ứng viên 'R2': Phủ 3/4 khu dân cư | Thời gian tiếp cận xa nhất: 24.0 phút
+  Ứng viên 'R3': Phủ 2/4 khu dân cư | Thời gian tiếp cận xa nhất: 23.0 phút
+
+  => KẾT QUẢ QUY HOẠCH: Vị trí tối ưu nhất là 'R1'
+     (Phủ 100% khu dân cư trong ngưỡng vàng, thời gian phản ứng tối đa chỉ 12.0 phút).
 ```
 
 ---
 
-### 4.3. Giải Thích Chi Tiết Các Khối Lệnh Quan Trọng
-
-1. **Khối Lazy Deletion trong `DijkstraSolver`:**
-   ```python
-   if current_dist > self.dist[u]:
-       continue
-   ```
-   *Ý nghĩa:* Trong Python chuẩn, thư viện `heapq` không hỗ trợ phương thức `decrease_key(node, new_val)`. Do đó, khi tìm thấy đường đi ngắn hơn tới đỉnh $v$, ta buộc phải đẩy một tuple mới `(new_dist, v)` vào Heap mà không xóa được phần tử cũ `(old_dist, v)`. Đoạn mã trên kiểm tra khi một đỉnh được lấy ra: nếu khoảng cách được lưu trong Heap lớn hơn khoảng cách tối ưu đã được chốt trong `self.dist[u]`, bản ghi này ngay lập tức bị loại bỏ với chi phí $O(1)$.
-
-2. **Khối Ba Vòng Lặp Lồng Nhau trong `FloydWarshallSolver`:**
-   ```python
-   for k in range(self.V):
-       for i in range(self.V):
-           for j in range(self.V):
-               if self.dist[i][k] != math.inf and self.dist[k][j] != math.inf:
-                   new_candidate_dist = self.dist[i][k] + self.dist[k][j]
-                   if new_candidate_dist < self.dist[i][j]:
-                       self.dist[i][j] = new_candidate_dist
-                       self.next_node[i][j] = self.next_node[i][k]
-   ```
-   *Ý nghĩa:*
-   - **Vòng lặp `k` ngoài cùng:** Đảm bảo tính toán đúng theo Quy hoạch động, cho phép tập đỉnh trung gian mở rộng dần từ $\{0\}$ đến $\{0, \dots, V-1\}$. *Nếu đặt vòng lặp `k` ở trong cùng, thuật toán sẽ sai hoàn toàn!*
-   - **Điều kiện kiểm tra `!= math.inf`:** Ngăn ngừa hiện tượng cộng tràn số khi đồ thị không liên thông.
-   - **Cập nhật `self.next_node[i][j] = self.next_node[i][k]`:** Trên hành trình ngắn nhất từ $i$ đến $j$ đi qua trung gian $k$, bước đi đầu tiên xuất phát từ $i$ chính là bước đi đầu tiên trên lộ trình từ $i$ đến $k$.
-
-3. **Phương thức `detect_negative_cycle()`:**
-   ```python
-   for i in range(self.V):
-       if self.dist[i][i] < 0:
-           return True
-   ```
-   *Ý nghĩa:* Khoảng cách từ đỉnh $i$ đến chính nó ban đầu là $0$. Nếu sau $V$ bước lặp, $dist[i][i] < 0$, điều này chứng minh tồn tại một chu trình đi từ $i$ và quay lại chính $i$ có tổng trọng số âm.
-
----
 
 ## PHẦN 5. ĐẶC TẢ DỮ LIỆU TRỰC QUAN HÓA (VISUALIZATION SPECIFICATION)
 

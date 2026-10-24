@@ -1,14 +1,15 @@
 /**
  * trace_data.js
- * Dữ liệu vết thực thi thuật toán được tự động sinh bởi generate_trace_data.py
- * Cập nhật: 2026-10-24
+ * Dữ liệu vết thực thi thuật toán sinh tự động từ edge.py, minpq.py, dijkstra_v2.py, floyd_v2.py
+ * Cập nhật: 2026-10-25
  */
 window.PRESENTATION_DATA = {
   "metadata": {
     "title": "Thuật toán tìm đường đi ngắn nhất: Dijkstra và Floyd-Warshall",
-    "version": "2.0.0",
-    "generated_at": "2026-10-24",
-    "author": "DSA Teaching & Engineering Team"
+    "version": "2.1.0",
+    "generated_at": "2026-10-25",
+    "author": "DSA Academic Teaching & Engineering Team",
+    "architecture": "EdgeWeightedDigraph + IndexMinPQ + DijkstraSP + FloydWarshall (_parent)"
   },
   "sample_graph_5": {
     "vertices": [
@@ -166,346 +167,448 @@ window.PRESENTATION_DATA = {
       },
       "trace_steps": [
         {
-          "step": 0,
-          "action": "INIT",
-          "current_node": "A",
-          "current_dist": 0.0,
-          "heap_snapshot": [
-            [
-              0.0,
-              "A"
-            ]
+          "step_index": 0,
+          "phase": "INIT",
+          "current_vertex": null,
+          "current_vertex_idx": null,
+          "current_dist": null,
+          "settled_vertices": [],
+          "pq_snapshot": [
+            {
+              "vertex": "A",
+              "idx": 0,
+              "dist": 0.0,
+              "heap_pos": 1
+            }
           ],
-          "dist_snapshot": {
+          "dist_to": {
             "A": 0.0,
             "B": null,
             "C": null,
             "D": null,
             "E": null
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
             "B": null,
             "C": null,
             "D": null,
             "E": null
           },
-          "relaxed_edges": []
+          "relaxed_edges": [],
+          "decrease_key_nodes": [],
+          "spt_edges": [],
+          "action_summary": "Khởi tạo nguồn s = A: gán _dist_to[A] = 0.0, gọi pq.insert(A, 0.0)."
         },
         {
-          "step": 1,
-          "action": "SETTLE_AND_RELAX",
-          "current_node": "A",
+          "step_index": 1,
+          "phase": "DEL_MIN",
+          "current_vertex": "A",
+          "current_vertex_idx": 0,
           "current_dist": 0.0,
-          "heap_snapshot": [
-            [
-              2.0,
-              "C"
-            ],
-            [
-              5.0,
-              "B"
-            ]
+          "settled_vertices": [
+            "A"
           ],
-          "dist_snapshot": {
+          "pq_snapshot": [
+            {
+              "vertex": "C",
+              "idx": 2,
+              "dist": 2.0,
+              "heap_pos": 1
+            },
+            {
+              "vertex": "B",
+              "idx": 1,
+              "dist": 5.0,
+              "heap_pos": 2
+            }
+          ],
+          "dist_to": {
             "A": 0.0,
             "B": 5.0,
             "C": 2.0,
             "D": null,
             "E": null
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
-            "B": "A",
-            "C": "A",
+            "B": {
+              "from": "A",
+              "to": "B",
+              "weight": 5.0,
+              "edge_id": "e_A_B"
+            },
+            "C": {
+              "from": "A",
+              "to": "C",
+              "weight": 2.0,
+              "edge_id": "e_A_C"
+            },
             "D": null,
             "E": null
           },
           "relaxed_edges": [
             {
+              "edge_id": "e_A_B",
               "from": "A",
               "to": "B",
               "weight": 5.0,
               "old_dist": null,
-              "new_dist": 5.0
+              "new_dist": 5.0,
+              "action": "insert",
+              "detail": "pq.insert(B, 5.0)"
             },
             {
+              "edge_id": "e_A_C",
               "from": "A",
               "to": "C",
               "weight": 2.0,
               "old_dist": null,
-              "new_dist": 2.0
+              "new_dist": 2.0,
+              "action": "insert",
+              "detail": "pq.insert(C, 2.0)"
             }
-          ]
+          ],
+          "decrease_key_nodes": [],
+          "spt_edges": [
+            "e_A_B",
+            "e_A_C"
+          ],
+          "action_summary": "Bước 1: pq.del_min() rút đỉnh nguồn A (dist=0.0). Nới lỏng các cạnh kề, thêm vào IndexMinPQ."
         },
         {
-          "step": 2,
-          "action": "SETTLE_AND_RELAX",
-          "current_node": "C",
+          "step_index": 2,
+          "phase": "DEL_MIN",
+          "current_vertex": "C",
+          "current_vertex_idx": 2,
           "current_dist": 2.0,
-          "heap_snapshot": [
-            [
-              3.0,
-              "B"
-            ],
-            [
-              5.0,
-              "B"
-            ],
-            [
-              9.0,
-              "D"
-            ],
-            [
-              11.0,
-              "E"
-            ]
+          "settled_vertices": [
+            "A",
+            "C"
           ],
-          "dist_snapshot": {
+          "pq_snapshot": [
+            {
+              "vertex": "B",
+              "idx": 1,
+              "dist": 3.0,
+              "heap_pos": 1
+            },
+            {
+              "vertex": "D",
+              "idx": 3,
+              "dist": 9.0,
+              "heap_pos": 2
+            },
+            {
+              "vertex": "E",
+              "idx": 4,
+              "dist": 11.0,
+              "heap_pos": 3
+            }
+          ],
+          "dist_to": {
             "A": 0.0,
             "B": 3.0,
             "C": 2.0,
             "D": 9.0,
             "E": 11.0
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "C",
-            "E": "C"
+            "B": {
+              "from": "C",
+              "to": "B",
+              "weight": 1.0,
+              "edge_id": "e_C_B"
+            },
+            "C": {
+              "from": "A",
+              "to": "C",
+              "weight": 2.0,
+              "edge_id": "e_A_C"
+            },
+            "D": {
+              "from": "C",
+              "to": "D",
+              "weight": 7.0,
+              "edge_id": "e_C_D"
+            },
+            "E": {
+              "from": "C",
+              "to": "E",
+              "weight": 9.0,
+              "edge_id": "e_C_E"
+            }
           },
           "relaxed_edges": [
             {
+              "edge_id": "e_C_B",
               "from": "C",
               "to": "B",
               "weight": 1.0,
               "old_dist": 5.0,
-              "new_dist": 3.0
+              "new_dist": 3.0,
+              "action": "decrease_key",
+              "detail": "pq.decrease_key(B, 3.0): giảm từ 5.0 xuống 3.0"
             },
             {
+              "edge_id": "e_C_D",
               "from": "C",
               "to": "D",
               "weight": 7.0,
               "old_dist": null,
-              "new_dist": 9.0
+              "new_dist": 9.0,
+              "action": "insert",
+              "detail": "pq.insert(D, 9.0)"
             },
             {
+              "edge_id": "e_C_E",
               "from": "C",
               "to": "E",
               "weight": 9.0,
               "old_dist": null,
-              "new_dist": 11.0
+              "new_dist": 11.0,
+              "action": "insert",
+              "detail": "pq.insert(E, 11.0)"
             }
-          ]
+          ],
+          "decrease_key_nodes": [
+            "B"
+          ],
+          "spt_edges": [
+            "e_C_B",
+            "e_A_C",
+            "e_C_D",
+            "e_C_E"
+          ],
+          "action_summary": "Bước 2: pq.del_min() rút đỉnh C (dist=2.0). Nới lỏng: giảm B (5.0→3.0) qua decrease_key, thêm D (9.0) qua insert, thêm E (11.0) qua insert."
         },
         {
-          "step": 3,
-          "action": "SETTLE_AND_RELAX",
-          "current_node": "B",
+          "step_index": 3,
+          "phase": "DEL_MIN",
+          "current_vertex": "B",
+          "current_vertex_idx": 1,
           "current_dist": 3.0,
-          "heap_snapshot": [
-            [
-              5.0,
-              "B"
-            ],
-            [
-              7.0,
-              "D"
-            ],
-            [
-              9.0,
-              "D"
-            ],
-            [
-              11.0,
-              "E"
-            ]
+          "settled_vertices": [
+            "A",
+            "C",
+            "B"
           ],
-          "dist_snapshot": {
+          "pq_snapshot": [
+            {
+              "vertex": "D",
+              "idx": 3,
+              "dist": 7.0,
+              "heap_pos": 1
+            },
+            {
+              "vertex": "E",
+              "idx": 4,
+              "dist": 11.0,
+              "heap_pos": 2
+            }
+          ],
+          "dist_to": {
             "A": 0.0,
             "B": 3.0,
             "C": 2.0,
             "D": 7.0,
             "E": 11.0
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "C"
+            "B": {
+              "from": "C",
+              "to": "B",
+              "weight": 1.0,
+              "edge_id": "e_C_B"
+            },
+            "C": {
+              "from": "A",
+              "to": "C",
+              "weight": 2.0,
+              "edge_id": "e_A_C"
+            },
+            "D": {
+              "from": "B",
+              "to": "D",
+              "weight": 4.0,
+              "edge_id": "e_B_D"
+            },
+            "E": {
+              "from": "C",
+              "to": "E",
+              "weight": 9.0,
+              "edge_id": "e_C_E"
+            }
           },
           "relaxed_edges": [
             {
+              "edge_id": "e_B_D",
               "from": "B",
               "to": "D",
               "weight": 4.0,
               "old_dist": 9.0,
-              "new_dist": 7.0
+              "new_dist": 7.0,
+              "action": "decrease_key",
+              "detail": "pq.decrease_key(D, 7.0): giảm từ 9.0 xuống 7.0"
+            },
+            {
+              "edge_id": "e_B_E",
+              "from": "B",
+              "to": "E",
+              "weight": 8.0,
+              "old_dist": 11.0,
+              "new_dist": 11.0,
+              "action": "skip",
+              "detail": "Bỏ qua: khoảng cách cũ 11.0 <= đường mới 11.0"
             }
-          ]
-        },
-        {
-          "step": 4,
-          "action": "LAZY_SKIP",
-          "current_node": "B",
-          "current_dist": 5.0,
-          "best_known_dist": 3.0,
-          "heap_snapshot": [
-            [
-              7.0,
-              "D"
-            ],
-            [
-              11.0,
-              "E"
-            ],
-            [
-              9.0,
-              "D"
-            ]
           ],
-          "dist_snapshot": {
-            "A": 0.0,
-            "B": 3.0,
-            "C": 2.0,
-            "D": 7.0,
-            "E": 11.0
-          },
-          "parent_snapshot": {
-            "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "C"
-          },
-          "relaxed_edges": []
+          "decrease_key_nodes": [
+            "D"
+          ],
+          "spt_edges": [
+            "e_C_B",
+            "e_A_C",
+            "e_B_D",
+            "e_C_E"
+          ],
+          "action_summary": "Bước 3: pq.del_min() rút đỉnh B (dist=3.0). Nới lỏng: giảm D (9.0→7.0) qua decrease_key."
         },
         {
-          "step": 5,
-          "action": "SETTLE_AND_RELAX",
-          "current_node": "D",
+          "step_index": 4,
+          "phase": "DEL_MIN",
+          "current_vertex": "D",
+          "current_vertex_idx": 3,
           "current_dist": 7.0,
-          "heap_snapshot": [
-            [
-              9.0,
-              "D"
-            ],
-            [
-              11.0,
-              "E"
-            ],
-            [
-              10.0,
-              "E"
-            ]
+          "settled_vertices": [
+            "A",
+            "C",
+            "B",
+            "D"
           ],
-          "dist_snapshot": {
+          "pq_snapshot": [
+            {
+              "vertex": "E",
+              "idx": 4,
+              "dist": 10.0,
+              "heap_pos": 1
+            }
+          ],
+          "dist_to": {
             "A": 0.0,
             "B": 3.0,
             "C": 2.0,
             "D": 7.0,
             "E": 10.0
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "D"
+            "B": {
+              "from": "C",
+              "to": "B",
+              "weight": 1.0,
+              "edge_id": "e_C_B"
+            },
+            "C": {
+              "from": "A",
+              "to": "C",
+              "weight": 2.0,
+              "edge_id": "e_A_C"
+            },
+            "D": {
+              "from": "B",
+              "to": "D",
+              "weight": 4.0,
+              "edge_id": "e_B_D"
+            },
+            "E": {
+              "from": "D",
+              "to": "E",
+              "weight": 3.0,
+              "edge_id": "e_D_E"
+            }
           },
           "relaxed_edges": [
             {
+              "edge_id": "e_D_E",
               "from": "D",
               "to": "E",
               "weight": 3.0,
               "old_dist": 11.0,
-              "new_dist": 10.0
+              "new_dist": 10.0,
+              "action": "decrease_key",
+              "detail": "pq.decrease_key(E, 10.0): giảm từ 11.0 xuống 10.0"
             }
-          ]
-        },
-        {
-          "step": 6,
-          "action": "LAZY_SKIP",
-          "current_node": "D",
-          "current_dist": 9.0,
-          "best_known_dist": 7.0,
-          "heap_snapshot": [
-            [
-              10.0,
-              "E"
-            ],
-            [
-              11.0,
-              "E"
-            ]
           ],
-          "dist_snapshot": {
-            "A": 0.0,
-            "B": 3.0,
-            "C": 2.0,
-            "D": 7.0,
-            "E": 10.0
-          },
-          "parent_snapshot": {
-            "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "D"
-          },
-          "relaxed_edges": []
+          "decrease_key_nodes": [
+            "E"
+          ],
+          "spt_edges": [
+            "e_C_B",
+            "e_A_C",
+            "e_B_D",
+            "e_D_E"
+          ],
+          "action_summary": "Bước 4: pq.del_min() rút đỉnh D (dist=7.0). Nới lỏng: giảm E (11.0→10.0) qua decrease_key."
         },
         {
-          "step": 7,
-          "action": "SETTLE_AND_RELAX",
-          "current_node": "E",
+          "step_index": 5,
+          "phase": "DEL_MIN",
+          "current_vertex": "E",
+          "current_vertex_idx": 4,
           "current_dist": 10.0,
-          "heap_snapshot": [
-            [
-              11.0,
-              "E"
-            ]
+          "settled_vertices": [
+            "A",
+            "C",
+            "B",
+            "D",
+            "E"
           ],
-          "dist_snapshot": {
+          "pq_snapshot": [],
+          "dist_to": {
             "A": 0.0,
             "B": 3.0,
             "C": 2.0,
             "D": 7.0,
             "E": 10.0
           },
-          "parent_snapshot": {
+          "edge_to": {
             "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "D"
+            "B": {
+              "from": "C",
+              "to": "B",
+              "weight": 1.0,
+              "edge_id": "e_C_B"
+            },
+            "C": {
+              "from": "A",
+              "to": "C",
+              "weight": 2.0,
+              "edge_id": "e_A_C"
+            },
+            "D": {
+              "from": "B",
+              "to": "D",
+              "weight": 4.0,
+              "edge_id": "e_B_D"
+            },
+            "E": {
+              "from": "D",
+              "to": "E",
+              "weight": 3.0,
+              "edge_id": "e_D_E"
+            }
           },
-          "relaxed_edges": []
-        },
-        {
-          "step": 8,
-          "action": "LAZY_SKIP",
-          "current_node": "E",
-          "current_dist": 11.0,
-          "best_known_dist": 10.0,
-          "heap_snapshot": [],
-          "dist_snapshot": {
-            "A": 0.0,
-            "B": 3.0,
-            "C": 2.0,
-            "D": 7.0,
-            "E": 10.0
-          },
-          "parent_snapshot": {
-            "A": null,
-            "B": "C",
-            "C": "A",
-            "D": "B",
-            "E": "D"
-          },
-          "relaxed_edges": []
+          "relaxed_edges": [],
+          "decrease_key_nodes": [],
+          "spt_edges": [
+            "e_C_B",
+            "e_A_C",
+            "e_B_D",
+            "e_D_E"
+          ],
+          "action_summary": "Bước 5: pq.del_min() rút đỉnh E (dist=10.0). Đỉnh không có cạnh đi ra. Hàng đợi rỗng."
         }
       ]
     },
@@ -555,41 +658,41 @@ window.PRESENTATION_DATA = {
           0.0
         ]
       ],
-      "final_next_matrix": [
+      "final_parent_matrix": [
         [
-          null,
+          -1,
           2,
-          2,
-          2,
-          2
-        ],
-        [
-          null,
-          null,
-          null,
-          3,
+          0,
+          1,
           3
         ],
         [
-          null,
+          -1,
+          -1,
+          -1,
           1,
-          null,
-          1,
-          1
+          3
         ],
         [
-          null,
-          null,
-          null,
-          null,
-          4
+          -1,
+          2,
+          -1,
+          1,
+          3
         ],
         [
-          null,
-          null,
-          null,
-          null,
-          null
+          -1,
+          -1,
+          -1,
+          -1,
+          3
+        ],
+        [
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
         ]
       ],
       "paths": {
@@ -756,7 +859,8 @@ window.PRESENTATION_DATA = {
       },
       "trace_steps": [
         {
-          "k_step": 0,
+          "step_index": 0,
+          "k": null,
           "k_vertex": null,
           "dist_matrix": [
             [
@@ -795,47 +899,86 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
+              -1,
+              0,
+              0,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
               1,
+              1
+            ],
+            [
+              -1,
               2,
-              null,
-              null
+              -1,
+              2,
+              2
             ],
             [
-              null,
-              null,
-              null,
-              3,
-              4
+              -1,
+              -1,
+              -1,
+              -1,
+              3
             ],
             [
-              null,
-              1,
-              null,
-              3,
-              4
-            ],
-            [
-              null,
-              null,
-              null,
-              null,
-              4
-            ],
-            [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
             ]
           ],
-          "updated_cells": []
+          "parent_labels_matrix": [
+            [
+              "-",
+              "A",
+              "A",
+              "-",
+              "-"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "B"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "C",
+              "C"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
+            ]
+          ],
+          "updated_cells": [],
+          "description": "Khởi tạo ma trận ban đầu từ trọng số cạnh: _dist[i][j] = w(i, j) và _parent[i][j] = i."
         },
         {
-          "k_step": 1,
+          "step_index": 1,
+          "k": 0,
           "k_vertex": "A",
           "dist_matrix": [
             [
@@ -874,47 +1017,86 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
+              -1,
+              0,
+              0,
+              -1,
+              -1
+            ],
+            [
+              -1,
+              -1,
+              -1,
               1,
+              1
+            ],
+            [
+              -1,
               2,
-              null,
-              null
+              -1,
+              2,
+              2
             ],
             [
-              null,
-              null,
-              null,
-              3,
-              4
+              -1,
+              -1,
+              -1,
+              -1,
+              3
             ],
             [
-              null,
-              1,
-              null,
-              3,
-              4
-            ],
-            [
-              null,
-              null,
-              null,
-              null,
-              4
-            ],
-            [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
             ]
           ],
-          "updated_cells": []
+          "parent_labels_matrix": [
+            [
+              "-",
+              "A",
+              "A",
+              "-",
+              "-"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "B"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "C",
+              "C"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
+            ]
+          ],
+          "updated_cells": [],
+          "description": "Bước k = 0 (xét đỉnh trung gian A): Không có đường đi nào qua đỉnh A ngắn hơn đường hiện tại. Ma trận giữ nguyên."
         },
         {
-          "k_step": 2,
+          "step_index": 2,
+          "k": 1,
           "k_vertex": "B",
           "dist_matrix": [
             [
@@ -953,69 +1135,120 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
-              1,
-              2,
+              -1,
+              0,
+              0,
               1,
               1
             ],
             [
-              null,
-              null,
-              null,
-              3,
-              4
-            ],
-            [
-              null,
+              -1,
+              -1,
+              -1,
               1,
-              null,
+              1
+            ],
+            [
+              -1,
+              2,
+              -1,
               1,
-              4
+              2
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              4
+              -1,
+              -1,
+              -1,
+              -1,
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "parent_labels_matrix": [
+            [
+              "-",
+              "A",
+              "A",
+              "B",
+              "B"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "B"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "B",
+              "C"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
             ]
           ],
           "updated_cells": [
             {
-              "from": "A",
-              "to": "D",
+              "i": "A",
+              "j": "D",
+              "i_idx": 0,
+              "j_idx": 3,
               "old_dist": null,
               "new_dist": 9.0,
-              "via": "B"
+              "old_parent": "-",
+              "new_parent": "B",
+              "formula": "D[A][D] = min(∞, D[A][B] + D[B][D]) = 9.0"
             },
             {
-              "from": "A",
-              "to": "E",
+              "i": "A",
+              "j": "E",
+              "i_idx": 0,
+              "j_idx": 4,
               "old_dist": null,
               "new_dist": 13.0,
-              "via": "B"
+              "old_parent": "-",
+              "new_parent": "B",
+              "formula": "D[A][E] = min(∞, D[A][B] + D[B][E]) = 13.0"
             },
             {
-              "from": "C",
-              "to": "D",
+              "i": "C",
+              "j": "D",
+              "i_idx": 2,
+              "j_idx": 3,
               "old_dist": 7.0,
               "new_dist": 5.0,
-              "via": "B"
+              "old_parent": "C",
+              "new_parent": "B",
+              "formula": "D[C][D] = min(7.0, D[C][B] + D[B][D]) = 5.0"
             }
-          ]
+          ],
+          "description": "Bước k = 1 (xét đỉnh trung gian B): Cập nhật tối ưu 3 ô [(A→D: 9.0), (A→E: 13.0), (C→D: 5.0)]. Gán _parent[i][j] = _parent[B][j]."
         },
         {
-          "k_step": 3,
+          "step_index": 3,
+          "k": 2,
           "k_vertex": "C",
           "dist_matrix": [
             [
@@ -1054,69 +1287,120 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
+              -1,
               2,
-              2,
-              2,
+              0,
+              1,
               2
             ],
             [
-              null,
-              null,
-              null,
-              3,
-              4
-            ],
-            [
-              null,
+              -1,
+              -1,
+              -1,
               1,
-              null,
+              1
+            ],
+            [
+              -1,
+              2,
+              -1,
               1,
-              4
+              2
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              4
+              -1,
+              -1,
+              -1,
+              -1,
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "parent_labels_matrix": [
+            [
+              "-",
+              "C",
+              "A",
+              "B",
+              "C"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "B"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "B",
+              "C"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
             ]
           ],
           "updated_cells": [
             {
-              "from": "A",
-              "to": "B",
+              "i": "A",
+              "j": "B",
+              "i_idx": 0,
+              "j_idx": 1,
               "old_dist": 5.0,
               "new_dist": 3.0,
-              "via": "C"
+              "old_parent": "A",
+              "new_parent": "C",
+              "formula": "D[A][B] = min(5.0, D[A][C] + D[C][B]) = 3.0"
             },
             {
-              "from": "A",
-              "to": "D",
+              "i": "A",
+              "j": "D",
+              "i_idx": 0,
+              "j_idx": 3,
               "old_dist": 9.0,
               "new_dist": 7.0,
-              "via": "C"
+              "old_parent": "B",
+              "new_parent": "B",
+              "formula": "D[A][D] = min(9.0, D[A][C] + D[C][D]) = 7.0"
             },
             {
-              "from": "A",
-              "to": "E",
+              "i": "A",
+              "j": "E",
+              "i_idx": 0,
+              "j_idx": 4,
               "old_dist": 13.0,
               "new_dist": 11.0,
-              "via": "C"
+              "old_parent": "B",
+              "new_parent": "C",
+              "formula": "D[A][E] = min(13.0, D[A][C] + D[C][E]) = 11.0"
             }
-          ]
+          ],
+          "description": "Bước k = 2 (xét đỉnh trung gian C): Cập nhật tối ưu 3 ô [(A→B: 3.0), (A→D: 7.0), (A→E: 11.0)]. Gán _parent[i][j] = _parent[C][j]."
         },
         {
-          "k_step": 4,
+          "step_index": 4,
+          "k": 3,
           "k_vertex": "D",
           "dist_matrix": [
             [
@@ -1155,69 +1439,120 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
+              -1,
               2,
-              2,
-              2,
-              2
-            ],
-            [
-              null,
-              null,
-              null,
-              3,
+              0,
+              1,
               3
             ],
             [
-              null,
+              -1,
+              -1,
+              -1,
               1,
-              null,
-              1,
-              1
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              4
+              -1,
+              2,
+              -1,
+              1,
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              3
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
+            ]
+          ],
+          "parent_labels_matrix": [
+            [
+              "-",
+              "C",
+              "A",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
             ]
           ],
           "updated_cells": [
             {
-              "from": "A",
-              "to": "E",
+              "i": "A",
+              "j": "E",
+              "i_idx": 0,
+              "j_idx": 4,
               "old_dist": 11.0,
               "new_dist": 10.0,
-              "via": "D"
+              "old_parent": "C",
+              "new_parent": "D",
+              "formula": "D[A][E] = min(11.0, D[A][D] + D[D][E]) = 10.0"
             },
             {
-              "from": "B",
-              "to": "E",
+              "i": "B",
+              "j": "E",
+              "i_idx": 1,
+              "j_idx": 4,
               "old_dist": 8.0,
               "new_dist": 7.0,
-              "via": "D"
+              "old_parent": "B",
+              "new_parent": "D",
+              "formula": "D[B][E] = min(8.0, D[B][D] + D[D][E]) = 7.0"
             },
             {
-              "from": "C",
-              "to": "E",
+              "i": "C",
+              "j": "E",
+              "i_idx": 2,
+              "j_idx": 4,
               "old_dist": 9.0,
               "new_dist": 8.0,
-              "via": "D"
+              "old_parent": "C",
+              "new_parent": "D",
+              "formula": "D[C][E] = min(9.0, D[C][D] + D[D][E]) = 8.0"
             }
-          ]
+          ],
+          "description": "Bước k = 3 (xét đỉnh trung gian D): Cập nhật tối ưu 3 ô [(A→E: 10.0), (B→E: 7.0), (C→E: 8.0)]. Gán _parent[i][j] = _parent[D][j]."
         },
         {
-          "k_step": 5,
+          "step_index": 5,
+          "k": 4,
           "k_vertex": "E",
           "dist_matrix": [
             [
@@ -1256,44 +1591,82 @@ window.PRESENTATION_DATA = {
               0.0
             ]
           ],
-          "next_matrix": [
+          "parent_matrix": [
             [
-              null,
+              -1,
               2,
-              2,
-              2,
-              2
-            ],
-            [
-              null,
-              null,
-              null,
-              3,
+              0,
+              1,
               3
             ],
             [
-              null,
+              -1,
+              -1,
+              -1,
               1,
-              null,
-              1,
-              1
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              4
+              -1,
+              2,
+              -1,
+              1,
+              3
             ],
             [
-              null,
-              null,
-              null,
-              null,
-              null
+              -1,
+              -1,
+              -1,
+              -1,
+              3
+            ],
+            [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1
             ]
           ],
-          "updated_cells": []
+          "parent_labels_matrix": [
+            [
+              "-",
+              "C",
+              "A",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "C",
+              "-",
+              "B",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "D"
+            ],
+            [
+              "-",
+              "-",
+              "-",
+              "-",
+              "-"
+            ]
+          ],
+          "updated_cells": [],
+          "description": "Bước k = 4 (xét đỉnh trung gian E): Không có đường đi nào qua đỉnh E ngắn hơn đường hiện tại. Ma trận giữ nguyên."
         }
       ]
     }
@@ -1605,17 +1978,21 @@ window.PRESENTATION_DATA = {
     },
     "dijkstra_h1_trace": [
       {
-        "step": 0,
-        "action": "INIT",
-        "current_node": "H1",
-        "current_dist": 0.0,
-        "heap_snapshot": [
-          [
-            0.0,
-            "H1"
-          ]
+        "step_index": 0,
+        "phase": "INIT",
+        "current_vertex": null,
+        "current_vertex_idx": null,
+        "current_dist": null,
+        "settled_vertices": [],
+        "pq_snapshot": [
+          {
+            "vertex": "H1",
+            "idx": 0,
+            "dist": 0.0,
+            "heap_pos": 1
+          }
         ],
-        "dist_snapshot": {
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": null,
@@ -1623,7 +2000,7 @@ window.PRESENTATION_DATA = {
           "R3": null,
           "R4": null
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
           "R1": null,
@@ -1631,24 +2008,35 @@ window.PRESENTATION_DATA = {
           "R3": null,
           "R4": null
         },
-        "relaxed_edges": []
+        "relaxed_edges": [],
+        "decrease_key_nodes": [],
+        "spt_edges": [],
+        "action_summary": "Khởi tạo nguồn s = H1: gán _dist_to[H1] = 0.0, gọi pq.insert(H1, 0.0)."
       },
       {
-        "step": 1,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "H1",
+        "step_index": 1,
+        "phase": "DEL_MIN",
+        "current_vertex": "H1",
+        "current_vertex_idx": 0,
         "current_dist": 0.0,
-        "heap_snapshot": [
-          [
-            4.0,
-            "R1"
-          ],
-          [
-            6.0,
-            "R2"
-          ]
+        "settled_vertices": [
+          "H1"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R1",
+            "idx": 2,
+            "dist": 4.0,
+            "heap_pos": 1
+          },
+          {
+            "vertex": "R2",
+            "idx": 3,
+            "dist": 6.0,
+            "heap_pos": 2
+          }
+        ],
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": 4.0,
@@ -1656,47 +2044,78 @@ window.PRESENTATION_DATA = {
           "R3": null,
           "R4": null
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "H1",
-          "R2": "H1",
+          "R1": {
+            "from": "H1",
+            "to": "R1",
+            "weight": 4.0,
+            "edge_id": "e_H1_R1"
+          },
+          "R2": {
+            "from": "H1",
+            "to": "R2",
+            "weight": 6.0,
+            "edge_id": "e_H1_R2"
+          },
           "R3": null,
           "R4": null
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_H1_R1",
             "from": "H1",
             "to": "R1",
             "weight": 4.0,
             "old_dist": null,
-            "new_dist": 4.0
+            "new_dist": 4.0,
+            "action": "insert",
+            "detail": "pq.insert(R1, 4.0)"
           },
           {
+            "edge_id": "e_H1_R2",
             "from": "H1",
             "to": "R2",
             "weight": 6.0,
             "old_dist": null,
-            "new_dist": 6.0
+            "new_dist": 6.0,
+            "action": "insert",
+            "detail": "pq.insert(R2, 6.0)"
           }
-        ]
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_H1_R1",
+          "e_H1_R2"
+        ],
+        "action_summary": "Bước 1: pq.del_min() rút đỉnh nguồn H1 (dist=0.0). Nới lỏng các cạnh kề, thêm vào IndexMinPQ."
       },
       {
-        "step": 2,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R1",
+        "step_index": 2,
+        "phase": "DEL_MIN",
+        "current_vertex": "R1",
+        "current_vertex_idx": 2,
         "current_dist": 4.0,
-        "heap_snapshot": [
-          [
-            6.0,
-            "R2"
-          ],
-          [
-            12.0,
-            "R3"
-          ]
+        "settled_vertices": [
+          "H1",
+          "R1"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R2",
+            "idx": 3,
+            "dist": 6.0,
+            "heap_pos": 1
+          },
+          {
+            "vertex": "R3",
+            "idx": 4,
+            "dist": 12.0,
+            "heap_pos": 2
+          }
+        ],
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": 4.0,
@@ -1704,44 +2123,85 @@ window.PRESENTATION_DATA = {
           "R3": 12.0,
           "R4": null
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R1",
+          "R1": {
+            "from": "H1",
+            "to": "R1",
+            "weight": 4.0,
+            "edge_id": "e_H1_R1"
+          },
+          "R2": {
+            "from": "H1",
+            "to": "R2",
+            "weight": 6.0,
+            "edge_id": "e_H1_R2"
+          },
+          "R3": {
+            "from": "R1",
+            "to": "R3",
+            "weight": 8.0,
+            "edge_id": "e_R1_R3"
+          },
           "R4": null
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_R1_R2",
+            "from": "R1",
+            "to": "R2",
+            "weight": 3.0,
+            "old_dist": 6.0,
+            "new_dist": 6.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 6.0 <= đường mới 7.0"
+          },
+          {
+            "edge_id": "e_R1_R3",
             "from": "R1",
             "to": "R3",
             "weight": 8.0,
             "old_dist": null,
-            "new_dist": 12.0
+            "new_dist": 12.0,
+            "action": "insert",
+            "detail": "pq.insert(R3, 12.0)"
           }
-        ]
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_H1_R1",
+          "e_H1_R2",
+          "e_R1_R3"
+        ],
+        "action_summary": "Bước 2: pq.del_min() rút đỉnh R1 (dist=4.0). Nới lỏng: thêm R3 (12.0) qua insert."
       },
       {
-        "step": 3,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R2",
+        "step_index": 3,
+        "phase": "DEL_MIN",
+        "current_vertex": "R2",
+        "current_vertex_idx": 3,
         "current_dist": 6.0,
-        "heap_snapshot": [
-          [
-            10.0,
-            "R3"
-          ],
-          [
-            12.0,
-            "R3"
-          ],
-          [
-            18.0,
-            "R4"
-          ]
+        "settled_vertices": [
+          "H1",
+          "R1",
+          "R2"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R3",
+            "idx": 4,
+            "dist": 10.0,
+            "heap_pos": 1
+          },
+          {
+            "vertex": "R4",
+            "idx": 5,
+            "dist": 18.0,
+            "heap_pos": 2
+          }
+        ],
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": 4.0,
@@ -1749,51 +2209,88 @@ window.PRESENTATION_DATA = {
           "R3": 10.0,
           "R4": 18.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R2",
-          "R4": "R2"
+          "R1": {
+            "from": "H1",
+            "to": "R1",
+            "weight": 4.0,
+            "edge_id": "e_H1_R1"
+          },
+          "R2": {
+            "from": "H1",
+            "to": "R2",
+            "weight": 6.0,
+            "edge_id": "e_H1_R2"
+          },
+          "R3": {
+            "from": "R2",
+            "to": "R3",
+            "weight": 4.0,
+            "edge_id": "e_R2_R3"
+          },
+          "R4": {
+            "from": "R2",
+            "to": "R4",
+            "weight": 12.0,
+            "edge_id": "e_R2_R4"
+          }
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_R2_R3",
             "from": "R2",
             "to": "R3",
             "weight": 4.0,
             "old_dist": 12.0,
-            "new_dist": 10.0
+            "new_dist": 10.0,
+            "action": "decrease_key",
+            "detail": "pq.decrease_key(R3, 10.0): giảm từ 12.0 xuống 10.0"
           },
           {
+            "edge_id": "e_R2_R4",
             "from": "R2",
             "to": "R4",
             "weight": 12.0,
             "old_dist": null,
-            "new_dist": 18.0
+            "new_dist": 18.0,
+            "action": "insert",
+            "detail": "pq.insert(R4, 18.0)"
           }
-        ]
+        ],
+        "decrease_key_nodes": [
+          "R3"
+        ],
+        "spt_edges": [
+          "e_H1_R1",
+          "e_H1_R2",
+          "e_R2_R3",
+          "e_R2_R4"
+        ],
+        "action_summary": "Bước 3: pq.del_min() rút đỉnh R2 (dist=6.0). Nới lỏng: giảm R3 (12.0→10.0) qua decrease_key, thêm R4 (18.0) qua insert."
       },
       {
-        "step": 4,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R3",
+        "step_index": 4,
+        "phase": "DEL_MIN",
+        "current_vertex": "R3",
+        "current_vertex_idx": 4,
         "current_dist": 10.0,
-        "heap_snapshot": [
-          [
-            12.0,
-            "R3"
-          ],
-          [
-            18.0,
-            "R4"
-          ],
-          [
-            15.0,
-            "R4"
-          ]
+        "settled_vertices": [
+          "H1",
+          "R1",
+          "R2",
+          "R3"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R4",
+            "idx": 5,
+            "dist": 15.0,
+            "heap_pos": 1
+          }
+        ],
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": 4.0,
@@ -1801,70 +2298,72 @@ window.PRESENTATION_DATA = {
           "R3": 10.0,
           "R4": 15.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R2",
-          "R4": "R3"
+          "R1": {
+            "from": "H1",
+            "to": "R1",
+            "weight": 4.0,
+            "edge_id": "e_H1_R1"
+          },
+          "R2": {
+            "from": "H1",
+            "to": "R2",
+            "weight": 6.0,
+            "edge_id": "e_H1_R2"
+          },
+          "R3": {
+            "from": "R2",
+            "to": "R3",
+            "weight": 4.0,
+            "edge_id": "e_R2_R3"
+          },
+          "R4": {
+            "from": "R3",
+            "to": "R4",
+            "weight": 5.0,
+            "edge_id": "e_R3_R4"
+          }
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_R3_R4",
             "from": "R3",
             "to": "R4",
             "weight": 5.0,
             "old_dist": 18.0,
-            "new_dist": 15.0
+            "new_dist": 15.0,
+            "action": "decrease_key",
+            "detail": "pq.decrease_key(R4, 15.0): giảm từ 18.0 xuống 15.0"
           }
-        ]
-      },
-      {
-        "step": 5,
-        "action": "LAZY_SKIP",
-        "current_node": "R3",
-        "current_dist": 12.0,
-        "best_known_dist": 10.0,
-        "heap_snapshot": [
-          [
-            15.0,
-            "R4"
-          ],
-          [
-            18.0,
-            "R4"
-          ]
         ],
-        "dist_snapshot": {
-          "H1": 0.0,
-          "H2": null,
-          "R1": 4.0,
-          "R2": 6.0,
-          "R3": 10.0,
-          "R4": 15.0
-        },
-        "parent_snapshot": {
-          "H1": null,
-          "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R2",
-          "R4": "R3"
-        },
-        "relaxed_edges": []
+        "decrease_key_nodes": [
+          "R4"
+        ],
+        "spt_edges": [
+          "e_H1_R1",
+          "e_H1_R2",
+          "e_R2_R3",
+          "e_R3_R4"
+        ],
+        "action_summary": "Bước 4: pq.del_min() rút đỉnh R3 (dist=10.0). Nới lỏng: giảm R4 (18.0→15.0) qua decrease_key."
       },
       {
-        "step": 6,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R4",
+        "step_index": 5,
+        "phase": "DEL_MIN",
+        "current_vertex": "R4",
+        "current_vertex_idx": 5,
         "current_dist": 15.0,
-        "heap_snapshot": [
-          [
-            18.0,
-            "R4"
-          ]
+        "settled_vertices": [
+          "H1",
+          "R1",
+          "R2",
+          "R3",
+          "R4"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [],
+        "dist_to": {
           "H1": 0.0,
           "H2": null,
           "R1": 4.0,
@@ -1872,55 +2371,73 @@ window.PRESENTATION_DATA = {
           "R3": 10.0,
           "R4": 15.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R2",
-          "R4": "R3"
+          "R1": {
+            "from": "H1",
+            "to": "R1",
+            "weight": 4.0,
+            "edge_id": "e_H1_R1"
+          },
+          "R2": {
+            "from": "H1",
+            "to": "R2",
+            "weight": 6.0,
+            "edge_id": "e_H1_R2"
+          },
+          "R3": {
+            "from": "R2",
+            "to": "R3",
+            "weight": 4.0,
+            "edge_id": "e_R2_R3"
+          },
+          "R4": {
+            "from": "R3",
+            "to": "R4",
+            "weight": 5.0,
+            "edge_id": "e_R3_R4"
+          }
         },
-        "relaxed_edges": []
-      },
-      {
-        "step": 7,
-        "action": "LAZY_SKIP",
-        "current_node": "R4",
-        "current_dist": 18.0,
-        "best_known_dist": 15.0,
-        "heap_snapshot": [],
-        "dist_snapshot": {
-          "H1": 0.0,
-          "H2": null,
-          "R1": 4.0,
-          "R2": 6.0,
-          "R3": 10.0,
-          "R4": 15.0
-        },
-        "parent_snapshot": {
-          "H1": null,
-          "H2": null,
-          "R1": "H1",
-          "R2": "H1",
-          "R3": "R2",
-          "R4": "R3"
-        },
-        "relaxed_edges": []
+        "relaxed_edges": [
+          {
+            "edge_id": "e_R4_R1",
+            "from": "R4",
+            "to": "R1",
+            "weight": 15.0,
+            "old_dist": 4.0,
+            "new_dist": 4.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 4.0 <= đường mới 30.0"
+          }
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_H1_R1",
+          "e_H1_R2",
+          "e_R2_R3",
+          "e_R3_R4"
+        ],
+        "action_summary": "Bước 5: pq.del_min() rút đỉnh R4 (dist=15.0). Nới lỏng: các cạnh không cải thiện."
       }
     ],
     "dijkstra_h2_trace": [
       {
-        "step": 0,
-        "action": "INIT",
-        "current_node": "H2",
-        "current_dist": 0.0,
-        "heap_snapshot": [
-          [
-            0.0,
-            "H2"
-          ]
+        "step_index": 0,
+        "phase": "INIT",
+        "current_vertex": null,
+        "current_vertex_idx": null,
+        "current_dist": null,
+        "settled_vertices": [],
+        "pq_snapshot": [
+          {
+            "vertex": "H2",
+            "idx": 1,
+            "dist": 0.0,
+            "heap_pos": 1
+          }
         ],
-        "dist_snapshot": {
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": null,
@@ -1928,7 +2445,7 @@ window.PRESENTATION_DATA = {
           "R3": null,
           "R4": null
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
           "R1": null,
@@ -1936,24 +2453,35 @@ window.PRESENTATION_DATA = {
           "R3": null,
           "R4": null
         },
-        "relaxed_edges": []
+        "relaxed_edges": [],
+        "decrease_key_nodes": [],
+        "spt_edges": [],
+        "action_summary": "Khởi tạo nguồn s = H2: gán _dist_to[H2] = 0.0, gọi pq.insert(H2, 0.0)."
       },
       {
-        "step": 1,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "H2",
+        "step_index": 1,
+        "phase": "DEL_MIN",
+        "current_vertex": "H2",
+        "current_vertex_idx": 1,
         "current_dist": 0.0,
-        "heap_snapshot": [
-          [
-            6.0,
-            "R3"
-          ],
-          [
-            7.0,
-            "R4"
-          ]
+        "settled_vertices": [
+          "H2"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R3",
+            "idx": 4,
+            "dist": 6.0,
+            "heap_pos": 1
+          },
+          {
+            "vertex": "R4",
+            "idx": 5,
+            "dist": 7.0,
+            "heap_pos": 2
+          }
+        ],
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": null,
@@ -1961,43 +2489,72 @@ window.PRESENTATION_DATA = {
           "R3": 6.0,
           "R4": 7.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
           "R1": null,
           "R2": null,
-          "R3": "H2",
-          "R4": "H2"
+          "R3": {
+            "from": "H2",
+            "to": "R3",
+            "weight": 6.0,
+            "edge_id": "e_H2_R3"
+          },
+          "R4": {
+            "from": "H2",
+            "to": "R4",
+            "weight": 7.0,
+            "edge_id": "e_H2_R4"
+          }
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_H2_R3",
             "from": "H2",
             "to": "R3",
             "weight": 6.0,
             "old_dist": null,
-            "new_dist": 6.0
+            "new_dist": 6.0,
+            "action": "insert",
+            "detail": "pq.insert(R3, 6.0)"
           },
           {
+            "edge_id": "e_H2_R4",
             "from": "H2",
             "to": "R4",
             "weight": 7.0,
             "old_dist": null,
-            "new_dist": 7.0
+            "new_dist": 7.0,
+            "action": "insert",
+            "detail": "pq.insert(R4, 7.0)"
           }
-        ]
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_H2_R3",
+          "e_H2_R4"
+        ],
+        "action_summary": "Bước 1: pq.del_min() rút đỉnh nguồn H2 (dist=0.0). Nới lỏng các cạnh kề, thêm vào IndexMinPQ."
       },
       {
-        "step": 2,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R3",
+        "step_index": 2,
+        "phase": "DEL_MIN",
+        "current_vertex": "R3",
+        "current_vertex_idx": 4,
         "current_dist": 6.0,
-        "heap_snapshot": [
-          [
-            7.0,
-            "R4"
-          ]
+        "settled_vertices": [
+          "H2",
+          "R3"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R4",
+            "idx": 5,
+            "dist": 7.0,
+            "heap_pos": 1
+          }
+        ],
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": null,
@@ -2005,28 +2562,63 @@ window.PRESENTATION_DATA = {
           "R3": 6.0,
           "R4": 7.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
           "R1": null,
           "R2": null,
-          "R3": "H2",
-          "R4": "H2"
+          "R3": {
+            "from": "H2",
+            "to": "R3",
+            "weight": 6.0,
+            "edge_id": "e_H2_R3"
+          },
+          "R4": {
+            "from": "H2",
+            "to": "R4",
+            "weight": 7.0,
+            "edge_id": "e_H2_R4"
+          }
         },
-        "relaxed_edges": []
+        "relaxed_edges": [
+          {
+            "edge_id": "e_R3_R4",
+            "from": "R3",
+            "to": "R4",
+            "weight": 5.0,
+            "old_dist": 7.0,
+            "new_dist": 7.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 7.0 <= đường mới 11.0"
+          }
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_H2_R3",
+          "e_H2_R4"
+        ],
+        "action_summary": "Bước 2: pq.del_min() rút đỉnh R3 (dist=6.0). Nới lỏng: các cạnh không cải thiện."
       },
       {
-        "step": 3,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R4",
+        "step_index": 3,
+        "phase": "DEL_MIN",
+        "current_vertex": "R4",
+        "current_vertex_idx": 5,
         "current_dist": 7.0,
-        "heap_snapshot": [
-          [
-            22.0,
-            "R1"
-          ]
+        "settled_vertices": [
+          "H2",
+          "R3",
+          "R4"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R1",
+            "idx": 2,
+            "dist": 22.0,
+            "heap_pos": 1
+          }
+        ],
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": 22.0,
@@ -2034,36 +2626,70 @@ window.PRESENTATION_DATA = {
           "R3": 6.0,
           "R4": 7.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "R4",
+          "R1": {
+            "from": "R4",
+            "to": "R1",
+            "weight": 15.0,
+            "edge_id": "e_R4_R1"
+          },
           "R2": null,
-          "R3": "H2",
-          "R4": "H2"
+          "R3": {
+            "from": "H2",
+            "to": "R3",
+            "weight": 6.0,
+            "edge_id": "e_H2_R3"
+          },
+          "R4": {
+            "from": "H2",
+            "to": "R4",
+            "weight": 7.0,
+            "edge_id": "e_H2_R4"
+          }
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_R4_R1",
             "from": "R4",
             "to": "R1",
             "weight": 15.0,
             "old_dist": null,
-            "new_dist": 22.0
+            "new_dist": 22.0,
+            "action": "insert",
+            "detail": "pq.insert(R1, 22.0)"
           }
-        ]
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_R4_R1",
+          "e_H2_R3",
+          "e_H2_R4"
+        ],
+        "action_summary": "Bước 3: pq.del_min() rút đỉnh R4 (dist=7.0). Nới lỏng: thêm R1 (22.0) qua insert."
       },
       {
-        "step": 4,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R1",
+        "step_index": 4,
+        "phase": "DEL_MIN",
+        "current_vertex": "R1",
+        "current_vertex_idx": 2,
         "current_dist": 22.0,
-        "heap_snapshot": [
-          [
-            25.0,
-            "R2"
-          ]
+        "settled_vertices": [
+          "H2",
+          "R3",
+          "R4",
+          "R1"
         ],
-        "dist_snapshot": {
+        "pq_snapshot": [
+          {
+            "vertex": "R2",
+            "idx": 3,
+            "dist": 25.0,
+            "heap_pos": 1
+          }
+        ],
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": 22.0,
@@ -2071,31 +2697,80 @@ window.PRESENTATION_DATA = {
           "R3": 6.0,
           "R4": 7.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "R4",
-          "R2": "R1",
-          "R3": "H2",
-          "R4": "H2"
+          "R1": {
+            "from": "R4",
+            "to": "R1",
+            "weight": 15.0,
+            "edge_id": "e_R4_R1"
+          },
+          "R2": {
+            "from": "R1",
+            "to": "R2",
+            "weight": 3.0,
+            "edge_id": "e_R1_R2"
+          },
+          "R3": {
+            "from": "H2",
+            "to": "R3",
+            "weight": 6.0,
+            "edge_id": "e_H2_R3"
+          },
+          "R4": {
+            "from": "H2",
+            "to": "R4",
+            "weight": 7.0,
+            "edge_id": "e_H2_R4"
+          }
         },
         "relaxed_edges": [
           {
+            "edge_id": "e_R1_R2",
             "from": "R1",
             "to": "R2",
             "weight": 3.0,
             "old_dist": null,
-            "new_dist": 25.0
+            "new_dist": 25.0,
+            "action": "insert",
+            "detail": "pq.insert(R2, 25.0)"
+          },
+          {
+            "edge_id": "e_R1_R3",
+            "from": "R1",
+            "to": "R3",
+            "weight": 8.0,
+            "old_dist": 6.0,
+            "new_dist": 6.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 6.0 <= đường mới 30.0"
           }
-        ]
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_R4_R1",
+          "e_R1_R2",
+          "e_H2_R3",
+          "e_H2_R4"
+        ],
+        "action_summary": "Bước 4: pq.del_min() rút đỉnh R1 (dist=22.0). Nới lỏng: thêm R2 (25.0) qua insert."
       },
       {
-        "step": 5,
-        "action": "SETTLE_AND_RELAX",
-        "current_node": "R2",
+        "step_index": 5,
+        "phase": "DEL_MIN",
+        "current_vertex": "R2",
+        "current_vertex_idx": 3,
         "current_dist": 25.0,
-        "heap_snapshot": [],
-        "dist_snapshot": {
+        "settled_vertices": [
+          "H2",
+          "R3",
+          "R4",
+          "R1",
+          "R2"
+        ],
+        "pq_snapshot": [],
+        "dist_to": {
           "H1": null,
           "H2": 0.0,
           "R1": 22.0,
@@ -2103,20 +2778,70 @@ window.PRESENTATION_DATA = {
           "R3": 6.0,
           "R4": 7.0
         },
-        "parent_snapshot": {
+        "edge_to": {
           "H1": null,
           "H2": null,
-          "R1": "R4",
-          "R2": "R1",
-          "R3": "H2",
-          "R4": "H2"
+          "R1": {
+            "from": "R4",
+            "to": "R1",
+            "weight": 15.0,
+            "edge_id": "e_R4_R1"
+          },
+          "R2": {
+            "from": "R1",
+            "to": "R2",
+            "weight": 3.0,
+            "edge_id": "e_R1_R2"
+          },
+          "R3": {
+            "from": "H2",
+            "to": "R3",
+            "weight": 6.0,
+            "edge_id": "e_H2_R3"
+          },
+          "R4": {
+            "from": "H2",
+            "to": "R4",
+            "weight": 7.0,
+            "edge_id": "e_H2_R4"
+          }
         },
-        "relaxed_edges": []
+        "relaxed_edges": [
+          {
+            "edge_id": "e_R2_R3",
+            "from": "R2",
+            "to": "R3",
+            "weight": 4.0,
+            "old_dist": 6.0,
+            "new_dist": 6.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 6.0 <= đường mới 29.0"
+          },
+          {
+            "edge_id": "e_R2_R4",
+            "from": "R2",
+            "to": "R4",
+            "weight": 12.0,
+            "old_dist": 7.0,
+            "new_dist": 7.0,
+            "action": "skip",
+            "detail": "Bỏ qua: khoảng cách cũ 7.0 <= đường mới 37.0"
+          }
+        ],
+        "decrease_key_nodes": [],
+        "spt_edges": [
+          "e_R4_R1",
+          "e_R1_R2",
+          "e_H2_R3",
+          "e_H2_R4"
+        ],
+        "action_summary": "Bước 5: pq.del_min() rút đỉnh R2 (dist=25.0). Nới lỏng: các cạnh không cải thiện."
       }
     ],
     "floyd_warshall_trace": [
       {
-        "k_step": 0,
+        "step_index": 0,
+        "k": null,
         "k_vertex": null,
         "dist_matrix": [
           [
@@ -2168,60 +2893,112 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
+            -1,
+            -1,
+            0,
+            0,
+            -1,
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
+          ],
+          [
+            -1,
+            -1,
+            -1,
             2,
-            3,
-            null,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
-            4,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
-          ],
-          [
-            null,
-            null,
             2,
-            null,
-            null,
-            null
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            3,
+            3
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
+            -1,
+            -1,
+            -1
           ]
         ],
-        "updated_cells": []
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "-",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R1",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "-",
+            "-",
+            "-"
+          ]
+        ],
+        "updated_cells": [],
+        "description": "Khởi tạo ma trận ban đầu từ trọng số cạnh: _dist[i][j] = w(i, j) và _parent[i][j] = i."
       },
       {
-        "k_step": 1,
+        "step_index": 1,
+        "k": 0,
         "k_vertex": "H1",
         "dist_matrix": [
           [
@@ -2273,60 +3050,112 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
+            -1,
+            -1,
+            0,
+            0,
+            -1,
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
+          ],
+          [
+            -1,
+            -1,
+            -1,
             2,
-            3,
-            null,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
-            4,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
-          ],
-          [
-            null,
-            null,
             2,
-            null,
-            null,
-            null
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            3,
+            3
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
+            -1,
+            -1,
+            -1
           ]
         ],
-        "updated_cells": []
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "-",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R1",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "-",
+            "-",
+            "-"
+          ]
+        ],
+        "updated_cells": [],
+        "description": "Bước k = 0 (xét đỉnh trung gian H1): Không có đường đi nào qua đỉnh H1 ngắn hơn đường hiện tại. Ma trận giữ nguyên."
       },
       {
-        "k_step": 2,
+        "step_index": 2,
+        "k": 1,
         "k_vertex": "H2",
         "dist_matrix": [
           [
@@ -2378,60 +3207,112 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
+            -1,
+            -1,
+            0,
+            0,
+            -1,
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
+          ],
+          [
+            -1,
+            -1,
+            -1,
             2,
-            3,
-            null,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
-            4,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
-          ],
-          [
-            null,
-            null,
             2,
-            null,
-            null,
-            null
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            3,
+            3
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
+            -1,
+            -1,
+            -1
           ]
         ],
-        "updated_cells": []
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "-",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R1",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "-",
+            "-",
+            "-"
+          ]
+        ],
+        "updated_cells": [],
+        "description": "Bước k = 1 (xét đỉnh trung gian H2): Không có đường đi nào qua đỉnh H2 ngắn hơn đường hiện tại. Ma trận giữ nguyên."
       },
       {
-        "k_step": 3,
+        "step_index": 3,
+        "k": 2,
         "k_vertex": "R1",
         "dist_matrix": [
           [
@@ -2483,82 +3364,146 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
+            -1,
+            -1,
+            0,
+            0,
             2,
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            2,
+            2,
+            -1
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
             3,
-            2,
-            null
+            3
           ],
           [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
           ],
           [
-            null,
-            null,
-            null,
-            3,
-            4,
-            null
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
-          ],
-          [
-            null,
-            null,
+            -1,
+            -1,
+            5,
             2,
             2,
-            2,
-            null
+            -1
+          ]
+        ],
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "R1",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R1",
+            "-"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "R1",
+            "-"
           ]
         ],
         "updated_cells": [
           {
-            "from": "H1",
-            "to": "R3",
+            "i": "H1",
+            "j": "R3",
+            "i_idx": 0,
+            "j_idx": 4,
             "old_dist": null,
             "new_dist": 12.0,
-            "via": "R1"
+            "old_parent": "-",
+            "new_parent": "R1",
+            "formula": "D[H1][R3] = min(∞, D[H1][R1] + D[R1][R3]) = 12.0"
           },
           {
-            "from": "R4",
-            "to": "R2",
+            "i": "R4",
+            "j": "R2",
+            "i_idx": 5,
+            "j_idx": 3,
             "old_dist": null,
             "new_dist": 18.0,
-            "via": "R1"
+            "old_parent": "-",
+            "new_parent": "R1",
+            "formula": "D[R4][R2] = min(∞, D[R4][R1] + D[R1][R2]) = 18.0"
           },
           {
-            "from": "R4",
-            "to": "R3",
+            "i": "R4",
+            "j": "R3",
+            "i_idx": 5,
+            "j_idx": 4,
             "old_dist": null,
             "new_dist": 23.0,
-            "via": "R1"
+            "old_parent": "-",
+            "new_parent": "R1",
+            "formula": "D[R4][R3] = min(∞, D[R4][R1] + D[R1][R3]) = 23.0"
           }
-        ]
+        ],
+        "description": "Bước k = 2 (xét đỉnh trung gian R1): Cập nhật tối ưu 3 ô [(H1→R3: 12.0), (R4→R2: 18.0), (R4→R3: 23.0)]. Gán _parent[i][j] = _parent[R1][j]."
       },
       {
-        "k_step": 4,
+        "step_index": 4,
+        "k": 3,
         "k_vertex": "R2",
         "dist_matrix": [
           [
@@ -2610,96 +3555,168 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
-            2,
-            3,
-            3,
-            3
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
+            -1,
+            -1,
+            0,
+            0,
             3,
             3
           ],
           [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
           ],
           [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
+            -1,
+            -1,
+            -1,
+            2,
+            3,
+            3
           ],
           [
-            null,
-            null,
+            -1,
+            -1,
+            -1,
+            -1,
+            3,
+            3
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
             2,
-            2,
-            2,
-            null
+            3,
+            -1
+          ]
+        ],
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "R2",
+            "-"
           ]
         ],
         "updated_cells": [
           {
-            "from": "H1",
-            "to": "R3",
+            "i": "H1",
+            "j": "R3",
+            "i_idx": 0,
+            "j_idx": 4,
             "old_dist": 12.0,
             "new_dist": 10.0,
-            "via": "R2"
+            "old_parent": "R1",
+            "new_parent": "R2",
+            "formula": "D[H1][R3] = min(12.0, D[H1][R2] + D[R2][R3]) = 10.0"
           },
           {
-            "from": "H1",
-            "to": "R4",
+            "i": "H1",
+            "j": "R4",
+            "i_idx": 0,
+            "j_idx": 5,
             "old_dist": null,
             "new_dist": 18.0,
-            "via": "R2"
+            "old_parent": "-",
+            "new_parent": "R2",
+            "formula": "D[H1][R4] = min(∞, D[H1][R2] + D[R2][R4]) = 18.0"
           },
           {
-            "from": "R1",
-            "to": "R3",
+            "i": "R1",
+            "j": "R3",
+            "i_idx": 2,
+            "j_idx": 4,
             "old_dist": 8.0,
             "new_dist": 7.0,
-            "via": "R2"
+            "old_parent": "R1",
+            "new_parent": "R2",
+            "formula": "D[R1][R3] = min(8.0, D[R1][R2] + D[R2][R3]) = 7.0"
           },
           {
-            "from": "R1",
-            "to": "R4",
+            "i": "R1",
+            "j": "R4",
+            "i_idx": 2,
+            "j_idx": 5,
             "old_dist": null,
             "new_dist": 15.0,
-            "via": "R2"
+            "old_parent": "-",
+            "new_parent": "R2",
+            "formula": "D[R1][R4] = min(∞, D[R1][R2] + D[R2][R4]) = 15.0"
           },
           {
-            "from": "R4",
-            "to": "R3",
+            "i": "R4",
+            "j": "R3",
+            "i_idx": 5,
+            "j_idx": 4,
             "old_dist": 23.0,
             "new_dist": 22.0,
-            "via": "R2"
+            "old_parent": "R1",
+            "new_parent": "R2",
+            "formula": "D[R4][R3] = min(23.0, D[R4][R2] + D[R2][R3]) = 22.0"
           }
-        ]
+        ],
+        "description": "Bước k = 3 (xét đỉnh trung gian R2): Cập nhật tối ưu 5 ô [(H1→R3: 10.0), (H1→R4: 18.0), (R1→R3: 7.0), (R1→R4: 15.0), (R4→R3: 22.0)]. Gán _parent[i][j] = _parent[R2][j]."
       },
       {
-        "k_step": 5,
+        "step_index": 5,
+        "k": 4,
         "k_vertex": "R3",
         "dist_matrix": [
           [
@@ -2751,82 +3768,146 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
-            2,
+            -1,
+            -1,
+            0,
+            0,
             3,
-            3,
-            3
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
-            3,
-            3
-          ],
-          [
-            null,
-            null,
-            null,
-            null,
-            4,
             4
           ],
           [
-            null,
-            null,
-            null,
-            null,
-            null,
-            5
+            -1,
+            -1,
+            -1,
+            -1,
+            1,
+            1
           ],
           [
-            null,
-            null,
+            -1,
+            -1,
+            -1,
             2,
+            3,
+            4
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            3,
+            4
+          ],
+          [
+            -1,
+            -1,
+            -1,
+            -1,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
             2,
-            2,
-            null
+            3,
+            -1
+          ]
+        ],
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "-",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "R2",
+            "-"
           ]
         ],
         "updated_cells": [
           {
-            "from": "H1",
-            "to": "R4",
+            "i": "H1",
+            "j": "R4",
+            "i_idx": 0,
+            "j_idx": 5,
             "old_dist": 18.0,
             "new_dist": 15.0,
-            "via": "R3"
+            "old_parent": "R2",
+            "new_parent": "R3",
+            "formula": "D[H1][R4] = min(18.0, D[H1][R3] + D[R3][R4]) = 15.0"
           },
           {
-            "from": "R1",
-            "to": "R4",
+            "i": "R1",
+            "j": "R4",
+            "i_idx": 2,
+            "j_idx": 5,
             "old_dist": 15.0,
             "new_dist": 12.0,
-            "via": "R3"
+            "old_parent": "R2",
+            "new_parent": "R3",
+            "formula": "D[R1][R4] = min(15.0, D[R1][R3] + D[R3][R4]) = 12.0"
           },
           {
-            "from": "R2",
-            "to": "R4",
+            "i": "R2",
+            "j": "R4",
+            "i_idx": 3,
+            "j_idx": 5,
             "old_dist": 12.0,
             "new_dist": 9.0,
-            "via": "R3"
+            "old_parent": "R2",
+            "new_parent": "R3",
+            "formula": "D[R2][R4] = min(12.0, D[R2][R3] + D[R3][R4]) = 9.0"
           }
-        ]
+        ],
+        "description": "Bước k = 4 (xét đỉnh trung gian R3): Cập nhật tối ưu 3 ô [(H1→R4: 15.0), (R1→R4: 12.0), (R2→R4: 9.0)]. Gán _parent[i][j] = _parent[R3][j]."
       },
       {
-        "k_step": 6,
+        "step_index": 6,
+        "k": 5,
         "k_vertex": "R4",
         "dist_matrix": [
           [
@@ -2878,93 +3959,164 @@ window.PRESENTATION_DATA = {
             0.0
           ]
         ],
-        "next_matrix": [
+        "parent_matrix": [
           [
-            null,
-            null,
-            2,
+            -1,
+            -1,
+            0,
+            0,
             3,
-            3,
-            3
-          ],
-          [
-            null,
-            null,
-            5,
-            5,
-            4,
-            5
-          ],
-          [
-            null,
-            null,
-            null,
-            3,
-            3,
-            3
-          ],
-          [
-            null,
-            null,
-            4,
-            null,
-            4,
             4
           ],
           [
-            null,
-            null,
+            -1,
+            -1,
             5,
-            5,
-            null,
-            5
+            2,
+            1,
+            1
           ],
           [
-            null,
-            null,
+            -1,
+            -1,
+            -1,
             2,
+            3,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
+            -1,
+            3,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
             2,
+            -1,
+            4
+          ],
+          [
+            -1,
+            -1,
+            5,
             2,
-            null
+            3,
+            -1
+          ]
+        ],
+        "parent_labels_matrix": [
+          [
+            "-",
+            "-",
+            "H1",
+            "H1",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "H2",
+            "H2"
+          ],
+          [
+            "-",
+            "-",
+            "-",
+            "R1",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "-",
+            "R2",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "-",
+            "R3"
+          ],
+          [
+            "-",
+            "-",
+            "R4",
+            "R1",
+            "R2",
+            "-"
           ]
         ],
         "updated_cells": [
           {
-            "from": "H2",
-            "to": "R1",
+            "i": "H2",
+            "j": "R1",
+            "i_idx": 1,
+            "j_idx": 2,
             "old_dist": null,
             "new_dist": 22.0,
-            "via": "R4"
+            "old_parent": "-",
+            "new_parent": "R4",
+            "formula": "D[H2][R1] = min(∞, D[H2][R4] + D[R4][R1]) = 22.0"
           },
           {
-            "from": "H2",
-            "to": "R2",
+            "i": "H2",
+            "j": "R2",
+            "i_idx": 1,
+            "j_idx": 3,
             "old_dist": null,
             "new_dist": 25.0,
-            "via": "R4"
+            "old_parent": "-",
+            "new_parent": "R1",
+            "formula": "D[H2][R2] = min(∞, D[H2][R4] + D[R4][R2]) = 25.0"
           },
           {
-            "from": "R2",
-            "to": "R1",
+            "i": "R2",
+            "j": "R1",
+            "i_idx": 3,
+            "j_idx": 2,
             "old_dist": null,
             "new_dist": 24.0,
-            "via": "R4"
+            "old_parent": "-",
+            "new_parent": "R4",
+            "formula": "D[R2][R1] = min(∞, D[R2][R4] + D[R4][R1]) = 24.0"
           },
           {
-            "from": "R3",
-            "to": "R1",
+            "i": "R3",
+            "j": "R1",
+            "i_idx": 4,
+            "j_idx": 2,
             "old_dist": null,
             "new_dist": 20.0,
-            "via": "R4"
+            "old_parent": "-",
+            "new_parent": "R4",
+            "formula": "D[R3][R1] = min(∞, D[R3][R4] + D[R4][R1]) = 20.0"
           },
           {
-            "from": "R3",
-            "to": "R2",
+            "i": "R3",
+            "j": "R2",
+            "i_idx": 4,
+            "j_idx": 3,
             "old_dist": null,
             "new_dist": 23.0,
-            "via": "R4"
+            "old_parent": "-",
+            "new_parent": "R1",
+            "formula": "D[R3][R2] = min(∞, D[R3][R4] + D[R4][R2]) = 23.0"
           }
-        ]
+        ],
+        "description": "Bước k = 5 (xét đỉnh trung gian R4): Cập nhật tối ưu 5 ô [(H2→R1: 22.0), (H2→R2: 25.0), (R2→R1: 24.0), (R3→R1: 20.0), (R3→R2: 23.0)]. Gán _parent[i][j] = _parent[R4][j]."
       }
     ],
     "apsp_matrix": [
@@ -3015,6 +4167,56 @@ window.PRESENTATION_DATA = {
         18.0,
         22.0,
         0.0
+      ]
+    ],
+    "apsp_parent_matrix": [
+      [
+        -1,
+        -1,
+        0,
+        0,
+        3,
+        4
+      ],
+      [
+        -1,
+        -1,
+        5,
+        2,
+        1,
+        1
+      ],
+      [
+        -1,
+        -1,
+        -1,
+        2,
+        3,
+        4
+      ],
+      [
+        -1,
+        -1,
+        5,
+        -1,
+        3,
+        4
+      ],
+      [
+        -1,
+        -1,
+        5,
+        2,
+        -1,
+        4
+      ],
+      [
+        -1,
+        -1,
+        5,
+        2,
+        3,
+        -1
       ]
     ]
   },

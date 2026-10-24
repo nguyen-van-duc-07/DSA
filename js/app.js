@@ -394,17 +394,14 @@ function closeAllModals() {
 window.s9_step = 0;
 let s9_playTimer = null;
 
-// Natural, human, pedagogical step-by-step descriptions
+// Natural, human, pedagogical step-by-step descriptions for DijkstraSP + IndexMinPQ
 const DIJKSTRA_HUMAN_DESCRIPTIONS = [
-  "Bước 0: Khởi tạo khoảng cách từ đỉnh nguồn A đến chính nó là 0, các đỉnh còn lại tạm thời là vô cùng (∞). Ta bỏ bản ghi (0, A) vào Hàng đợi ưu tiên (Min-Heap).",
-  "Bước 1: Ta lấy đỉnh A (khoảng cách = 0) ra khỏi Heap và chốt luôn khoảng cách này! Từ A, ta đi thử sang B (chi phí = 5) và sang C (chi phí = 2). Cả hai đường đều ngắn hơn vô cùng nên ta cập nhật mảng dist và đẩy (5, B), (2, C) vào Heap.",
-  "Bước 2: Ta lấy đỉnh C (khoảng cách = 2) ra khỏi Heap và chốt luôn. Từ C đi sang B chỉ tốn 2 + 1 = 3 (ngắn hơn đường cũ từ A sang B là 5), nên ta cập nhật lại đường đi tới B thành 3! Đồng thời mở thêm đường tới D (chi phí 9) và E (chi phí 11).",
-  "Bước 3: Ta lấy đỉnh B (khoảng cách = 3) ra khỏi Heap và chốt luôn. Từ B đi tiếp sang D chỉ tốn 3 + 4 = 7 (ngắn hơn đường qua C là 9), nên ta cập nhật lại đường đi tới D thành 7!",
-  "Bước 4: Ta lấy ra bản ghi (5, B). Nhưng vì trước đó ta đã chốt khoảng cách tới B là 3 rồi, nên giá trị 5 này đã cũ. Kỹ thuật Lazy Deletion lập tức bỏ qua bản ghi này mà không tốn công duyệt cạnh!",
-  "Bước 5: Ta lấy đỉnh D (khoảng cách = 7) ra khỏi Heap và chốt luôn. Từ D đi sang E chỉ tốn 7 + 3 = 10 (ngắn hơn đường cũ là 11), nên ta cập nhật lại đường đi tới E thành 10!",
-  "Bước 6: Ta lấy ra bản ghi (9, D). Vì đỉnh D đã được chốt trước đó với khoảng cách 7, nên giá trị 9 này là cũ. Ta bỏ qua ngay!",
-  "Bước 7: Ta lấy đỉnh E (khoảng cách = 10) ra khỏi Heap và chốt luôn! Đỉnh E không có cạnh đi tiếp.",
-  "Bước 8: Ta lấy ra bản ghi (11, E). Giá trị này cũ hơn 10 nên ta bỏ qua. Lúc này Min-Heap đã rỗng, thuật toán hoàn tất trọn vẹn!"
+  "Bước 0 (Khởi tạo): Đặt _dist_to[A] = 0.0, các đỉnh còn lại là vô cùng (∞). Đưa (A: 0.0) vào IndexMinPQ.",
+  "Bước 1: pq.del_min() rút đỉnh nguồn A (dist=0.0) và chốt đỉnh A. Nới lỏng cạnh A→B (5.0) và A→C (2.0) qua lệnh pq.insert(B, 5.0) và pq.insert(C, 2.0).",
+  "Bước 2: pq.del_min() rút đỉnh C (dist=2.0) và chốt đỉnh C. Cạnh C→B (2+1=3.0 < 5.0) gọi pq.decrease_key(B, 3.0) trực tiếp giảm khóa! Thêm D (9.0) và E (11.0) qua pq.insert().",
+  "Bước 3: pq.del_min() rút đỉnh B (dist=3.0) và chốt đỉnh B. Cạnh B→D (3+4=7.0 < 9.0) gọi pq.decrease_key(D, 7.0) trực tiếp giảm khóa! Cạnh B→E (3+8=11.0) không cải thiện (bỏ qua).",
+  "Bước 4: pq.del_min() rút đỉnh D (dist=7.0) và chốt đỉnh D. Cạnh D→E (7+3=10.0 < 11.0) gọi pq.decrease_key(E, 10.0) trực tiếp giảm khóa!",
+  "Bước 5: pq.del_min() rút đỉnh E (dist=10.0) và chốt đỉnh E. Đỉnh E không có cạnh đi ra. Hàng đợi IndexMinPQ rỗng. Toàn bộ 5 đỉnh đã chốt tối ưu!"
 ];
 
 function computeEdgeGeometry(sNode, tNode, curve, rStart, rEnd) {
@@ -612,48 +609,67 @@ window.s9_renderStep = function(stepIdx) {
   if (indicator) indicator.textContent = `${stepIdx} / ${trace.length - 1}`;
 
   if (badge) {
-    if (frame.action === "SETTLE_AND_RELAX") {
-      badge.textContent = `CHỐT ĐỈNH ${frame.current_node} & NỚI LỎNG`;
-      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800";
-    } else if (frame.action === "LAZY_SKIP") {
-      badge.textContent = `BỎ QUA GIÁ TRỊ CŨ (LAZY)`;
-      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800";
+    if (stepIdx === 0) {
+      badge.textContent = "KHỞI TẠO NGUỒN A (ĐỈNH 0)";
+      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 font-sans";
+    } else if (frame.decrease_key_nodes && frame.decrease_key_nodes.length > 0) {
+      badge.textContent = `RÚT ĐỈNH ${frame.current_vertex} • CÓ DECREASE_KEY`;
+      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 font-sans";
     } else {
-      badge.textContent = "KHỞI TẠO BƯỚC ĐẦU";
-      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800";
+      badge.textContent = `RÚT ĐỈNH ${frame.current_vertex} (dist = ${frame.current_dist !== null ? frame.current_dist.toFixed(1) : "0.0"})`;
+      badge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 font-sans";
     }
   }
 
   if (desc) {
-    desc.textContent = DIJKSTRA_HUMAN_DESCRIPTIONS[stepIdx] || "Đang thực hiện bước lặp của thuật toán...";
+    desc.textContent = DIJKSTRA_HUMAN_DESCRIPTIONS[stepIdx] || frame.action_summary || "Đang thực hiện bước lặp của thuật toán...";
   }
 
-  // Update SVG node circle colors in Light Theme
+  // Update SVG node circle colors
   const nodes = data.sample_graph_5.nodes_layout;
+  const settled = frame.settled_vertices || [];
+  const inPQ = (frame.pq_snapshot || []).map(p => p.vertex);
+  const decNodes = frame.decrease_key_nodes || [];
+
   nodes.forEach((n) => {
     const circle = document.getElementById(`s9-node-${n.id}`);
     if (!circle) return;
 
-    const d = frame.dist_snapshot[n.id];
-    if (n.id === frame.current_node && frame.action === "SETTLE_AND_RELAX") {
+    if (settled.includes(n.id)) {
       circle.setAttribute("fill", "#D1FAE5");
       circle.setAttribute("stroke", "#059669");
-    } else if (d !== null && d !== undefined) {
+      circle.setAttribute("stroke-width", "4");
+    } else if (decNodes.includes(n.id)) {
+      circle.setAttribute("fill", "#FEF3C7");
+      circle.setAttribute("stroke", "#D97706");
+      circle.setAttribute("stroke-width", "4.5");
+    } else if (inPQ.includes(n.id)) {
       circle.setAttribute("fill", "#EFF6FF");
       circle.setAttribute("stroke", "#2563EB");
+      circle.setAttribute("stroke-width", "3.5");
     } else {
       circle.setAttribute("fill", "#FFFFFF");
       circle.setAttribute("stroke", "#64748B");
+      circle.setAttribute("stroke-width", "3.5");
     }
   });
 
   // Highlight tree edges in SVG
   const edges = data.sample_graph_5.edges;
+  const sptEdges = frame.spt_edges || [];
+  const decEdges = (frame.relaxed_edges || [])
+    .filter(r => r.action === "decrease_key")
+    .map(r => r.edge_id);
+
   edges.forEach((edge) => {
     const path = document.getElementById(`s9-edge-${edge.id}`);
     if (!path) return;
-    const isTreeEdge = frame.parent_snapshot && frame.parent_snapshot[edge.target] === edge.source;
-    if (isTreeEdge) {
+
+    if (decEdges.includes(edge.id)) {
+      path.setAttribute("stroke", "#D97706");
+      path.setAttribute("stroke-width", "4.5");
+      path.setAttribute("marker-end", "url(#s9-arrowhead-amber)");
+    } else if (sptEdges.includes(edge.id)) {
       path.setAttribute("stroke", "#059669");
       path.setAttribute("stroke-width", "4");
       path.setAttribute("marker-end", "url(#s9-arrowhead-active)");
@@ -664,46 +680,61 @@ window.s9_renderStep = function(stepIdx) {
     }
   });
 
-  // Update Heap Badges
+  // Update IndexMinPQ Badges
   if (heapBox) {
     heapBox.innerHTML = "";
-    if (frame.heap_snapshot && frame.heap_snapshot.length > 0) {
-      frame.heap_snapshot.forEach(([d, u]) => {
+    const pqItems = frame.pq_snapshot || [];
+    if (pqItems.length > 0) {
+      pqItems.forEach((item) => {
+        const isDecreased = decNodes.includes(item.vertex);
         const span = document.createElement("span");
-        span.className = "px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold shadow-sm";
-        span.textContent = `(${d}, ${u})`;
+        if (isDecreased) {
+          span.className = "px-3 py-1 rounded-xl bg-amber-50 border-2 border-amber-500 text-amber-900 font-bold shadow-sm flex items-center gap-1.5 animate-pulse";
+          span.innerHTML = `<span>(${item.vertex}: ${item.dist.toFixed(1)})</span> <span class="text-[10px] font-sans px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 font-bold uppercase">decrease_key</span>`;
+        } else {
+          span.className = "px-3 py-1 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-bold shadow-sm";
+          span.textContent = `(${item.vertex}: ${item.dist.toFixed(1)})`;
+        }
         heapBox.appendChild(span);
       });
     } else {
-      heapBox.innerHTML = `<span class="text-slate-400 text-sm">Heap rỗng (Thuật toán đã hoàn tất)</span>`;
+      heapBox.innerHTML = `<span class="text-slate-400 text-sm font-sans font-medium">IndexMinPQ rỗng (Cả 5 đỉnh đã chốt tối ưu)</span>`;
     }
   }
 
-  // Update dist & parent table
+  // Update dist & edge_to table
+  const distMap = frame.dist_to || {};
+  const edgeMap = frame.edge_to || {};
+
   ["A", "B", "C", "D", "E"].forEach((v) => {
     const tdD = document.getElementById(`s9-d-${v}`);
     const tdP = document.getElementById(`s9-p-${v}`);
-    const dVal = frame.dist_snapshot[v];
-    const pVal = frame.parent_snapshot[v];
+    const dVal = distMap[v];
+    const eVal = edgeMap[v];
 
     if (tdD) {
-      tdD.textContent = dVal === null ? "∞" : dVal;
-      tdD.className = dVal !== null ? "p-2 text-emerald-700 font-extrabold text-base" : "p-2 text-slate-400";
+      tdD.textContent = dVal === null || dVal === undefined ? "∞" : dVal.toFixed(1);
+      tdD.className = (dVal !== null && dVal !== undefined) ? "p-2 text-emerald-700 font-extrabold text-base" : "p-2 text-slate-400";
     }
     if (tdP) {
-      tdP.textContent = pVal || "None";
-      tdP.className = pVal ? "p-2 text-blue-700 font-semibold" : "p-2 text-slate-400";
+      if (eVal && eVal.from) {
+        tdP.textContent = `${eVal.from}→${eVal.to} (${eVal.weight.toFixed(1)})`;
+        tdP.className = "p-2 text-blue-700 font-semibold text-xs";
+      } else {
+        tdP.textContent = "-";
+        tdP.className = "p-2 text-slate-400 text-xs";
+      }
     }
   });
 
   // Path reconstructed
   if (pathBox) {
-    if (stepIdx === trace.length - 1) {
+    if (stepIdx >= 4) {
       pathBox.textContent = "A → C → B → D → E (Tổng chi phí = 10.0)";
-      pathBox.className = "font-extrabold text-emerald-700 text-base";
+      pathBox.className = "font-extrabold text-emerald-700 text-base font-mono";
     } else {
-      pathBox.textContent = "Đang duyệt từng bước...";
-      pathBox.className = "font-semibold text-slate-500 text-sm";
+      pathBox.textContent = "Đang thực thi các bước nới lỏng...";
+      pathBox.className = "font-semibold text-slate-500 text-sm font-sans";
     }
   }
 };
@@ -813,6 +844,28 @@ function initFloydSim() {
   const btnPrev = document.getElementById("s10-btn-prev");
   const btnReset = document.getElementById("s10-btn-reset");
   const btnPlay = document.getElementById("s10-btn-play");
+  const tabDist = document.getElementById("s10-tab-dist");
+  const tabParent = document.getElementById("s10-tab-parent");
+
+  window.s10_active_tab = "dist";
+
+  if (tabDist) {
+    tabDist.addEventListener("click", () => {
+      window.s10_active_tab = "dist";
+      tabDist.className = "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all font-sans";
+      if (tabParent) tabParent.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition-all font-sans";
+      window.s10_renderStep(window.s10_step || 0);
+    });
+  }
+
+  if (tabParent) {
+    tabParent.addEventListener("click", () => {
+      window.s10_active_tab = "parent";
+      tabParent.className = "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all font-sans";
+      if (tabDist) tabDist.className = "px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition-all font-sans";
+      window.s10_renderStep(window.s10_step || 0);
+    });
+  }
 
   if (btnNext) btnNext.addEventListener("click", () => s10_changeStep(1));
   if (btnPrev) btnPrev.addEventListener("click", () => s10_changeStep(-1));
@@ -883,17 +936,17 @@ window.s10_renderStep = function(kIdx) {
   const desc = document.getElementById("s10-desc-text");
   const updateText = document.getElementById("s10-update-count-text");
   const container = document.getElementById("s10-matrix-container");
-  const matrixTitle = document.getElementById("s10-matrix-title");
+  const legend = document.getElementById("s10-matrix-legend");
 
-  if (kBadge) kBadge.textContent = `k = ${frame.k_step} / 5`;
-  if (kLabel) kLabel.textContent = frame.k_vertex ? `Đỉnh trung gian k = ${frame.k_vertex}` : "k = 0 (Khởi tạo)";
-  if (matrixTitle) matrixTitle.innerHTML = `MA TRẬN KHOẢNG CÁCH D<sup>(${frame.k_step})</sup>:`;
+  const currentKStep = frame.k === null ? 0 : frame.k + 1;
+  if (kBadge) kBadge.textContent = `k = ${currentKStep} / 5`;
+  if (kLabel) kLabel.textContent = frame.k_vertex ? `Đỉnh trung gian k = ${frame.k_vertex} (đỉnh ${frame.k})` : "k = 0 (Khởi tạo cạnh trực tiếp)";
 
   const updates = frame.updated_cells || [];
   if (updateText) updateText.textContent = `${updates.length} ô được rút ngắn`;
 
   if (desc) {
-    desc.innerHTML = FLOYD_HUMAN_DESCRIPTIONS[kIdx] || "Đang duyệt đỉnh trung gian...";
+    desc.innerHTML = FLOYD_HUMAN_DESCRIPTIONS[kIdx] || frame.description || "Đang duyệt đỉnh trung gian...";
   }
 
   // Highlight intermediate node k in SVG
@@ -912,7 +965,7 @@ window.s10_renderStep = function(kIdx) {
     }
   });
 
-  // Highlight intermediate node k and adjacent edges in SVG
+  // Highlight edges connected to intermediate k
   const edges = data.sample_graph_5.edges;
   edges.forEach((edge) => {
     const path = document.getElementById(`s10-edge-${edge.id}`);
@@ -929,33 +982,48 @@ window.s10_renderStep = function(kIdx) {
     }
   });
 
-  // Render Matrix Table using clean D<sup>(k)</sup>
+  // Render Matrix Table: toggle between _dist and _parent
   if (container) {
     const vertices = ["A", "B", "C", "D", "E"];
-    const mat = frame.dist_matrix;
+    const isParentTab = window.s10_active_tab === "parent";
+
+    if (legend) {
+      legend.textContent = isParentTab ? "Ô tím = Đổi đỉnh đứng trước" : "Ô xanh lá = Được rút ngắn";
+      legend.className = isParentTab ? "text-xs text-purple-700 font-bold font-sans" : "text-xs text-emerald-700 font-bold font-sans";
+    }
+
+    const mat = isParentTab ? frame.parent_labels_matrix : frame.dist_matrix;
+    const headerTitle = isParentTab ? `_parent<sup>(${currentKStep})</sup>` : `_dist<sup>(${currentKStep})</sup>`;
 
     let html = `<table class="w-full text-center text-sm sm:text-base font-mono border-collapse">
       <thead class="bg-slate-100 text-slate-700">
         <tr>
-          <th class="p-3 border-b border-slate-200 text-indigo-700 font-bold">D<sup>(${frame.k_step})</sup></th>
-          ${vertices.map(v => `<th class="p-3 border-b border-slate-200 font-bold ${v === frame.k_vertex ? "text-indigo-800 bg-indigo-100" : ""}">${v}</th>`).join("")}
+          <th class="p-2.5 border-b border-slate-200 text-indigo-700 font-bold text-xs">${headerTitle}</th>
+          ${vertices.map(v => `<th class="p-2.5 border-b border-slate-200 font-bold text-xs ${v === frame.k_vertex ? "text-indigo-800 bg-indigo-100" : ""}">${v}</th>`).join("")}
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-200 bg-white">`;
 
     for (let i = 0; i < vertices.length; i++) {
-      html += `<tr><td class="p-3 font-bold ${vertices[i] === frame.k_vertex ? "text-indigo-800 bg-indigo-100" : "text-slate-700 bg-slate-50"}">${vertices[i]}</td>`;
+      html += `<tr><td class="p-2.5 font-bold text-xs ${vertices[i] === frame.k_vertex ? "text-indigo-800 bg-indigo-100" : "text-slate-700 bg-slate-50"}">${vertices[i]}</td>`;
       for (let j = 0; j < vertices.length; j++) {
         const val = mat[i][j];
-        const isUpdated = updates.some(u => u.from === vertices[i] && u.to === vertices[j]);
+        const isUpdated = updates.some(u => (u.i === vertices[i] && u.j === vertices[j]) || (u.from === vertices[i] && u.to === vertices[j]));
         const isKFocus = vertices[i] === frame.k_vertex || vertices[j] === frame.k_vertex;
 
-        let cellClass = "p-3 font-semibold ";
-        if (isUpdated) cellClass += "matrix-cell cell-updated";
-        else if (isKFocus) cellClass += "matrix-cell cell-k-focus";
-        else cellClass += "text-slate-800";
+        let cellClass = "p-2.5 text-xs font-semibold ";
+        if (isUpdated) {
+          cellClass += isParentTab
+            ? "bg-purple-100 text-purple-900 border border-purple-400 font-extrabold animate-pulse"
+            : "bg-emerald-100 text-emerald-900 border border-emerald-400 font-extrabold animate-pulse";
+        } else if (isKFocus) {
+          cellClass += "bg-indigo-50/70 text-indigo-900 font-bold";
+        } else {
+          cellClass += "text-slate-800";
+        }
 
-        html += `<td class="${cellClass}">${val === null ? "∞" : val}</td>`;
+        const displayVal = val === null ? "∞" : (typeof val === "number" ? val.toFixed(1) : val);
+        html += `<td class="${cellClass}">${displayVal}</td>`;
       }
       html += `</tr>`;
     }
@@ -1104,3 +1172,49 @@ function renderEmergencyMap() {
     mapSvg.appendChild(g);
   });
 }
+
+/* ==========================================================================
+   9. Code Window Tab Switchers (Slide 11 & Slide 12)
+   ========================================================================== */
+window.s11_switchTab = function(tab) {
+  const btnEdge = document.getElementById("s11-btn-edge");
+  const btnMinpq = document.getElementById("s11-btn-minpq");
+  const codeEdge = document.getElementById("s11-code-edge");
+  const codeMinpq = document.getElementById("s11-code-minpq");
+
+  if (!btnEdge || !btnMinpq || !codeEdge || !codeMinpq) return;
+
+  if (tab === "edge") {
+    btnEdge.className = "px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all";
+    btnMinpq.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all";
+    codeEdge.classList.remove("hidden");
+    codeMinpq.classList.add("hidden");
+  } else {
+    btnMinpq.className = "px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all";
+    btnEdge.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all";
+    codeMinpq.classList.remove("hidden");
+    codeEdge.classList.add("hidden");
+  }
+};
+
+window.s12_switchTab = function(tab) {
+  const btnDijkstra = document.getElementById("s12-btn-dijkstra");
+  const btnFloyd = document.getElementById("s12-btn-floyd");
+  const codeDijkstra = document.getElementById("s12-code-dijkstra");
+  const codeFloyd = document.getElementById("s12-code-floyd");
+
+  if (!btnDijkstra || !btnFloyd || !codeDijkstra || !codeFloyd) return;
+
+  if (tab === "dijkstra") {
+    btnDijkstra.className = "px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all";
+    btnFloyd.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all";
+    codeDijkstra.classList.remove("hidden");
+    codeFloyd.classList.add("hidden");
+  } else {
+    btnFloyd.className = "px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all";
+    btnDijkstra.className = "px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all";
+    codeFloyd.classList.remove("hidden");
+    codeDijkstra.classList.add("hidden");
+  }
+};
+

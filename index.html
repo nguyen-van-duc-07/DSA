@@ -508,72 +508,71 @@
     </section>
 
     <!-- =====================================================================
-         SLIDE 6 (#6) - Ý TƯỞNG CỐT LÕI DIJKSTRA (P2): MIN-HEAP & LAZY DELETION
+         SLIDE 6 (#6) - Ý TƯỞNG CỐT LÕI DIJKSTRA (P2): INDEXMINPQ
          ===================================================================== -->
     <section class="slide" id="slide-6" data-slide="6">
       <div class="slide-container">
         <header class="slide-header">
           <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Ý tưởng Cốt lõi • Dijkstra (Phần 2)</span>
-          <h2 class="slide-title">Ý tưởng Cốt lõi của Dijkstra: <em>Min-Heap & Kỹ thuật Lazy Deletion</em></h2>
+          <h2 class="slide-title">Ý tưởng Cốt lõi của Dijkstra: <em>Hàng đợi Định chỉ mục (IndexMinPQ)</em></h2>
         </header>
 
         <div class="slide-body-grid">
-          <!-- Left Column: Min-Heap vs Array & Lazy Deletion -->
+          <!-- Left Column: Why IndexMinPQ & 3 Synchronized Arrays -->
           <div class="slide-col gap-4 justify-center">
             <div class="spec-card">
-              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">TẠI SAO CẦN HÀNG ĐỢI ƯU TIÊN (MIN-HEAP)?</span>
+              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">TẠI SAO CẦN INDEXMINPQ THAY VÌ HEAP THƯỜNG?</span>
               <p class="spec-text font-medium text-slate-800">
-                Nếu dùng mảng thông thường, mỗi lần tìm đỉnh gần nhất ta phải duyệt qua toàn bộ <strong>V</strong> phần tử (<strong>O(V)</strong>), khiến tổng thời gian là <strong>O(V<sup>2</sup>)</strong>.
+                Min-Heap thông thường không hỗ trợ tìm kiếm và sửa khoảng cách của đỉnh trong <strong>O(1)</strong>. Nếu dùng Lazy Deletion, ta phải đẩy nhiều bản sao rác vào heap làm dung lượng phình lên <strong>O(E)</strong>.
               </p>
               <p class="text-base text-slate-700 mt-2">
-                Dùng <strong>Min-Heap</strong> giúp ta lấy ngay đỉnh nhỏ nhất chỉ mất <strong>O(log V)</strong>, tăng tốc độ bài toán ngoạn mục lên <strong>O((V + E) log V)</strong>.
+                <strong>IndexMinPQ</strong> giải quyết triệt để: cập nhật trực tiếp khoảng cách qua <code>decrease_key()</code> trong <strong>O(log V)</strong>, giữ kích thước heap luôn <strong>≤ V</strong>, không sinh đỉnh rác!
               </p>
             </div>
 
             <div class="spec-card border-indigo-200 bg-indigo-50/40">
-              <span class="spec-badge bg-indigo-600 text-white font-bold">KỸ THUẬT BỎ QUA GIÁ TRỊ CŨ (LAZY DELETION)</span>
-              <p class="spec-text text-slate-800 font-medium">
-                Trong Python <code>heapq</code>, ta không thể sửa trực tiếp phần tử trong Heap. Khi tìm được đường đi ngắn hơn, ta cứ đẩy giá trị mới vào.
-              </p>
-              <p class="text-sm sm:text-base text-slate-700 mt-1">
-                Khi lấy ra, chỉ cần kiểm tra nhanh: <code>if current_dist > dist[u]: continue</code> để bỏ qua giá trị cũ trong 1 nốt nhạc (<strong>O(1)</strong>)!
-              </p>
+              <span class="spec-badge bg-indigo-600 text-white font-bold">CẤU TRÚC 3 MẢNG ĐỒNG BỘ: keys[], pq[], qp[]</span>
+              <div class="mt-2 space-y-1.5 text-xs sm:text-sm text-slate-700 font-sans">
+                <div>• <code class="text-indigo-700 font-bold">keys[i]</code>: Độ ưu tiên / khoảng cách ngắn nhất hiện tại của đỉnh <strong>i</strong>.</div>
+                <div>• <code class="text-indigo-700 font-bold">pq[k]</code>: Binary Heap (1-indexed) lưu chỉ số các đỉnh theo trật tự Min-Heap.</div>
+                <div>• <code class="text-indigo-700 font-bold">qp[i]</code>: Mảng chỉ mục ngược lưu vị trí của đỉnh <strong>i</strong> trong heap <code>pq</code> (<span class="font-mono text-indigo-800">qp[pq[k]] = k</span>, <code>-1</code> nếu không có).</div>
+              </div>
             </div>
           </div>
 
-          <!-- Right Column: Visual Diagram of Heap & Filter -->
+          <!-- Right Column: Visual Operations of IndexMinPQ -->
           <div class="slide-col">
             <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
-              <span class="text-sm text-slate-500 font-bold self-start">CƠ CHẾ LỌC GIÁ TRỊ CŨ (LAZY DELETION) TRONG HEAP</span>
+              <span class="text-sm text-slate-500 font-bold self-start">CƠ CHẾ VẬN HÀNH CỦA IndexMinPQ TRONG O(log V)</span>
 
-              <div class="w-full flex-1 flex flex-col justify-center gap-4 my-auto">
-                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div class="w-full flex-1 flex flex-col justify-center gap-3.5 my-auto">
+                <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-slate-500 font-semibold block">LẦN NỚI LỎNG THỨ 1 (TỪ A SANG B):</span>
-                    <span class="text-base font-bold text-slate-800">Đẩy vào Heap: (5, B)</span>
+                    <span class="text-xs text-blue-600 font-bold block">1. KIỂM TRA ĐỈNH TỒN TẠI TỨC THỜI:</span>
+                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">contains(i) ➔ qp[i] != -1</span>
                   </div>
-                  <span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-800 text-xs font-bold">Chưa chốt</span>
+                  <span class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold font-mono">O(1)</span>
                 </div>
 
-                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
+                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-emerald-700 font-semibold block">LẦN NỚI LỎNG THỨ 2 (TỪ C SANG B TỐT HƠN):</span>
-                    <span class="text-base font-bold text-emerald-900">Đẩy vào Heap: (3, B)</span>
+                    <span class="text-xs text-amber-700 font-bold block">2. NỚI LỎNG VÀ GIẢM KHÓA TRỰC TIẾP:</span>
+                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">decrease_key(i, key) ➔ _swim(qp[i])</span>
                   </div>
-                  <span class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold">Chốt trước (dist[B]=3)</span>
+                  <span class="px-2.5 py-1 rounded-lg bg-amber-600 text-white text-xs font-bold font-mono">O(log V)</span>
                 </div>
 
-                <div class="p-4 rounded-xl bg-rose-50 border border-rose-300 flex items-center justify-between">
+                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-rose-700 font-semibold block">KHI LẤY LẠI BẢN GHI (5, B) CŨ RA KHỎI HEAP:</span>
-                    <span class="text-base font-bold text-rose-900">current_dist (5) > dist[B] (3)</span>
+                    <span class="text-xs text-emerald-700 font-bold block">3. TRÍCH XUẤT ĐỈNH NHỎ NHẤT:</span>
+                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">del_min() ➔ _sink(1), qp[min] = -1</span>
                   </div>
-                  <span class="px-3 py-1 rounded-lg bg-rose-600 text-white text-xs font-bold">BỎ QUA NGAY!</span>
+                  <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold font-mono">O(log V)</span>
                 </div>
               </div>
 
               <div class="w-full text-center p-2.5 rounded-xl bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700">
-                Dung lượng Heap tối đa chỉ là O(E), thời gian vẫn được bảo toàn nguyên vẹn O(E log V)
+                Không sinh bất kỳ phần tử rác nào. Dung lượng Heap luôn cố định O(V), chuẩn học thuật Algorithms!
               </div>
             </div>
           </div>
@@ -732,17 +731,17 @@
     </section>
 
     <!-- =====================================================================
-         SLIDE 9 (#9) - MINH HỌA TỪNG BƯỚC: THUẬT TOÁN DIJKSTRA
+         SLIDE 9 (#9) - MINH HỌA TỪNG BƯỚC: THUẬT TOÁN DIJKSTRA + INDEXMINPQ
          ===================================================================== -->
     <section class="slide" id="slide-9" data-slide="9">
       <div class="slide-container">
         <header class="slide-header flex items-center justify-between">
           <div>
-            <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mô phỏng Trực quan • Dijkstra</span>
-            <h2 class="slide-title">Minh họa từng bước: <em>Dijkstra trên Đồ thị 5 Đỉnh</em></h2>
+            <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mô phỏng Trực quan • DijkstraSP & IndexMinPQ</span>
+            <h2 class="slide-title">Minh họa từng bước: <em>DijkstraSP & IndexMinPQ trên Đồ thị 5 Đỉnh</em></h2>
           </div>
           <div class="flex items-center gap-2 font-mono text-sm">
-            <span class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold text-blue-700">Bước: <span id="s9-step-indicator">0 / 8</span></span>
+            <span class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold text-blue-700">Bước: <span id="s9-step-indicator">0 / 5</span></span>
           </div>
         </header>
 
@@ -750,7 +749,7 @@
           <!-- Left Column: Big SVG Graph & Play Controls -->
           <div class="slide-col justify-between bento-box p-5 bg-white relative">
             <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100 font-sans">
-              <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> Đồ thị 5 Đỉnh (Bắt đầu từ A)</span>
+              <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> Đồ thị 5 Đỉnh (Nguồn: A = Đỉnh 0)</span>
               <span class="text-slate-400 text-xs">Phím tắt: P (Play), N (Next), R (Reset)</span>
             </div>
 
@@ -763,6 +762,9 @@
                   </marker>
                   <marker id="s9-arrowhead-active" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
                     <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
+                  </marker>
+                  <marker id="s9-arrowhead-amber" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
+                    <polygon points="0 0, 9 3.5, 0 7" fill="#D97706" />
                   </marker>
                 </defs>
                 <g id="s9-edges-layer"></g>
@@ -783,7 +785,8 @@
               </div>
 
               <div class="flex items-center gap-3 text-xs text-slate-600 font-semibold font-sans">
-                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Trong Heap</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Trong IndexMinPQ</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span> decrease_key</span>
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600"></span> Đã chốt</span>
               </div>
             </div>
@@ -798,48 +801,51 @@
                 <span id="s9-action-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">KHỞI TẠO</span>
               </div>
               <p id="s9-desc-text" class="text-base text-slate-800 leading-relaxed font-sans min-h-[50px]">
-                Bước 0: Khởi tạo khoảng cách từ A đến chính nó là 0, các đỉnh còn lại tạm thời là vô cùng (∞). Ta bỏ (0, A) vào Hàng đợi ưu tiên (Min-Heap).
+                Bước 0: Khởi tạo nguồn s = A (đỉnh 0): gán _dist_to[A] = 0.0, gọi pq.insert(A, 0.0).
               </p>
             </div>
 
-            <!-- Min-Heap Elements -->
+            <!-- IndexMinPQ Elements -->
             <div class="bento-box p-4">
-              <span class="text-xs text-slate-500 font-bold block mb-2 font-sans">HÀNG ĐỢI ƯU TIÊN (MIN-HEAP HIỆN TẠI):</span>
-              <div id="s9-heap-container" class="flex flex-wrap gap-2 min-h-[42px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs text-slate-500 font-bold block font-sans">HÀNG ĐỢI ĐỊNH CHỈ MỤC (INDEXMINPQ):</span>
+                <span class="text-xs text-slate-400 font-mono">qp[i] != -1</span>
+              </div>
+              <div id="s9-heap-container" class="flex flex-wrap gap-2 min-h-[42px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm items-center">
                 <!-- Pills generated by js -->
               </div>
             </div>
 
-            <!-- Distance Table -->
+            <!-- Distance & Edge Table -->
             <div class="bento-box p-4 overflow-hidden">
-              <span class="text-xs text-slate-500 font-bold block mb-2 font-sans">MẢNG KHOẢNG CÁCH dist[] VÀ ĐỈNH CHA parent[]:</span>
+              <span class="text-xs text-slate-500 font-bold block mb-2 font-sans">BẢNG KHOẢNG CÁCH _dist_to[] VÀ CẠNH ĐẾN _edge_to[]:</span>
               <table class="w-full text-center text-sm font-mono border border-slate-200 rounded-xl overflow-hidden">
                 <thead class="bg-slate-100 text-slate-700">
                   <tr>
-                    <th class="p-2 font-bold">Đỉnh</th>
-                    <th class="p-2 font-bold text-blue-700">A (Nguồn)</th>
-                    <th class="p-2 font-bold">B</th>
-                    <th class="p-2 font-bold">C</th>
-                    <th class="p-2 font-bold">D</th>
-                    <th class="p-2 font-bold">E</th>
+                    <th class="p-2 font-bold font-sans">Đỉnh (v)</th>
+                    <th class="p-2 font-bold text-blue-700">0 (A)</th>
+                    <th class="p-2 font-bold">1 (B)</th>
+                    <th class="p-2 font-bold">2 (C)</th>
+                    <th class="p-2 font-bold">3 (D)</th>
+                    <th class="p-2 font-bold">4 (E)</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
                   <tr>
-                    <td class="p-2 font-bold text-slate-600 bg-slate-50">dist</td>
-                    <td id="s9-d-A" class="p-2 text-emerald-700 font-extrabold text-base">0</td>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50 font-mono text-xs">_dist_to</td>
+                    <td id="s9-d-A" class="p-2 text-emerald-700 font-extrabold text-base">0.0</td>
                     <td id="s9-d-B" class="p-2 text-slate-400">∞</td>
                     <td id="s9-d-C" class="p-2 text-slate-400">∞</td>
                     <td id="s9-d-D" class="p-2 text-slate-400">∞</td>
                     <td id="s9-d-E" class="p-2 text-slate-400">∞</td>
                   </tr>
                   <tr>
-                    <td class="p-2 font-bold text-slate-600 bg-slate-50">parent</td>
-                    <td id="s9-p-A" class="p-2 text-slate-400">None</td>
-                    <td id="s9-p-B" class="p-2 text-slate-400">None</td>
-                    <td id="s9-p-C" class="p-2 text-slate-400">None</td>
-                    <td id="s9-p-D" class="p-2 text-slate-400">None</td>
-                    <td id="s9-p-E" class="p-2 text-slate-400">None</td>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50 font-mono text-xs">_edge_to</td>
+                    <td id="s9-p-A" class="p-2 text-slate-400 text-xs">-</td>
+                    <td id="s9-p-B" class="p-2 text-slate-400 text-xs">-</td>
+                    <td id="s9-p-C" class="p-2 text-slate-400 text-xs">-</td>
+                    <td id="s9-p-D" class="p-2 text-slate-400 text-xs">-</td>
+                    <td id="s9-p-E" class="p-2 text-slate-400 text-xs">-</td>
                   </tr>
                 </tbody>
               </table>
@@ -847,7 +853,7 @@
 
             <!-- Path Reconstructed Display -->
             <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm font-mono flex items-center justify-between">
-              <span class="text-emerald-800 font-bold">LỘ TRÌNH ĐẾN ĐÍCH E:</span>
+              <span class="text-emerald-800 font-bold font-sans">LỘ TRÌNH ĐẾN ĐÍCH E:</span>
               <span id="s9-path-display" class="font-extrabold text-emerald-700 text-base">Đang thực thi...</span>
             </div>
           </div>
@@ -921,11 +927,14 @@
             <!-- Matrix Container -->
             <div class="bento-box p-4 overflow-hidden">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-slate-500 font-bold block font-sans" id="s10-matrix-title">MA TRẬN KHOẢNG CÁCH D<sup>(k)</sup>:</span>
-                <span class="text-xs text-emerald-700 font-bold font-sans">Ô xanh lá = Được rút ngắn</span>
+                <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
+                  <button id="s10-tab-dist" class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all font-sans">_dist (Khoảng cách)</button>
+                  <button id="s10-tab-parent" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition-all font-sans">_parent (Đỉnh trước)</button>
+                </div>
+                <span id="s10-matrix-legend" class="text-xs text-emerald-700 font-bold font-sans">Ô xanh lá = Rút ngắn</span>
               </div>
               <div id="s10-matrix-container" class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <!-- Rendered dynamically by app.js using D<sup>(k)</sup> -->
+                <!-- Rendered dynamically by app.js using _dist or _parent -->
               </div>
             </div>
 
@@ -940,78 +949,120 @@
     </section>
 
     <!-- =====================================================================
-         SLIDE 11 (#11) - CÀI ĐẶT BẰNG PYTHON (P1): LỚP DIJKSTRASOLVER
+         SLIDE 11 (#11) - CÀI ĐẶT BẰNG PYTHON (P1): edge.py & minpq.py
          ===================================================================== -->
     <section class="slide" id="slide-11" data-slide="11">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mã nguồn Python • Lớp DijkstraSolver</span>
-          <h2 class="slide-title">Cài đặt bằng Python (Phần 1): <em>Cấu trúc Lớp DijkstraSolver</em></h2>
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mã nguồn Chuẩn Học thuật • edge.py & minpq.py</span>
+          <h2 class="slide-title">Cài đặt bằng Python (Phần 1): <em>DirectedEdge, EdgeWeightedDigraph & IndexMinPQ</em></h2>
         </header>
 
         <div class="slide-body-grid">
-          <!-- Left Column: Code Window -->
+          <!-- Left Column: Code Window with Tabs -->
           <div class="slide-col">
             <div class="terminal-window h-full flex flex-col">
-              <div class="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
-                <span class="font-bold text-white flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-blue-400"></i> DijkstraSolver.py</span>
-                <span class="text-xs text-blue-300 font-bold">Min-Heap & Lazy Deletion</span>
+              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+                <div class="flex items-center gap-2">
+                  <button id="s11-btn-edge" onclick="s11_switchTab('edge')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">edge.py</button>
+                  <button id="s11-btn-minpq" onclick="s11_switchTab('minpq')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all">minpq.py</button>
+                </div>
+                <span class="text-xs text-blue-300 font-bold font-sans">OOP Chuẩn Algorithms</span>
               </div>
-              <pre class="p-5 text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DijkstraSolver:
-    def __init__(self, vertices: List[str]) -> None:
-        self.vertices = list(vertices)
-        self.adj = {v: [] for v in self.vertices}
-        self.dist = {}
-        self.parent = {}
+              <pre id="s11-code-edge" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DirectedEdge:
+    def __init__(self, v: int, w: int, weight: float):
+        self._v = v
+        self._w = w
+        self._weight = weight
 
-    def add_edge(self, u: str, v: str, weight: float) -> None:
-        if weight < 0:
-            raise ValueError("Dijkstra không hỗ trợ cạnh âm!")
-        self.adj[u].append((v, float(weight)))
+    def from_vertex(self) -> int: return self._v
+    def to_vertex(self) -> int: return self._w
+    def weight(self) -> float: return self._weight
 
-    def solve(self, start_node: str) -> Dict[str, float]:
-        self.dist = {v: math.inf for v in self.vertices}
-        self.parent = {v: None for v in self.vertices}
-        self.dist[start_node] = 0.0
-        pq = [(0.0, start_node)]
+    def __str__(self) -> str:
+        return f"{self._v} -> {self._w} {self._weight:.2f}"
 
-        while pq:
-            current_dist, u = heapq.heappop(pq)
+class EdgeWeightedDigraph:
+    def __init__(self, V: int):
+        self.V = V
+        self._adj = [[] for _ in range(V)]
 
-            # Bỏ qua giá trị cũ trong Heap (Lazy Deletion)
-            if current_dist > self.dist[u]:
-                continue
+    def add_edge(self, e: DirectedEdge):
+        self._adj[e.from_vertex()].append(e)
 
-            for v, weight in self.adj[u]:
-                new_dist = self.dist[u] + weight
-                if new_dist < self.dist[v]:
-                    self.dist[v] = new_dist
-                    self.parent[v] = u
-                    heapq.heappush(pq, (new_dist, v))
-        return self.dist</code></pre>
+    def adj(self, v: int) -> list[DirectedEdge]:
+        return self._adj[v]
+
+    def edges(self) -> list[DirectedEdge]:
+        return [e for v in range(self.V) for e in self._adj[v]]</code></pre>
+
+              <pre id="s11-code-minpq" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class IndexMinPQ:
+    def __init__(self, max_n: int):
+        self.max_n = max_n
+        self.n = 0
+        self.keys = [None] * (max_n + 1)   # keys[i] = độ ưu tiên đỉnh i
+        self.pq = [0] * (max_n + 1)        # Heap nhị phân chứa đỉnh (1-indexed)
+        self.qp = [-1] * (max_n + 1)       # qp[i] = vị trí của i trong pq
+
+    def is_empty(self) -> bool: return self.n == 0
+    def contains(self, i: int) -> bool: return self.qp[i] != -1
+
+    def insert(self, i: int, key: float):
+        self.n += 1
+        self.qp[i] = self.n
+        self.pq[self.n] = i
+        self.keys[i] = key
+        self._swim(self.n)
+
+    def del_min(self) -> int:
+        min_idx = self.pq[1]
+        self._exch(1, self.n)
+        self.n -= 1
+        self._sink(1)
+        self.qp[min_idx] = -1
+        self.keys[min_idx] = None
+        return min_idx
+
+    def decrease_key(self, i: int, key: float):
+        if self.keys[i] <= key: return
+        self.keys[i] = key
+        self._swim(self.qp[i])
+
+    def _swim(self, k: int):
+        while k > 1 and self._greater(k // 2, k):
+            self._exch(k, k // 2)
+            k = k // 2
+
+    def _sink(self, k: int):
+        while 2 * k <= self.n:
+            j = 2 * k
+            if j < self.n and self._greater(j, j + 1): j += 1
+            if not self._greater(k, j): break
+            self._exch(k, j)
+            k = j</code></pre>
             </div>
           </div>
 
           <!-- Right Column: 3 Key Notes -->
           <div class="slide-col gap-4 justify-center">
             <div class="spec-card border-blue-200 bg-blue-50/40">
-              <span class="spec-badge bg-blue-600 text-white font-bold">1. KHỞI TẠO & KIỂM TRA CẠNH ÂM</span>
+              <span class="spec-badge bg-blue-600 text-white font-bold">1. DirectedEdge & EdgeWeightedDigraph</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Lớp nhận danh sách đỉnh và khởi tạo danh sách kề. Nếu có ai đó nhập cạnh âm, phương thức <code>add_edge</code> sẽ báo lỗi ngay lập tức để tránh tính toán sai.
+                Đóng gói cạnh có hướng với trọng số thực. Đồ thị danh sách kề <code>_adj</code> tối ưu bộ nhớ <strong>O(V + E)</strong> và truy xuất nhanh các cạnh kề từ đỉnh <code>v</code> qua <code>adj(v)</code>.
               </p>
             </div>
 
             <div class="spec-card">
-              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">2. VÒNG LẶP VÀ LAZY DELETION</span>
+              <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">2. BỘ 3 MẢNG ĐỒNG BỘ TRONG IndexMinPQ</span>
               <p class="spec-text text-slate-800">
-                Sử dụng thư viện <code>heapq</code> chuẩn của Python. Đoạn mã <code>if current_dist > self.dist[u]: continue</code> là điểm mấu chốt giúp thuật toán chạy trơn tru mà không cần hàm decrease-key phức tạp.
+                <code>keys[i]</code> lưu khoảng cách, <code>pq[k]</code> quản lý cấu trúc cây heap, và <code>qp[i]</code> là mảng chỉ mục ngược giúp tìm vị trí heap của đỉnh bất kỳ trong <strong>O(1)</strong>!
               </p>
             </div>
 
-            <div class="spec-card">
-              <span class="spec-badge bg-slate-100 text-slate-700 font-bold">3. NỚI LỎNG CẠNH VÀ TRUY VẾT</span>
+            <div class="spec-card border-emerald-200 bg-emerald-50/30">
+              <span class="spec-badge bg-emerald-600 text-white font-bold">3. decrease_key() & TÁI CÂN BẰNG HEAP</span>
               <p class="spec-text text-slate-800">
-                Mỗi khi tìm được khoảng cách ngắn hơn tới đỉnh <strong>v</strong>, ta gán <code>parent[v] = u</code> để khôi phục chính xác lộ trình qua hàm <code>get_path()</code>.
+                Khi tìm thấy đường đi ngắn hơn tới đỉnh <code>w</code>, gọi <code>decrease_key(w, dist)</code>. Hàm <code>_swim()</code> đẩy đỉnh lên chỉ mất <strong>O(log V)</strong> mà không sinh đỉnh rác!
               </p>
             </div>
           </div>
@@ -1020,74 +1071,124 @@
     </section>
 
     <!-- =====================================================================
-         SLIDE 12 (#12) - CÀI ĐẶT BẰNG PYTHON (P2): LỚP FLOYDWARSHALLSOLVER
+         SLIDE 12 (#12) - CÀI ĐẶT BẰNG PYTHON (P2): dijkstra_v2.py & floyd_v2.py
          ===================================================================== -->
     <section class="slide" id="slide-12" data-slide="12">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Mã nguồn Python • Lớp FloydWarshallSolver</span>
-          <h2 class="slide-title">Cài đặt bằng Python (Phần 2): <em>Cấu trúc Lớp FloydWarshallSolver</em></h2>
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Mã nguồn Chuẩn Học thuật • dijkstra_v2.py & floyd_v2.py</span>
+          <h2 class="slide-title">Cài đặt bằng Python (Phần 2): <em>DijkstraSP & FloydWarshall</em></h2>
         </header>
 
         <div class="slide-body-grid">
-          <!-- Left Column: Code Window -->
+          <!-- Left Column: Code Window with Tabs -->
           <div class="slide-col">
             <div class="terminal-window h-full flex flex-col">
-              <div class="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
-                <span class="font-bold text-white flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-indigo-400"></i> FloydWarshallSolver.py</span>
-                <span class="text-xs text-indigo-300 font-bold">3 Vòng Lặp k, i, j</span>
+              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+                <div class="flex items-center gap-2">
+                  <button id="s12-btn-dijkstra" onclick="s12_switchTab('dijkstra')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">dijkstra_v2.py</button>
+                  <button id="s12-btn-floyd" onclick="s12_switchTab('floyd')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all">floyd_v2.py</button>
+                </div>
+                <span class="text-xs text-indigo-300 font-bold font-sans">IndexMinPQ & _parent Matrix</span>
               </div>
-              <pre class="p-5 text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class FloydWarshallSolver:
-    def __init__(self, vertices: List[str]) -> None:
-        self.vertices = list(vertices)
-        self.V = len(vertices)
-        self.dist = [[math.inf] * self.V for _ in range(self.V)]
-        self.next_node = [[None] * self.V for _ in range(self.V)]
-        for i in range(self.V):
-            self.dist[i][i] = 0.0
+              <pre id="s12-code-dijkstra" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DijkstraSP:
+    def __init__(self, G: EdgeWeightedDigraph, s: int):
+        self._s = s
+        self._edge_to = [None] * G.V
+        self._dist_to = [float('inf')] * G.V
+        self._pq = IndexMinPQ(G.V)
 
-    def add_edge(self, u: str, v: str, weight: float) -> None:
-        ui, vi = self.v_to_idx[u], self.v_to_idx[v]
-        if weight < self.dist[ui][vi]:
-            self.dist[ui][vi] = float(weight)
-            self.next_node[ui][vi] = vi
+        self._dist_to[s] = 0.0
+        self._pq.insert(s, 0.0)
 
-    def solve(self):
-        # Vòng lặp k đỉnh trung gian BẮT BUỘC ở ngoài cùng
+        while not self._pq.is_empty():
+            v = self._pq.del_min()
+            for e in G.adj(v):
+                self._relax(e)
+
+    def _relax(self, e: DirectedEdge):
+        v, w = e.from_vertex(), e.to_vertex()
+        new_dist = self._dist_to[v] + e.weight()
+        if new_dist < self._dist_to[w]:
+            self._dist_to[w] = new_dist
+            self._edge_to[w] = e
+            if self._pq.contains(w):
+                self._pq.decrease_key(w, self._dist_to[w])
+            else:
+                self._pq.insert(w, self._dist_to[w])
+
+    def dist_to(self, v: int) -> float: return self._dist_to[v]
+    def has_path_to(self, v: int) -> bool: return self._dist_to[v] < float('inf')
+
+    def path_to(self, v: int) -> list[DirectedEdge] | None:
+        if not self.has_path_to(v): return None
+        path, e = [], self._edge_to[v]
+        while e is not None:
+            path.append(e)
+            e = self._edge_to[e.from_vertex()]
+        path.reverse()
+        return path</code></pre>
+
+              <pre id="s12-code-floyd" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class FloydWarshall:
+    def __init__(self, G: EdgeWeightedDigraph):
+        self.V = G.V
+        self._dist = [[float('inf')] * self.V for _ in range(self.V)]
+        self._parent = [[-1] * self.V for _ in range(self.V)]
+
+        for i in range(self.V): self._dist[i][i] = 0.0
+        for u in range(self.V):
+            for e in G.adj(u):
+                v, w = e.to_vertex(), e.weight()
+                if w < self._dist[u][v]:
+                    self._dist[u][v] = w
+                    self._parent[u][v] = u
+
+        # Thuật toán Floyd-Warshall qua 3 vòng lặp
         for k in range(self.V):
             for i in range(self.V):
                 for j in range(self.V):
-                    if self.dist[i][k] != math.inf and self.dist[k][j] != math.inf:
-                        new_d = self.dist[i][k] + self.dist[k][j]
-                        if new_d < self.dist[i][j]:
-                            self.dist[i][j] = new_d
-                            self.next_node[i][j] = self.next_node[i][k]
+                    if self._dist[i][k] != float('inf') and self._dist[k][j] != float('inf'):
+                        new_dist = self._dist[i][k] + self._dist[k][j]
+                        if new_dist < self._dist[i][j]:
+                            self._dist[i][j] = new_dist
+                            self._parent[i][j] = self._parent[k][j]
 
-    def detect_negative_cycle(self) -> bool:
-        return any(self.dist[i][i] < 0 for i in range(self.V))</code></pre>
+    def has_negative_cycle(self) -> bool:
+        return any(self._dist[i][i] < 0 for i in range(self.V))
+
+    def path_to(self, u: int, v: int) -> list[int] | None:
+        if self._dist[u][v] == float('inf'): return None
+        path, curr = [], v
+        while curr != -1:
+            path.append(curr)
+            if curr == u: break
+            curr = self._parent[u][curr]
+        if path[-1] != u: return None
+        path.reverse()
+        return path</code></pre>
             </div>
           </div>
 
           <!-- Right Column: Explanations -->
           <div class="slide-col gap-4 justify-center">
-            <div class="spec-card border-indigo-200 bg-indigo-50/40">
-              <span class="spec-badge bg-indigo-600 text-white font-bold">1. KHỞI TẠO MA TRẬN 2 CHIỀU</span>
+            <div class="spec-card border-blue-200 bg-blue-50/40">
+              <span class="spec-badge bg-blue-600 text-white font-bold">1. PHƯƠNG THỨC _relax() VÀ decrease_key()</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Khởi tạo mảng khoảng cách với giá trị vô cùng (<code>math.inf</code>) và gán đường chéo <code>dist[i][i] = 0</code> (khoảng cách từ 1 điểm đến chính nó là 0).
+                Trong <code>DijkstraSP</code>, khi phát hiện đường đi tốt hơn tới đỉnh <code>w</code>, ta kiểm tra <code>_pq.contains(w)</code>. Nếu có sẵn thì gọi <code>decrease_key</code>, nếu chưa có thì <code>insert</code>.
               </p>
             </div>
 
-            <div class="spec-card">
-              <span class="spec-badge bg-amber-100 text-amber-800 font-bold">2. THỨ TỰ 3 VÒNG LẶP k, i, j</span>
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">2. BA VÒNG LẶP k, i, j & MA TRẬN _parent</span>
               <p class="spec-text text-slate-800">
-                <strong>Vòng lặp k phải đặt ngoài cùng!</strong> Nếu đặt k ở trong cùng, thuật toán sẽ chỉ tối ưu cục bộ và cho ra kết quả sai hoàn toàn.
+                Vòng lặp <strong>k</strong> đỉnh trung gian bắt buộc ở ngoài cùng. Khi đi qua đỉnh <code>k</code> ngắn hơn, ta gán ngay <code>_parent[i][j] = _parent[k][j]</code>.
               </p>
             </div>
 
-            <div class="spec-card">
-              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">3. PHÁT HIỆN CHU TRÌNH ÂM DỄ DÀNG</span>
+            <div class="spec-card border-emerald-200 bg-emerald-50/30">
+              <span class="spec-badge bg-emerald-600 text-white font-bold">3. TRUY VẾT & PHÁT HIỆN CHU TRÌNH ÂM</span>
               <p class="spec-text text-slate-800">
-                Hàm <code>detect_negative_cycle()</code> chỉ cần duyệt đường chéo chính: nếu có bất kỳ đỉnh nào có <code>dist[i][i] < 0</code>, đồ thị lập tức được cảnh báo là chứa chu trình âm.
+                Phương thức <code>path_to(u, v)</code> lần ngược từ <code>v</code> về <code>u</code> qua <code>_parent</code>. Kiểm tra chu trình âm cực nhanh qua đường chéo chính <code>_dist[i][i] &lt; 0</code>.
               </p>
             </div>
           </div>
@@ -1096,13 +1197,13 @@
     </section>
 
     <!-- =====================================================================
-         SLIDE 13 (#13) - KẾT QUẢ CHẠY THỬ NGHIỆM PYTHON
+         SLIDE 13 (#13) - KẾT QUẢ CHẠY THỰC TẾ PYTHON
          ===================================================================== -->
     <section class="slide" id="slide-13" data-slide="13">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Kiểm thử Thực tế • Console Output</span>
-          <h2 class="slide-title">Kết quả Chạy thử nghiệm: <em>Đối chiếu Hai Thuật toán</em></h2>
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Kiểm thử Thực tế • Console Output & print_tables()</span>
+          <h2 class="slide-title">Kết quả Chạy thực tế: <em>dijkstra_v2.py & floyd_v2.py</em></h2>
         </header>
 
         <div class="slide-body-grid">
@@ -1111,24 +1212,24 @@
             <div class="spec-card border-emerald-300 bg-emerald-50/60">
               <span class="spec-badge bg-emerald-600 text-white font-bold">KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI 100%</span>
               <p class="spec-text text-emerald-950 font-semibold mt-1">
-                Cả DijkstraSolver và FloydWarshallSolver trên cùng đồ thị 5 đỉnh đều tìm ra chính xác lộ trình ngắn nhất từ A tới E:
+                Cả DijkstraSP (IndexMinPQ) và FloydWarshall (_parent) trên đồ thị 5 đỉnh đều cho cùng khoảng cách và lộ trình từ 0 (A) đến 4 (E):
               </p>
               <div class="p-3 rounded-xl bg-white border border-emerald-200 font-mono text-emerald-700 text-base font-extrabold text-center mt-2 shadow-sm">
-                A → C → B → D → E (Tổng chi phí: 10.0)
+                0 → 2 → 1 → 3 → 4 (A → C → B → D → E, Chi phí: 10.0)
               </div>
             </div>
 
             <div class="spec-card">
-              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">LAZY DELETION HOẠT ĐỘNG HOÀN HẢO</span>
+              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">INDEXMINPQ TIẾT KIỆM BỘ NHỚ TUYỆT ĐỐI</span>
               <p class="spec-text text-slate-800">
-                Trong quá trình chạy, bộ lọc của Dijkstra đã bỏ qua đúng 3 bản ghi cũ (B=5, D=9, E=11) mà không tốn công duyệt cạnh dư thừa.
+                Không sinh bất kỳ đỉnh rác nào! Các đỉnh B (5.0➔3.0), D (9.0➔7.0), E (11.0➔10.0) được cập nhật tại chỗ bằng <code>decrease_key()</code>.
               </p>
             </div>
 
             <div class="spec-card">
-              <span class="spec-badge bg-slate-100 text-slate-700 font-bold">KIỂM TRA CHU TRÌNH ÂM: HỢP LỆ</span>
+              <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">BẢNG MA TRẬN IN RA TỪ print_tables()</span>
               <p class="spec-text text-slate-800">
-                Phương thức <code>detect_negative_cycle()</code> trả về <code>False</code>, xác nhận đồ thị hoàn toàn an toàn và hội tụ nghiệm tối ưu.
+                Cả 2 bảng khoảng cách <code>_dist</code> và bảng tiền nhiệm <code>_parent</code> được hiển thị trực quan, giúp lần vết đường đi giữa bất kỳ cặp đỉnh nào trong <strong>O(V)</strong>.
               </p>
             </div>
           </div>
@@ -1140,30 +1241,43 @@
                 <span class="w-3 h-3 rounded-full bg-rose-500"></span>
                 <span class="w-3 h-3 rounded-full bg-amber-500"></span>
                 <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                <span class="ml-2 font-bold text-white">Console Output — python shortest_path_solvers.py</span>
+                <span class="ml-2 font-bold text-white">Console Output — dijkstra_v2.py & floyd_v2.py</span>
               </div>
-              <pre class="p-5 text-xs sm:text-sm font-mono text-emerald-400 flex-1 overflow-auto bg-slate-900 leading-relaxed font-bold">================================================================================
-CHƯƠNG TRÌNH KIỂM THỬ SO SÁNH: DIJKSTRA vs. FLOYD-WARSHALL
-================================================================================
+              <pre class="p-4 text-xs font-mono text-emerald-400 flex-1 overflow-auto bg-slate-900 leading-relaxed font-medium">--- ĐƯỜNG ĐI NGẮN NHẤT TỪ ĐỈNH 0 (A) THEO DIJKSTRASP ---
+0 to 0 ( 0.00): 
+0 to 1 ( 3.00): 0 -> 2 2.00  2 -> 1 1.00
+0 to 2 ( 2.00): 0 -> 2 2.00
+0 to 3 ( 7.00): 0 -> 2 2.00  2 -> 1 1.00  1 -> 3 4.00
+0 to 4 (10.00): 0 -> 2 2.00  2 -> 1 1.00  1 -> 3 4.00  3 -> 4 3.00
 
---- KẾT QUẢ DIJKSTRA (Nguồn: A) ---
-  Khoảng cách A -> A:  0.0 | Lộ trình: A
-  Khoảng cách A -> B:  3.0 | Lộ trình: A -> C -> B
-  Khoảng cách A -> C:  2.0 | Lộ trình: A -> C
-  Khoảng cách A -> D:  7.0 | Lộ trình: A -> C -> B -> D
-  Khoảng cách A -> E: 10.0 | Lộ trình: A -> C -> B -> D -> E
+═══════════════════════════════════════════════════════
+══════════ BẢNG KHOẢNG CÁCH NGẮN NHẤT (_dist) ═════════
+═══════════════════════════════════════════════════════
+ From \ To │       0       1       2       3       4
+────────────────────────────────────────────────────
+    0       │     0.0     3.0     2.0     7.0    10.0
+    1       │       ∞     0.0       ∞     4.0     7.0
+    2       │       ∞     1.0     0.0     5.0     8.0
+    3       │       ∞       ∞       ∞     0.0     3.0
+    4       │       ∞       ∞       ∞       ∞     0.0
 
---- KẾT QUẢ FLOYD-WARSHALL (Toàn bộ ma trận khoảng cách D) ---
-          A      B      C      D      E
-    A:   0.0    3.0    2.0    7.0   10.0   
-    B:   inf    0.0    inf    4.0    7.0   
-    C:   inf    1.0    0.0    5.0    8.0   
-    D:   inf    inf    inf    0.0    3.0   
-    E:   inf    inf    inf    inf    0.0   
-
---- PHÁT HIỆN CHU TRÌNH ÂM ---
-  Đồ thị có chu trình âm không? KHÔNG (HỢP LỆ)
-  => KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI!</pre>
+═══════════════════════════════════════════════════════
+══════ BẢNG ĐỈNH ĐỨNG TRƯỚC ĐỂ TRUY VẾT (_parent) ═════
+═══════════════════════════════════════════════════════
+ From \ To │       0       1       2       3       4
+────────────────────────────────────────────────────
+    0       │       -       2       0       1       3
+    1       │       -       -       -       1       3
+    2       │       -       2       -       1       3
+    3       │       -       -       -       -       3
+    4       │       -       -       -       -       -
+═══════════════════════════════════════════════════════
+Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C -> B -> D -> E)</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
             </div>
           </div>
         </div>
