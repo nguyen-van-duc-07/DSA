@@ -1,0 +1,510 @@
+/* ==========================================================================
+   Full-Screen Slide Deck Presentation Engine Styles
+   Clean & Bright Light Theme (Slate 50 #F8FAFC)
+   Optimized for High-Contrast Projector Displays
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+:root {
+  --bg-page: #F8FAFC;            /* Slate 50 - Trắng ngà / Xám xanh cực sáng */
+  --bg-card: #FFFFFF;            /* Trắng tinh */
+  --bg-card-subtle: #F1F5F9;     /* Slate 100 */
+  --border-card: #E2E8F0;        /* Slate 200 - Viền mảnh rõ nét */
+  --border-hover: #CBD5E1;       /* Slate 300 */
+  
+  --text-main: #0F172A;          /* Slate 900 - Đen xanh đậm, cực kỳ sắc nét */
+  --text-secondary: #334155;     /* Slate 700 - Xám đậm, dễ đọc trên máy chiếu */
+  --text-muted: #64748B;         /* Slate 500 */
+  
+  /* Màu nhấn theo thuật toán và trạng thái */
+  --accent-dijkstra: #2563EB;    /* Xanh dương Hoàng gia */
+  --accent-dijkstra-bg: #EFF6FF; /* Blue 50 */
+  --accent-dijkstra-border: #BFDBFE;
+
+  --accent-floyd: #4F46E5;       /* Tím chàm Indigo */
+  --accent-floyd-bg: #EEF2FF;    /* Indigo 50 */
+  --accent-floyd-border: #C7D2FE;
+
+  --accent-success: #059669;     /* Xanh lá Emerald (Tối ưu) */
+  --accent-success-bg: #ECFDF5;
+  --accent-success-border: #A7F3D0;
+
+  --accent-active: #D97706;      /* Cam Amber (Đang xét) */
+  --accent-active-bg: #FFFBEB;
+  --accent-active-border: #FDE68A;
+
+  --accent-danger: #E11D48;      /* Đỏ Rose (Cạnh âm / Cảnh báo) */
+  --accent-danger-bg: #FFF1F2;
+  --accent-danger-border: #FECDD3;
+
+  --shadow-soft: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 16px 36px -6px rgba(15, 23, 42, 0.1), 0 6px 12px -3px rgba(15, 23, 42, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  user-select: none;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Hiệu ứng chuyển màu Pastel thật nhẹ ở góc */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-glow::before {
+  content: '';
+  position: absolute;
+  top: -15%;
+  left: 15%;
+  width: 55vw;
+  height: 50vh;
+  background: radial-gradient(circle, rgba(191, 219, 254, 0.45) 0%, rgba(248, 250, 252, 0) 70%);
+  filter: blur(80px);
+}
+
+.ambient-glow::after {
+  content: '';
+  position: absolute;
+  bottom: -15%;
+  right: 15%;
+  width: 50vw;
+  height: 50vh;
+  background: radial-gradient(circle, rgba(199, 210, 254, 0.4) 0%, rgba(248, 250, 252, 0) 70%);
+  filter: blur(90px);
+}
+
+/* ==========================================================================
+   Full-Screen Slide Engine
+   ========================================================================== */
+.slide-deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 2.25rem 3.5rem 5.5rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.985) translateY(10px);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+  z-index: 20;
+}
+
+/* Slide Container */
+.slide-container {
+  width: 100%;
+  max-width: 1560px;
+  height: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Slide Header */
+.slide-header {
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
+}
+
+.slide-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.slide-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.25;
+}
+
+@media (min-width: 1536px) {
+  .slide-title {
+    font-size: 2.85rem;
+  }
+}
+
+.slide-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 55%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 2-Column Spacious Grid Layout */
+.slide-body-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.25rem;
+  align-items: stretch;
+  flex-grow: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.slide-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* Bento Box & Card Component */
+.bento-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.25s ease;
+}
+
+.bento-box:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Structured Label Card */
+.spec-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-card);
+  border-radius: 1.15rem;
+  padding: 1.25rem 1.6rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  transition: all 0.25s ease;
+}
+
+.spec-card:hover {
+  border-color: #CBD5E1;
+  transform: translateX(4px);
+  box-shadow: var(--shadow-soft);
+}
+
+.spec-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.spec-text {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (min-width: 1536px) {
+  .spec-text {
+    font-size: 1.325rem;
+  }
+}
+
+/* ==========================================================================
+   Floating Bottom Control Bar (Light Theme)
+   ========================================================================== */
+.floating-bar-container {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #CBD5E1;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+}
+
+.bar-btn {
+  background: transparent;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  padding: 0.45rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bar-btn:hover {
+  color: #0F172A;
+  background: #F1F5F9;
+}
+
+.bar-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.bar-divider {
+  width: 1px;
+  height: 20px;
+  background: #E2E8F0;
+}
+
+/* Progress Track on Floating Bar */
+.progress-track {
+  width: 100px;
+  height: 5px;
+  background: #E2E8F0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 5%;
+  background: linear-gradient(90deg, #2563EB, #4F46E5);
+  border-radius: 9999px;
+  transition: width 0.35s ease;
+}
+
+/* ==========================================================================
+   Timeline Sidebar Drawer (Light Theme)
+   ========================================================================== */
+.timeline-drawer {
+  position: fixed;
+  top: 0;
+  right: -440px;
+  width: 420px;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid #E2E8F0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -20px 0 50px rgba(15, 23, 42, 0.12);
+}
+
+.timeline-drawer.open {
+  right: 0;
+}
+
+.timeline-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(4px);
+  z-index: 190;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.timeline-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.timeline-item:hover {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+}
+
+.timeline-item.active {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+}
+
+.timeline-item.active .timeline-num {
+  background: #2563EB;
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Help Modal
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 560px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.5rem;
+  padding: 2.25rem;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2);
+  transform: scale(0.95);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-overlay.open .modal-card {
+  transform: scale(1);
+}
+
+.kbd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 0.55rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  border-radius: 0.45rem;
+  color: #0F172A;
+  box-shadow: 0 1px 0 1px #E2E8F0;
+}
+
+/* ==========================================================================
+   Matrix & Visualizer Elements (Light Theme)
+   ========================================================================== */
+.matrix-cell {
+  transition: all 0.25s ease;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.matrix-cell.cell-updated {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  font-weight: 800;
+  border: 1px solid #10B981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+
+.matrix-cell.cell-k-focus {
+  background-color: #EEF2FF !important;
+  color: #3730A3 !important;
+  font-weight: 700;
+}
+
+/* Terminal Window Mockup in Light Deck */
+.terminal-window {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 1.15rem;
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.18);
+  overflow: hidden;
+}
+
+/* KaTeX Custom Light Styling */
+.katex {
+  color: #1D4ED8 !important;
+  font-size: 1.15em;
+}
+
+.katex-display {
+  margin: 0.85rem 0 !important;
+  padding: 0.65rem 1rem;
+  background: #F1F5F9;
+  border-radius: 0.75rem;
+  border: 1px solid #E2E8F0;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}

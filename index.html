@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thuật toán Tìm Đường đi Ngắn nhất: Dijkstra & Floyd-Warshall | Slide Deck</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              50: '#F8FAFC',
+              100: '#F1F5F9',
+              200: '#E2E8F0',
+              300: '#CBD5E1',
+              400: '#94A3B8',
+              500: '#64748B',
+              600: '#475569',
+              700: '#334155',
+              800: '#1E293B',
+              900: '#0F172A',
+            },
+            blue: {
+              50: '#EFF6FF',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            },
+            indigo: {
+              50: '#EEF2FF',
+              600: '#4F46E5',
+              700: '#4338CA',
+            },
+            emerald: {
+              50: '#ECFDF5',
+              600: '#059669',
+              700: '#047857',
+            }
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+            heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- KaTeX CSS & JS for Math Formulas -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Prism.js for Syntax Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Clean & Bright Light Theme Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Generated Simulation Data -->
+  <script src="data/trace_data.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 overflow-hidden">
+
+  <!-- Ambient Subtle Pastel Glow -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+
+  <!-- =========================================================================
+       FULL-SCREEN SLIDE DECK CONTAINER (20 SLIDES)
+       ========================================================================= -->
+  <main class="slide-deck" id="slide-deck">
+
+    <!-- =====================================================================
+         SLIDE 1 (#1) - TRANG BÌA (HERO COVER)
+         ===================================================================== -->
+    <section class="slide active" id="slide-1" data-slide="1">
+      <div class="slide-container justify-center items-center text-center relative z-10 max-w-5xl my-auto">
+        
+        <!-- Badge -->
+        <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white border border-slate-200 text-sm font-mono font-semibold text-slate-700 mb-8 shadow-sm">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
+          <span>BÁO CÁO CHUYÊN ĐỀ HỌC PHẦN</span>
+          <span class="text-slate-300">•</span>
+          <span class="text-blue-600 font-bold">CẤU TRÚC DỮ LIỆU & GIẢI THUẬT</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight mb-8 font-heading">
+          Thuật toán Tìm Đường đi Ngắn nhất:<br>
+          <em class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 font-extrabold not-italic">
+            Dijkstra & Floyd-Warshall
+          </em>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="text-xl sm:text-2xl text-slate-700 max-w-3xl mx-auto leading-relaxed mb-10 font-normal">
+          Tìm hiểu toàn diện từ bài toán thực tế, ý tưởng thuật toán, mô phỏng từng bước, mã nguồn Python tới ứng dụng điều phối xe cấp cứu đô thị.
+        </p>
+
+        <!-- Meta info -->
+        <div class="flex flex-wrap items-center justify-center gap-6 text-base font-mono text-slate-600 mb-10">
+          <div class="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
+            <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
+            <span class="font-semibold text-slate-800">Nhóm Thuyết trình Thuật toán</span>
+          </div>
+          <div class="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
+            <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
+            <span class="font-semibold text-slate-800">Thời lượng: 15–20 Phút</span>
+          </div>
+        </div>
+
+        <!-- Start Button -->
+        <button id="hero-start-btn" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg shadow-blue-500/25 hover:scale-105 cursor-pointer">
+          <span>Bắt đầu Bài Thuyết trình</span>
+          <kbd class="kbd-badge text-xs bg-blue-700 text-white border-blue-500">Space</kbd>
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </button>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 2 (#2) - LỘ TRÌNH BÀI THUYẾT TRÌNH (8 PHẦN NỘI DUNG)
+         ===================================================================== -->
+    <section class="slide" id="slide-2" data-slide="2">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Nội dung Chính</span>
+          <h2 class="slide-title">Lộ trình Bài Thuyết trình: <em>8 Chặng Khám phá</em></h2>
+        </header>
+
+        <!-- 8 Bento Cards Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 flex-grow my-auto">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-blue-400 group" onclick="goToSlide(3)">
+            <div>
+              <span class="font-mono text-xs font-bold text-blue-600 block mb-2">PHẦN 01</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Bài toán Tìm đường</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Định nghĩa bài toán một nguồn (SSSP) và bài toán mọi cặp đỉnh (APSP).</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 3 - 4</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-indigo-400 group" onclick="goToSlide(5)">
+            <div>
+              <span class="font-mono text-xs font-bold text-indigo-600 block mb-2">PHẦN 02</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Ý tưởng Cốt lõi</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chiến lược tham lam, nới lỏng cạnh, Min-Heap và quy hoạch động Bellman.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 5 - 8</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-400 group" onclick="goToSlide(9)">
+            <div>
+              <span class="font-mono text-xs font-bold text-emerald-600 block mb-2">PHẦN 03</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Minh họa Từng bước (Trace)</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chạy thử đồ thị mẫu 5 đỉnh, xem Min-Heap và ma trận D<sup>(k)</sup> qua từng bước.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 9 - 10</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-blue-400 group" onclick="goToSlide(11)">
+            <div>
+              <span class="font-mono text-xs font-bold text-blue-600 block mb-2">PHẦN 04</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Cài đặt Python & Chạy thử</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Thiết kế 2 lớp DijkstraSolver và FloydWarshallSolver rõ ràng, mạch lạc.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 11 - 13</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-400 group" onclick="goToSlide(14)">
+            <div>
+              <span class="font-mono text-xs font-bold text-amber-600 block mb-2">PHẦN 05</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Độ phức tạp Thời gian</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Đánh giá các trường hợp Best / Average / Worst trên đồ thị thưa và đồ thị dày.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 14</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-400 group" onclick="goToSlide(15)">
+            <div>
+              <span class="font-mono text-xs font-bold text-amber-600 block mb-2">PHẦN 06</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Bộ nhớ & CPU Cache</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">So sánh lượng RAM và lý do ma trận liên tục của Floyd chạy cực nhanh.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 15</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-rose-400 group" onclick="goToSlide(16)">
+            <div>
+              <span class="font-mono text-xs font-bold text-rose-600 block mb-2">PHẦN 07</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-rose-600 transition-colors">Cạnh âm & Chu trình âm</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Trực quan hóa vì sao cạnh âm làm Dijkstra sai và cách Floyd phát hiện chu trình âm.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 16</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-400 group" onclick="goToSlide(17)">
+            <div>
+              <span class="font-mono text-xs font-bold text-emerald-600 block mb-2">PHẦN 08</span>
+              <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Ứng dụng Thực tế & Tổng kết</h3>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Hệ thống cấp cứu (LeetCode 743 & 1334), liên hệ Google Maps và kết luận.</p>
+            </div>
+            <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-slate-100">
+              <span class="font-semibold text-slate-700">Slide 17 - 20</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 3 (#3) - BÀI TOÁN CỦA DIJKSTRA (SSSP)
+         ===================================================================== -->
+    <section class="slide" id="slide-3" data-slide="3">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Định nghĩa Bài toán • Single-Source</span>
+          <h2 class="slide-title">Bài toán của Dijkstra: <em>Tìm Đường từ Một Nguồn (SSSP)</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: 4 Spec Cards -->
+          <div class="slide-col gap-4">
+            <div class="spec-card">
+              <span class="spec-badge bg-blue-100 text-blue-800">BÀI TOÁN (SSSP)</span>
+              <p class="spec-text font-medium text-slate-800">
+                Tìm đường đi có tổng chi phí nhỏ nhất từ <strong>duy nhất 1 đỉnh xuất phát \(s\)</strong> tới tất cả các đỉnh khác trong mạng lưới.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700">ĐẦU VÀO (INPUT)</span>
+              <p class="spec-text text-slate-700">
+                Đồ thị danh sách kề \(O(V+E)\) và đỉnh nguồn bắt đầu \(s\).
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700">ĐẦU RA (OUTPUT)</span>
+              <p class="spec-text text-slate-700">
+                Mảng khoảng cách <code>dist[v]</code> và mảng đỉnh đi liền trước <code>parent[v]</code> để lần ngược lộ trình.
+              </p>
+            </div>
+
+            <div class="spec-card border-rose-200 bg-rose-50/60">
+              <span class="spec-badge bg-rose-100 text-rose-800 font-bold">ĐIỀU KIỆN QUAN TRỌNG</span>
+              <p class="spec-text text-rose-900 font-medium">
+                Tất cả các cạnh <strong>bắt buộc phải có trọng số không âm (\(w \ge 0\))</strong>. Nếu có cạnh âm, chiến lược chọn đỉnh gần nhất sẽ bị sai!
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Clean Large SVG -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-semibold self-start">MINH HỌA: TỪ 1 ĐỈNH NGUỒN \(s\) TỎA ĐƯỜNG ĐI ĐẾN MỌI NƠI</span>
+              
+              <svg viewBox="0 0 540 380" class="w-full h-full">
+                <!-- Directed Edges -->
+                <line x1="270" y1="70" x2="140" y2="180" stroke="#2563EB" stroke-width="4" />
+                <line x1="270" y1="70" x2="400" y2="180" stroke="#2563EB" stroke-width="4" />
+                <line x1="140" y1="180" x2="80" y2="300" stroke="#2563EB" stroke-width="3" />
+                <line x1="140" y1="180" x2="200" y2="300" stroke="#2563EB" stroke-width="3" />
+                <line x1="400" y1="180" x2="340" y2="300" stroke="#2563EB" stroke-width="3" />
+                <line x1="400" y1="180" x2="460" y2="300" stroke="#2563EB" stroke-width="3" />
+
+                <!-- Source Node s -->
+                <circle cx="270" cy="70" r="34" fill="#2563EB" stroke="#1E40AF" stroke-width="4" />
+                <text x="270" y="77" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">s</text>
+                <text x="270" y="28" fill="#1D4ED8" font-size="14" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">Nguồn (dist = 0)</text>
+
+                <!-- Layer 1 -->
+                <circle cx="140" cy="180" r="28" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" />
+                <text x="140" y="187" fill="#1E40AF" font-weight="bold" font-size="16" text-anchor="middle">v1</text>
+
+                <circle cx="400" cy="180" r="28" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" />
+                <text x="400" y="187" fill="#1E40AF" font-weight="bold" font-size="16" text-anchor="middle">v2</text>
+
+                <!-- Layer 2 -->
+                <circle cx="80" cy="300" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
+                <text x="80" y="306" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u1</text>
+
+                <circle cx="200" cy="300" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
+                <text x="200" y="306" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u2</text>
+
+                <circle cx="340" cy="300" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
+                <text x="340" y="306" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u3</text>
+
+                <circle cx="460" cy="300" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
+                <text x="460" y="306" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u4</text>
+              </svg>
+
+              <div class="w-full text-center p-3 rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
+                Cây đường đi ngắn nhất (Shortest Path Tree) lan tỏa từ một điểm gốc
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 4 (#4) - BÀI TOÁN CỦA FLOYD-WARSHALL (APSP) & SO SÁNH
+         ===================================================================== -->
+    <section class="slide" id="slide-4" data-slide="4">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Định nghĩa Bài toán • All-Pairs</span>
+          <h2 class="slide-title">Bài toán của Floyd-Warshall: <em>Mọi Cặp Đỉnh & So sánh</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: 4 Spec Cards -->
+          <div class="slide-col gap-4">
+            <div class="spec-card">
+              <span class="spec-badge bg-indigo-100 text-indigo-800">BÀI TOÁN (APSP)</span>
+              <p class="spec-text font-medium text-slate-800">
+                Tìm đường đi ngắn nhất giữa <strong>mọi cặp đỉnh có thể có (u, v)</strong> trong toàn bộ đồ thị.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700">ĐẦU VÀO & ĐẦU RA</span>
+              <p class="spec-text text-slate-700">
+                Đầu vào là ma trận kề \(V \times V\); đầu ra là ma trận khoảng cách \(D[V][V]\) và ma trận đỉnh kế tiếp \(Next[V][V]\).
+              </p>
+            </div>
+
+            <div class="spec-card border-amber-200 bg-amber-50/60">
+              <span class="spec-badge bg-amber-100 text-amber-800 font-bold">ĐIỀU KIỆN QUAN TRỌNG</span>
+              <p class="spec-text text-amber-900 font-medium">
+                Cho phép cạnh mang trọng số âm, nhưng <strong>tuyệt đối không được có chu trình âm</strong> (nếu có, khoảng cách sẽ giảm vô tận về \(-\infty\)).
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Comparison Table -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-center">
+              <h3 class="text-base font-mono uppercase tracking-wider text-slate-600 font-bold mb-4">BẢNG SO SÁNH NHANH GIỮA HAI BÀI TOÁN</h3>
+              
+              <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left text-base font-sans">
+                  <thead class="bg-slate-100 text-xs font-mono text-slate-700 uppercase">
+                    <tr>
+                      <th class="p-4 border-b border-slate-200">Tiêu chí</th>
+                      <th class="p-4 border-b border-slate-200 text-blue-700 font-bold">Dijkstra (SSSP)</th>
+                      <th class="p-4 border-b border-slate-200 text-indigo-700 font-bold">Floyd-Warshall (APSP)</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-200 text-slate-800 text-sm sm:text-base">
+                    <tr>
+                      <td class="p-4 font-semibold text-slate-600">Phạm vi giải quyết</td>
+                      <td class="p-4 text-blue-800 font-medium">Từ 1 nguồn \(s\) duy nhất</td>
+                      <td class="p-4 text-indigo-800 font-medium">Giữa mọi cặp đỉnh \((u, v)\)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-4 font-semibold text-slate-600">Trọng số âm</td>
+                      <td class="p-4 text-rose-700 font-bold">Không hỗ trợ (\(w \ge 0\))</td>
+                      <td class="p-4 text-emerald-700 font-bold">Hỗ trợ tốt cạnh âm</td>
+                    </tr>
+                    <tr>
+                      <td class="p-4 font-semibold text-slate-600">Cấu trúc dữ liệu</td>
+                      <td class="p-4 font-mono text-sm">Danh sách kề + Min-Heap</td>
+                      <td class="p-4 font-mono text-sm">Ma trận 2D \(V \times V\)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-4 font-semibold text-slate-600">Thời gian tiêu biểu</td>
+                      <td class="p-4 font-mono text-sm font-bold text-blue-700">\(O((V+E)\log V)\)</td>
+                      <td class="p-4 font-mono text-sm font-bold text-indigo-700">\(\Theta(V^3)\)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 5 (#5) - Ý TƯỞNG CỐT LÕI DIJKSTRA (P1): THAM LAM & NỚI LỎNG
+         ===================================================================== -->
+    <section class="slide" id="slide-5" data-slide="5">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Ý tưởng Cốt lõi • Dijkstra (Phần 1)</span>
+          <h2 class="slide-title">Ý tưởng Cốt lõi của Dijkstra: <em>Tham lam & Nới lỏng cạnh</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Explanation -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-blue-200 bg-blue-50/40">
+              <span class="spec-badge bg-blue-600 text-white font-bold">Ý TƯỞNG 1: LUÔN ƯU TIÊN ĐỈNH GẦN NHẤT (THAM LAM)</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Tại mỗi bước, ta luôn lấy ra đỉnh \(u\) chưa chốt có khoảng cách tạm thời <code>dist[u]</code> nhỏ nhất và <strong>chốt luôn đỉnh này</strong>!
+              </p>
+              <p class="text-base text-slate-700 mt-2">
+                Vì tất cả các cạnh đều có trọng số dương, đi qua bất kỳ đỉnh trung gian nào khác cũng chỉ làm đường đi dài hơn. Do đó giá trị <code>dist[u]</code> này chắc chắn là ngắn nhất.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">Ý TƯỞNG 2: NỚI LỎNG CẠNH (EDGE RELAXATION)</span>
+              <p class="spec-text text-slate-800 font-medium">
+                Dựa trên Bất đẳng thức tam giác: nếu đi vòng qua \(u\) tới \(v\) mà ngắn hơn đường cũ tới \(v\), ta lập tức cập nhật lại:
+              </p>
+              <div class="p-3.5 rounded-xl bg-slate-100 font-mono text-emerald-700 text-sm sm:text-base font-bold my-2 text-center">
+                if dist[u] + w(u, v) < dist[v]:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;dist[v] = dist[u] + w(u, v)
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Big SVG Diagram -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-bold self-start">SƠ ĐỒ TRỰC QUAN: PHÉP NỚI LỎNG CẠNH \(s \to u \to v\)</span>
+              
+              <svg viewBox="0 0 520 340" class="w-full h-full">
+                <!-- Source Node s -->
+                <circle cx="100" cy="100" r="34" fill="#2563EB" stroke="#1E40AF" stroke-width="4" />
+                <text x="100" y="108" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">s</text>
+
+                <!-- Node u -->
+                <circle cx="390" cy="100" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
+                <text x="390" y="107" fill="#1E40AF" font-weight="bold" font-size="18" text-anchor="middle">u</text>
+
+                <!-- Target Node v -->
+                <circle cx="245" cy="260" r="34" fill="#ECFDF5" stroke="#059669" stroke-width="4" />
+                <text x="245" y="267" fill="#065F46" font-weight="bold" font-size="19" text-anchor="middle">v</text>
+
+                <!-- Edges -->
+                <line x1="134" y1="100" x2="358" y2="100" stroke="#2563EB" stroke-width="4" />
+                <text x="245" y="85" fill="#1D4ED8" font-size="15" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">dist[u] = 3</text>
+
+                <line x1="375" y1="128" x2="265" y2="236" stroke="#059669" stroke-width="4.5" />
+                <text x="350" y="195" fill="#047857" font-size="15" font-family="JetBrains Mono" font-weight="bold">w(u, v) = 4</text>
+
+                <line x1="120" y1="124" x2="225" y2="238" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="5,5" />
+                <text x="135" y="200" fill="#BE123C" font-size="15" font-family="JetBrains Mono" font-weight="bold">Đường cũ = 9</text>
+
+                <!-- Check badge -->
+                <rect x="145" y="295" width="200" height="36" rx="10" fill="#059669" />
+                <text x="245" y="318" fill="#FFFFFF" font-size="14" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">3 + 4 = 7 < 9 (Rút ngắn!)</text>
+              </svg>
+
+              <div class="w-full text-center p-2.5 rounded-xl bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700">
+                Khoảng cách tới v được rút ngắn từ 9 xuống 7 nhờ đi vòng qua u
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 6 (#6) - Ý TƯỞNG CỐT LÕI DIJKSTRA (P2): MIN-HEAP & LAZY DELETION
+         ===================================================================== -->
+    <section class="slide" id="slide-6" data-slide="6">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Ý tưởng Cốt lõi • Dijkstra (Phần 2)</span>
+          <h2 class="slide-title">Ý tưởng Cốt lõi của Dijkstra: <em>Min-Heap & Kỹ thuật Lazy Deletion</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Min-Heap vs Array & Lazy Deletion -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card">
+              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">TẠI SAO CẦN HÀNG ĐỢI ƯU TIÊN (MIN-HEAP)?</span>
+              <p class="spec-text font-medium text-slate-800">
+                Nếu dùng mảng thông thường, mỗi lần tìm đỉnh gần nhất ta phải duyệt qua toàn bộ \(V\) phần tử (\(O(V)\)), khiến tổng thời gian là \(O(V^2)\).
+              </p>
+              <p class="text-base text-slate-700 mt-2">
+                Dùng <strong>Min-Heap</strong> giúp ta lấy ngay đỉnh nhỏ nhất chỉ mất \(O(\log V)\), tăng tốc độ bài toán ngoạn mục lên \(O((V+E)\log V)\).
+              </p>
+            </div>
+
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">KỸ THUẬT BỎ QUA GIÁ TRỊ CŨ (LAZY DELETION)</span>
+              <p class="spec-text text-slate-800 font-medium">
+                Trong Python <code>heapq</code>, ta không thể sửa trực tiếp phần tử trong Heap. Khi tìm được đường đi ngắn hơn, ta cứ đẩy giá trị mới vào.
+              </p>
+              <p class="text-sm sm:text-base text-slate-700 mt-1">
+                Khi lấy ra, chỉ cần kiểm tra nhanh: <code>if current_dist > dist[u]: continue</code> để bỏ qua giá trị cũ trong 1 nốt nhạc (\(O(1)\))!
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Diagram of Heap & Filter -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-bold self-start">CƠ CHẾ LỌC GIÁ TRỊ CŨ (LAZY DELETION) TRONG HEAP</span>
+
+              <div class="w-full flex-1 flex flex-col justify-center gap-4 my-auto">
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-mono text-slate-500 block">LẦN NỚI LỎNG THỨ 1 (TỪ A SANG B):</span>
+                    <span class="text-base font-bold text-slate-800">Đẩy vào Heap: (5, B)</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-lg bg-blue-100 text-blue-800 font-mono text-xs font-bold">Chưa chốt</span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-mono text-emerald-700 block">LẦN NỚI LỎNG THỨ 2 (TỪ C SANG B TỐT HƠN):</span>
+                    <span class="text-base font-bold text-emerald-900">Đẩy vào Heap: (3, B)</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-lg bg-emerald-600 text-white font-mono text-xs font-bold">Chốt trước (dist[B]=3)</span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-rose-50 border border-rose-300 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-mono text-rose-700 block">KHI LẤY LẠI BẢN GHI (5, B) CŨ RA KHỎI HEAP:</span>
+                    <span class="text-base font-bold text-rose-900">current_dist (5) > dist[B] (3)</span>
+                  </div>
+                  <span class="px-3 py-1 rounded-lg bg-rose-600 text-white font-mono text-xs font-bold">BỎ QUA NGAY!</span>
+                </div>
+              </div>
+
+              <div class="w-full text-center p-2.5 rounded-xl bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700">
+                Dung lượng Heap tối đa chỉ là O(E), thời gian vẫn được bảo toàn nguyên vẹn O(E log V)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 7 (#7) - Ý TƯỞNG CỐT LÕI FLOYD-WARSHALL (P1): ĐỈNH TRUNG GIAN
+         ===================================================================== -->
+    <section class="slide" id="slide-7" data-slide="7">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Ý tưởng Cốt lõi • Floyd-Warshall (Phần 1)</span>
+          <h2 class="slide-title">Ý tưởng Cốt lõi của Floyd-Warshall: <em>Thử đi vòng qua Đỉnh trung gian</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Intuitive DP Explanation -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">TƯ DUY QUY HOẠCH ĐỘNG (DYNAMIC PROGRAMMING)</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Để tìm đường đi ngắn nhất giữa hai đỉnh bất kỳ \(i\) và \(j\), ta lần lượt <strong>thử cho phép từng đỉnh \(k\) làm trạm trung chuyển</strong> (từ \(k=1\) đến \(k=V\)).
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700">ĐỊNH NGHĨA TRẠNG THÁI CON</span>
+              <p class="spec-text text-slate-800">
+                Gọi <strong>D<sup>(k)</sup>[i][j]</strong> là độ dài đường đi ngắn nhất từ đỉnh \(i\) đến đỉnh \(j\) mà chỉ được phép ghé qua các đỉnh trung gian thuộc tập \(\{1, 2, \dots, k\}\).
+              </p>
+              <ul class="list-disc pl-5 mt-2 space-y-1 text-sm sm:text-base text-slate-700">
+                <li>Khi \(k = 0\): Chỉ là các cạnh nối trực tiếp.</li>
+                <li>Khi \(k = V\): Cho phép tất cả các đỉnh làm trung gian \(\implies\) Đạt được khoảng cách ngắn nhất tuyệt đối giữa mọi cặp đỉnh!</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Path Comparison SVG -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-bold self-start">SO SÁNH: ĐI TRỰC TIẾP HAY ĐI VÒNG QUA TRUNG GIAN \(k\)?</span>
+
+              <svg viewBox="0 0 520 320" class="w-full h-full">
+                <!-- Node i -->
+                <circle cx="90" cy="180" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
+                <text x="90" y="188" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">i</text>
+
+                <!-- Intermediate Node k -->
+                <circle cx="260" cy="70" r="36" fill="#4F46E5" stroke="#312E81" stroke-width="4" />
+                <text x="260" y="78" fill="#FFFFFF" font-weight="bold" font-size="22" text-anchor="middle">k</text>
+                <text x="260" y="24" fill="#4F46E5" font-size="13" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">Đỉnh trung gian k</text>
+
+                <!-- Node j -->
+                <circle cx="430" cy="180" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
+                <text x="430" y="188" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">j</text>
+
+                <!-- Direct Path -->
+                <line x1="124" y1="180" x2="396" y2="180" stroke="#94A3B8" stroke-width="3" stroke-dasharray="6,6" />
+                <text x="260" y="208" fill="#64748B" font-size="15" font-family="JetBrains Mono" font-weight="bold" text-anchor="middle">Đường cũ: D<tspan dy="-4" font-size="11">(k-1)</tspan><tspan dy="4" font-size="15">[i][j]</tspan></text>
+
+                <!-- Via k Paths -->
+                <path d="M 115 158 Q 170 90 224 74" stroke="#4F46E5" stroke-width="4" fill="none" />
+                <text x="145" y="100" fill="#4338CA" font-size="15" font-family="JetBrains Mono" font-weight="bold">D<tspan dy="-4" font-size="11">(k-1)</tspan><tspan dy="4" font-size="15">[i][k]</tspan></text>
+
+                <path d="M 296 74 Q 350 90 405 158" stroke="#4F46E5" stroke-width="4" fill="none" />
+                <text x="375" y="100" fill="#4338CA" font-size="15" font-family="JetBrains Mono" font-weight="bold">D<tspan dy="-4" font-size="11">(k-1)</tspan><tspan dy="4" font-size="15">[k][j]</tspan></text>
+              </svg>
+
+              <div class="w-full text-center p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs sm:text-sm font-semibold text-indigo-900">
+                Hỏi: Đi vòng qua k (đoạn i → k cộng đoạn k → j) có ngắn hơn đường cũ không?
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 8 (#8) - Ý TƯỞNG CỐT LÕI FLOYD-WARSHALL (P2): TRUY HỒI & TỐI ƯU BỘ NHỚ
+         ===================================================================== -->
+    <section class="slide" id="slide-8" data-slide="8">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Ý tưởng Cốt lõi • Floyd-Warshall (Phần 2)</span>
+          <h2 class="slide-title">Ý tưởng Cốt lõi của Floyd-Warshall: <em>Công thức Truy hồi & Tối ưu Bộ nhớ</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Recurrence & In-place Explanation -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">CÔNG THỨC TRUY HỒI BELLMAN</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Tại bước thứ \(k\), khoảng cách mới giữa cặp \((i, j)\) được tính bằng cách so sánh 2 phương án:
+              </p>
+              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 font-mono text-indigo-700 text-sm sm:text-base font-bold my-2 text-center shadow-sm">
+                $$D^{(k)}[i][j] = \min \left( D^{(k-1)}[i][j], \; D^{(k-1)}[i][k] + D^{(k-1)}[k][j] \right)$$
+              </div>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">TỐI ƯU BỘ NHỚ: CHỈ DÙNG 1 MA TRẬN 2 CHIỀU</span>
+              <p class="spec-text text-slate-800 font-medium">
+                Tại sao không cần mảng 3 chiều \(O(V^3)\) mà ghi đè trực tiếp lên ma trận \(V \times V\) vẫn đúng?
+              </p>
+              <p class="text-sm sm:text-base text-slate-700 mt-1.5 leading-relaxed">
+                Vì khoảng cách từ \(i \to k\) và từ \(k \to j\) đi qua chính \(k\) không thể tự rút ngắn chính nó. Do đó <strong>hàng \(k\) và cột \(k\) hoàn toàn không thay đổi giá trị trong bước \(k\)</strong>! Ta thoải mái ghi đè kết quả in-place (\(O(V^2)\)).
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Matrix Invariant -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-bold self-start">MINH HỌA: HÀNG \(k\) VÀ CỘT \(k\) KHÔNG THAY ĐỔI TRONG BƯỚC \(k\)</span>
+
+              <div class="w-full flex-1 flex flex-col justify-center items-center my-auto">
+                <div class="grid grid-cols-4 gap-2 text-center font-mono text-sm sm:text-base p-4 bg-slate-50 rounded-2xl border border-slate-200 max-w-sm w-full shadow-inner">
+                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[1][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[1][k]</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[1][j]</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200">...</div>
+
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[k][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-600 font-bold text-white shadow-md">0 (k)</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[k][j]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">...</div>
+
+                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[i][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[i][k]</div>
+                  <div class="p-3 rounded-lg bg-emerald-100 border border-emerald-400 font-bold text-emerald-900">Cập nhật!</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200">...</div>
+                </div>
+              </div>
+
+              <div class="w-full text-center p-2.5 rounded-xl bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700">
+                Ô xanh lá D[i][j] được tính từ 2 ô màu tím D[i][k] và D[k][j] vốn cố định
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 9 (#9) - MINH HỌA TỪNG BƯỚC: THUẬT TOÁN DIJKSTRA
+         ===================================================================== -->
+    <section class="slide" id="slide-9" data-slide="9">
+      <div class="slide-container">
+        <header class="slide-header flex items-center justify-between">
+          <div>
+            <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mô phỏng Trực quan • Dijkstra</span>
+            <h2 class="slide-title">Minh họa từng bước: <em>Dijkstra trên Đồ thị 5 Đỉnh</em></h2>
+          </div>
+          <div class="flex items-center gap-2 font-mono text-sm">
+            <span class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold text-blue-700">Bước: <span id="s9-step-indicator">0 / 8</span></span>
+          </div>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Big SVG Graph & Play Controls -->
+          <div class="slide-col justify-between bento-box p-5 bg-white relative">
+            <div class="flex items-center justify-between text-sm font-mono text-slate-600 pb-2 border-b border-slate-100">
+              <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> Đồ thị 5 Đỉnh (Bắt đầu từ A)</span>
+              <span class="text-slate-400 text-xs">Phím tắt: P (Play), N (Next), R (Reset)</span>
+            </div>
+
+            <!-- SVG Graph (Expanded) -->
+            <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[360px]">
+              <svg id="s9-graph-svg" viewBox="0 0 900 480" class="w-full h-full">
+                <defs>
+                  <marker id="s9-arrowhead" markerWidth="9" markerHeight="7" refX="28" refY="3.5" orient="auto">
+                    <polygon points="0 0, 9 3.5, 0 7" fill="#64748B" />
+                  </marker>
+                  <marker id="s9-arrowhead-active" markerWidth="9" markerHeight="7" refX="28" refY="3.5" orient="auto">
+                    <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
+                  </marker>
+                </defs>
+                <g id="s9-edges-layer"></g>
+                <g id="s9-nodes-layer"></g>
+              </svg>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <button id="s9-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-mono font-bold text-slate-700 transition-colors">Reset [R]</button>
+                <button id="s9-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                <button id="s9-btn-play" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all">
+                  <i data-lucide="play" class="w-4 h-4" id="s9-play-icon"></i>
+                  <span id="s9-play-text">Tự động Chạy [P]</span>
+                </button>
+                <button id="s9-btn-next" class="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-mono font-bold transition-colors">Bước tiếp [N] →</button>
+              </div>
+
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-600 font-semibold">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Trong Heap</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600"></span> Đã chốt</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Narrative Box, Heap & Tables -->
+          <div class="slide-col gap-3.5 justify-between">
+            <!-- Narrative Box -->
+            <div class="bento-box p-4 border-l-4 border-l-blue-600">
+              <div class="flex items-center justify-between text-xs font-mono mb-1.5">
+                <span class="text-slate-500 font-bold uppercase">DIỄN GIẢI TỪNG BƯỚC</span>
+                <span id="s9-action-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">KHỞI TẠO</span>
+              </div>
+              <p id="s9-desc-text" class="text-base text-slate-800 leading-relaxed font-sans min-h-[50px]">
+                Bước 0: Khởi tạo khoảng cách từ A đến chính nó là 0, các đỉnh còn lại tạm thời là vô cùng (∞). Ta bỏ (0, A) vào Hàng đợi ưu tiên (Min-Heap).
+              </p>
+            </div>
+
+            <!-- Min-Heap Elements -->
+            <div class="bento-box p-4">
+              <span class="text-xs font-mono text-slate-500 font-bold block mb-2">HÀNG ĐỢI ƯU TIÊN (MIN-HEAP HIỆN TẠI):</span>
+              <div id="s9-heap-container" class="flex flex-wrap gap-2 min-h-[42px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm">
+                <!-- Pills generated by js -->
+              </div>
+            </div>
+
+            <!-- Distance Table -->
+            <div class="bento-box p-4 overflow-hidden">
+              <span class="text-xs font-mono text-slate-500 font-bold block mb-2">MẢNG KHOẢNG CÁCH dist[] VÀ ĐỈNH CHA parent[]:</span>
+              <table class="w-full text-center text-sm font-mono border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-slate-100 text-slate-700">
+                  <tr>
+                    <th class="p-2 font-bold">Đỉnh</th>
+                    <th class="p-2 font-bold text-blue-700">A (Nguồn)</th>
+                    <th class="p-2 font-bold">B</th>
+                    <th class="p-2 font-bold">C</th>
+                    <th class="p-2 font-bold">D</th>
+                    <th class="p-2 font-bold">E</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  <tr>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50">dist</td>
+                    <td id="s9-d-A" class="p-2 text-emerald-700 font-extrabold text-base">0</td>
+                    <td id="s9-d-B" class="p-2 text-slate-400">∞</td>
+                    <td id="s9-d-C" class="p-2 text-slate-400">∞</td>
+                    <td id="s9-d-D" class="p-2 text-slate-400">∞</td>
+                    <td id="s9-d-E" class="p-2 text-slate-400">∞</td>
+                  </tr>
+                  <tr>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50">parent</td>
+                    <td id="s9-p-A" class="p-2 text-slate-400">None</td>
+                    <td id="s9-p-B" class="p-2 text-slate-400">None</td>
+                    <td id="s9-p-C" class="p-2 text-slate-400">None</td>
+                    <td id="s9-p-D" class="p-2 text-slate-400">None</td>
+                    <td id="s9-p-E" class="p-2 text-slate-400">None</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Path Reconstructed Display -->
+            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm font-mono flex items-center justify-between">
+              <span class="text-emerald-800 font-bold">LỘ TRÌNH ĐẾN ĐÍCH E:</span>
+              <span id="s9-path-display" class="font-extrabold text-emerald-700 text-base">Đang thực thi...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 10 (#10) - MINH HỌA TỪNG BƯỚC: THUẬT TOÁN FLOYD-WARSHALL
+         ===================================================================== -->
+    <section class="slide" id="slide-10" data-slide="10">
+      <div class="slide-container">
+        <header class="slide-header flex items-center justify-between">
+          <div>
+            <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Mô phỏng Trực quan • Floyd-Warshall</span>
+            <h2 class="slide-title">Minh họa từng bước: <em>Floyd-Warshall qua từng Đỉnh Trung gian k</em></h2>
+          </div>
+          <span id="s10-k-badge" class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono text-sm font-bold shadow-sm">k = 0 / 5</span>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Graph View with Highlighted Intermediate k -->
+          <div class="slide-col justify-between bento-box p-5 bg-white">
+            <div class="flex items-center justify-between text-sm font-mono text-slate-600 pb-2 border-b border-slate-100">
+              <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="network" class="w-4 h-4 text-indigo-600"></i> Cầu nối Đỉnh trung gian \(k\)</span>
+              <span id="s10-active-k-label" class="text-indigo-700 font-extrabold">k = Chưa xét</span>
+            </div>
+
+            <!-- SVG Graph -->
+            <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[340px]">
+              <svg id="s10-graph-svg" viewBox="0 0 900 480" class="w-full h-full">
+                <g id="s10-edges-layer"></g>
+                <g id="s10-nodes-layer"></g>
+              </svg>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <button id="s10-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-mono font-bold text-slate-700 transition-colors">Reset</button>
+                <button id="s10-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                <button id="s10-btn-play" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-indigo-500/20 transition-all">
+                  <i data-lucide="play" class="w-4 h-4" id="s10-play-icon"></i>
+                  <span id="s10-play-text">Tự động Chạy</span>
+                </button>
+                <button id="s10-btn-next" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-mono font-bold transition-colors">Xét đỉnh kế k →</button>
+              </div>
+
+              <span id="s10-update-count-text" class="text-sm font-mono text-emerald-700 font-extrabold">0 ô cập nhật</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Distance Matrix Table -->
+          <div class="slide-col gap-3.5 justify-between">
+            <!-- Narrative Box -->
+            <div class="bento-box p-4 border-l-4 border-l-indigo-600">
+              <span class="text-xs font-mono text-slate-500 font-bold block mb-1">MÔ TẢ BƯỚC QUY HOẠCH ĐỘNG</span>
+              <p id="s10-desc-text" class="text-base text-slate-800 leading-relaxed font-sans min-h-[50px]">
+                Khởi tạo ma trận D<sup>(0)</sup>: Các giá trị là khoảng cách nối trực tiếp giữa hai đỉnh, nếu không có đường đi thì đặt là vô cùng (∞).
+              </p>
+            </div>
+
+            <!-- Matrix Container -->
+            <div class="bento-box p-4 overflow-hidden">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-mono text-slate-500 font-bold block" id="s10-matrix-title">MA TRẬN KHOẢNG CÁCH D<sup>(k)</sup>:</span>
+                <span class="text-xs font-mono text-emerald-700 font-bold">Ô xanh lá = Được rút ngắn</span>
+              </div>
+              <div id="s10-matrix-container" class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+                <!-- Rendered dynamically by app.js using D<sup>(k)</sup> -->
+              </div>
+            </div>
+
+            <!-- Formula Box -->
+            <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-xs sm:text-sm font-mono flex items-center justify-between">
+              <span class="text-slate-600 font-bold">CÔNG THỨC:</span>
+              <span class="text-indigo-800 font-extrabold">\(D^{(k)}[i][j] = \min(D^{(k-1)}[i][j], D^{(k-1)}[i][k] + D^{(k-1)}[k][j])\)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 11 (#11) - CÀI ĐẶT BẰNG PYTHON (P1): LỚP DIJKSTRASOLVER
+         ===================================================================== -->
+    <section class="slide" id="slide-11" data-slide="11">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mã nguồn Python • Lớp DijkstraSolver</span>
+          <h2 class="slide-title">Cài đặt bằng Python (Phần 1): <em>Cấu trúc Lớp DijkstraSolver</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Code Window -->
+          <div class="slide-col">
+            <div class="terminal-window h-full flex flex-col">
+              <div class="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+                <span class="font-bold text-white flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-blue-400"></i> DijkstraSolver.py</span>
+                <span class="text-xs text-blue-300 font-bold">Min-Heap & Lazy Deletion</span>
+              </div>
+              <pre class="p-5 text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DijkstraSolver:
+    def __init__(self, vertices: List[str]) -> None:
+        self.vertices = list(vertices)
+        self.adj = {v: [] for v in self.vertices}
+        self.dist = {}
+        self.parent = {}
+
+    def add_edge(self, u: str, v: str, weight: float) -> None:
+        if weight < 0:
+            raise ValueError("Dijkstra không hỗ trợ cạnh âm!")
+        self.adj[u].append((v, float(weight)))
+
+    def solve(self, start_node: str) -> Dict[str, float]:
+        self.dist = {v: math.inf for v in self.vertices}
+        self.parent = {v: None for v in self.vertices}
+        self.dist[start_node] = 0.0
+        pq = [(0.0, start_node)]
+
+        while pq:
+            current_dist, u = heapq.heappop(pq)
+
+            # Bỏ qua giá trị cũ trong Heap (Lazy Deletion)
+            if current_dist > self.dist[u]:
+                continue
+
+            for v, weight in self.adj[u]:
+                new_dist = self.dist[u] + weight
+                if new_dist < self.dist[v]:
+                    self.dist[v] = new_dist
+                    self.parent[v] = u
+                    heapq.heappush(pq, (new_dist, v))
+        return self.dist</code></pre>
+            </div>
+          </div>
+
+          <!-- Right Column: 3 Key Notes -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-blue-200 bg-blue-50/40">
+              <span class="spec-badge bg-blue-600 text-white font-bold">1. KHỞI TẠO & KIỂM TRA CẠNH ÂM</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Lớp nhận danh sách đỉnh và khởi tạo danh sách kề. Nếu có ai đó nhập cạnh âm, phương thức <code>add_edge</code> sẽ báo lỗi ngay lập tức để tránh tính toán sai.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">2. VÒNG LẶP VÀ LAZY DELETION</span>
+              <p class="spec-text text-slate-800">
+                Sử dụng thư viện <code>heapq</code> chuẩn của Python. Đoạn mã <code>if current_dist > self.dist[u]: continue</code> là điểm mấu chốt giúp thuật toán chạy trơn tru mà không cần hàm decrease-key phức tạp.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700 font-bold">3. NỚI LỎNG CẠNH VÀ TRUY VẾT</span>
+              <p class="spec-text text-slate-800">
+                Mỗi khi tìm được khoảng cách ngắn hơn tới đỉnh \(v\), ta gán <code>parent[v] = u</code> để khôi phục chính xác lộ trình qua hàm <code>get_path()</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 12 (#12) - CÀI ĐẶT BẰNG PYTHON (P2): LỚP FLOYDWARSHALLSOLVER
+         ===================================================================== -->
+    <section class="slide" id="slide-12" data-slide="12">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Mã nguồn Python • Lớp FloydWarshallSolver</span>
+          <h2 class="slide-title">Cài đặt bằng Python (Phần 2): <em>Cấu trúc Lớp FloydWarshallSolver</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Code Window -->
+          <div class="slide-col">
+            <div class="terminal-window h-full flex flex-col">
+              <div class="flex items-center justify-between px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+                <span class="font-bold text-white flex items-center gap-2"><i data-lucide="file-code" class="w-4 h-4 text-indigo-400"></i> FloydWarshallSolver.py</span>
+                <span class="text-xs text-indigo-300 font-bold">3 Vòng Lặp k, i, j</span>
+              </div>
+              <pre class="p-5 text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class FloydWarshallSolver:
+    def __init__(self, vertices: List[str]) -> None:
+        self.vertices = list(vertices)
+        self.V = len(vertices)
+        self.dist = [[math.inf] * self.V for _ in range(self.V)]
+        self.next_node = [[None] * self.V for _ in range(self.V)]
+        for i in range(self.V):
+            self.dist[i][i] = 0.0
+
+    def add_edge(self, u: str, v: str, weight: float) -> None:
+        ui, vi = self.v_to_idx[u], self.v_to_idx[v]
+        if weight < self.dist[ui][vi]:
+            self.dist[ui][vi] = float(weight)
+            self.next_node[ui][vi] = vi
+
+    def solve(self):
+        # Vòng lặp k đỉnh trung gian BẮT BUỘC ở ngoài cùng
+        for k in range(self.V):
+            for i in range(self.V):
+                for j in range(self.V):
+                    if self.dist[i][k] != math.inf and self.dist[k][j] != math.inf:
+                        new_d = self.dist[i][k] + self.dist[k][j]
+                        if new_d < self.dist[i][j]:
+                            self.dist[i][j] = new_d
+                            self.next_node[i][j] = self.next_node[i][k]
+
+    def detect_negative_cycle(self) -> bool:
+        return any(self.dist[i][i] < 0 for i in range(self.V))</code></pre>
+            </div>
+          </div>
+
+          <!-- Right Column: Explanations -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">1. KHỞI TẠO MA TRẬN 2 CHIỀU</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Khởi tạo mảng khoảng cách với giá trị vô cùng (<code>math.inf</code>) và gán đường chéo <code>dist[i][i] = 0</code> (khoảng cách từ 1 điểm đến chính nó là 0).
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-amber-100 text-amber-800 font-bold">2. THỨ TỰ 3 VÒNG LẶP k, i, j</span>
+              <p class="spec-text text-slate-800">
+                <strong>Vòng lặp k phải đặt ngoài cùng!</strong> Nếu đặt k ở trong cùng, thuật toán sẽ chỉ tối ưu cục bộ và cho ra kết quả sai hoàn toàn.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">3. PHÁT HIỆN CHU TRÌNH ÂM DỄ DÀNG</span>
+              <p class="spec-text text-slate-800">
+                Hàm <code>detect_negative_cycle()</code> chỉ cần duyệt đường chéo chính: nếu có bất kỳ đỉnh nào có <code>dist[i][i] < 0</code>, đồ thị lập tức được cảnh báo là chứa chu trình âm.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 13 (#13) - KẾT QUẢ CHẠY THỬ NGHIỆM PYTHON
+         ===================================================================== -->
+    <section class="slide" id="slide-13" data-slide="13">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Kiểm thử Thực tế • Console Output</span>
+          <h2 class="slide-title">Kết quả Chạy thử nghiệm: <em>Đối chiếu Hai Thuật toán</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Observations -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-emerald-300 bg-emerald-50/60">
+              <span class="spec-badge bg-emerald-600 text-white font-bold">KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI 100%</span>
+              <p class="spec-text text-emerald-950 font-semibold mt-1">
+                Cả DijkstraSolver và FloydWarshallSolver trên cùng đồ thị 5 đỉnh đều tìm ra chính xác lộ trình ngắn nhất từ A tới E:
+              </p>
+              <div class="p-3 rounded-xl bg-white border border-emerald-200 font-mono text-emerald-700 text-base font-extrabold text-center mt-2 shadow-sm">
+                A → C → B → D → E (Tổng chi phí: 10.0)
+              </div>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">LAZY DELETION HOẠT ĐỘNG HOÀN HẢO</span>
+              <p class="spec-text text-slate-800">
+                Trong quá trình chạy, bộ lọc của Dijkstra đã bỏ qua đúng 3 bản ghi cũ (B=5, D=9, E=11) mà không tốn công duyệt cạnh dư thừa.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-slate-100 text-slate-700 font-bold">KIỂM TRA CHU TRÌNH ÂM: HỢP LỆ</span>
+              <p class="spec-text text-slate-800">
+                Phương thức <code>detect_negative_cycle()</code> trả về <code>False</code>, xác nhận đồ thị hoàn toàn an toàn và hội tụ nghiệm tối ưu.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Terminal Window Mockup -->
+          <div class="slide-col">
+            <div class="terminal-window h-full flex flex-col">
+              <div class="flex items-center gap-2 px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span class="ml-2 font-bold text-white">Console Output — python shortest_path_solvers.py</span>
+              </div>
+              <pre class="p-5 text-xs sm:text-sm font-mono text-emerald-400 flex-1 overflow-auto bg-slate-900 leading-relaxed font-bold">================================================================================
+CHƯƠNG TRÌNH KIỂM THỬ SO SÁNH: DIJKSTRA vs. FLOYD-WARSHALL
+================================================================================
+
+--- KẾT QUẢ DIJKSTRA (Nguồn: A) ---
+  Khoảng cách A -> A:  0.0 | Lộ trình: A
+  Khoảng cách A -> B:  3.0 | Lộ trình: A -> C -> B
+  Khoảng cách A -> C:  2.0 | Lộ trình: A -> C
+  Khoảng cách A -> D:  7.0 | Lộ trình: A -> C -> B -> D
+  Khoảng cách A -> E: 10.0 | Lộ trình: A -> C -> B -> D -> E
+
+--- KẾT QUẢ FLOYD-WARSHALL (Toàn bộ ma trận khoảng cách D) ---
+          A      B      C      D      E
+    A:   0.0    3.0    2.0    7.0   10.0   
+    B:   inf    0.0    inf    4.0    7.0   
+    C:   inf    1.0    0.0    5.0    8.0   
+    D:   inf    inf    inf    0.0    3.0   
+    E:   inf    inf    inf    inf    0.0   
+
+--- PHÁT HIỆN CHU TRÌNH ÂM ---
+  Đồ thị có chu trình âm không? KHÔNG (HỢP LỆ)
+  => KẾT QUẢ ĐỒNG NHẤT TUYỆT ĐỐI!</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 14 (#14) - ĐỘ PHỨC TẠP THỜI GIAN
+         ===================================================================== -->
+    <section class="slide" id="slide-14" data-slide="14">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-amber-50 text-amber-700 border border-amber-200">Phân tích Hiệu năng • Thời gian chạy</span>
+          <h2 class="slide-title">Phân tích Hiệu năng: <em>Độ phức tạp Thời gian</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Table -->
+          <div class="slide-col justify-center">
+            <div class="bento-box p-6 overflow-hidden">
+              <span class="text-sm font-mono uppercase tracking-wider text-slate-500 font-bold block mb-4">BẢNG SO SÁNH TIỆM CẬN (BEST / AVERAGE / WORST)</span>
+              <table class="w-full text-left text-base font-sans border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <thead class="bg-slate-100 text-xs font-mono text-slate-700 uppercase">
+                  <tr>
+                    <th class="p-3.5 border-b border-slate-200">Cấu hình Cài đặt</th>
+                    <th class="p-3.5 border-b border-slate-200">Tốt nhất (Best)</th>
+                    <th class="p-3.5 border-b border-slate-200">Trung bình</th>
+                    <th class="p-3.5 border-b border-slate-200">Xấu nhất (Worst)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 font-mono text-sm sm:text-base text-slate-800">
+                  <tr>
+                    <td class="p-3.5 font-sans font-semibold text-slate-600">Dijkstra (Mảng phẳng)</td>
+                    <td class="p-3.5">O(V<sup>2</sup>)</td>
+                    <td class="p-3.5">O(V<sup>2</sup>)</td>
+                    <td class="p-3.5">O(V<sup>2</sup>)</td>
+                  </tr>
+                  <tr class="bg-blue-50/60 text-blue-900">
+                    <td class="p-3.5 font-sans font-bold text-blue-700">Dijkstra (Min-Heap)</td>
+                    <td class="p-3.5 text-emerald-700 font-bold">Ω(V log V)</td>
+                    <td class="p-3.5 font-bold text-blue-700">O((V+E) log V)</td>
+                    <td class="p-3.5 font-bold text-blue-700">O((V+E) log V)</td>
+                  </tr>
+                  <tr class="bg-indigo-50/60 text-indigo-900">
+                    <td class="p-3.5 font-sans font-bold text-indigo-700">Floyd-Warshall</td>
+                    <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
+                    <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
+                    <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="text-sm text-slate-600 mt-4 font-sans leading-relaxed">
+                * Thuật toán Floyd-Warshall luôn chạy đúng \(V^3\) phép tính trong mọi trường hợp vì 3 vòng lặp phải duyệt hết để so sánh, không có điều kiện dừng sớm.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Density Scenarios -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-blue-200 bg-blue-50/40">
+              <span class="spec-badge bg-blue-600 text-white font-bold">KHI ĐỒ THỊ THƯA (SPARSE: E ≈ V)</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Như mạng lưới đường bộ, giao thông (\(V \approx 100.000, E \approx 300.000\)):
+              </p>
+              <div class="flex items-center justify-between text-base font-mono mt-2 p-3 bg-white rounded-xl border border-blue-200 shadow-sm">
+                <span class="font-bold text-slate-700">Dijkstra: O(V log V)</span>
+                <span class="text-emerald-700 font-bold">ÁP ĐẢO HOÀN TOÀN</span>
+              </div>
+            </div>
+
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">KHI ĐỒ THỊ DÀY ĐẶC (DENSE: E ≈ V<sup>2</sup>)</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Khi hầu như giữa hai đỉnh nào cũng có cạnh nối trực tiếp:
+              </p>
+              <div class="flex items-center justify-between text-base font-mono mt-2 p-3 bg-white rounded-xl border border-indigo-200 shadow-sm">
+                <span class="font-bold text-slate-700">Floyd-Warshall: O(V<sup>3</sup>)</span>
+                <span class="text-indigo-700 font-bold">THẮNG NHỜ VÒNG LẶP ĐƠN GIẢN</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 15 (#15) - BỘ NHỚ RAM & HIỆU NĂNG CPU CACHE
+         ===================================================================== -->
+    <section class="slide" id="slide-15" data-slide="15">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-amber-50 text-amber-700 border border-amber-200">Hiệu năng Phần cứng • Bộ nhớ RAM</span>
+          <h2 class="slide-title">Độ phức tạp Không gian & <em>Hiệu năng CPU Cache Locality</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Memory Comparison -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card">
+              <span class="spec-badge bg-blue-100 text-blue-800 font-bold">BỘ NHỚ CỦA DIJKSTRA: O(V + E)</span>
+              <p class="spec-text text-slate-800">
+                Rất tiết kiệm trên đồ thị thưa. Danh sách kề chỉ lưu đúng số cạnh thực tế, Min-Heap chứa tối đa \(E\) phần tử.
+              </p>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">BỘ NHỚ CỦA FLOYD-WARSHALL: O(V<sup>2</sup>)</span>
+              <p class="spec-text text-slate-800">
+                Bắt buộc cấp phát mảng 2 chiều kích thước \(V \times V\). Với \(V = 500\), ma trận chỉ chiếm khoảng <strong>1 MB RAM</strong> — hoàn toàn nhẹ nhàng trên máy tính hiện đại!
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Cache Locality Explanation -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-center">
+              <span class="text-sm font-mono uppercase tracking-wider text-emerald-700 font-bold mb-3">VÌ SAO FLOYD-WARSHALL CHẠY CỰC NHANH KHI V ≤ 500?</span>
+              
+              <div class="space-y-4 text-base text-slate-700 font-sans mt-2">
+                <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
+                  <span class="text-indigo-900 font-bold font-mono block mb-1">Floyd-Warshall: Tận dụng hoàn hảo Cache L1/L2</span>
+                  <p class="leading-relaxed">
+                    Ba vòng lặp tuần tự duyệt qua các ô nhớ mảng 2 chiều nằm sát nhau trong RAM. Khi nạp 1 ô, CPU kéo theo cả dòng nhớ kế bên vào Cache, giúp <strong>tỉ lệ Cache Hit đạt trên 95%</strong>!
+                  </p>
+                </div>
+
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+                  <span class="text-blue-900 font-bold font-mono block mb-1">Dijkstra: Hiện tượng nhảy con trỏ ngẫu nhiên</span>
+                  <p class="leading-relaxed">
+                    Cấu trúc cây nhị phân trong Heap và danh sách kề phải liên tục nhảy địa chỉ nhớ ngẫu nhiên, gây hiện tượng <strong>Cache Miss</strong> liên tục khi đồ thị dày đặc.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 16 (#16) - GIỚI HẠN: CẠNH ÂM & CHU TRÌNH ÂM
+         ===================================================================== -->
+    <section class="slide" id="slide-16" data-slide="16">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-rose-50 text-rose-700 border border-rose-200">Trường hợp Biên • Giới hạn Thuật toán</span>
+          <h2 class="slide-title">Giới hạn Thuật toán: <em>Điều gì xảy ra khi có Cạnh âm?</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Counterexample Story -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-rose-200 bg-rose-50/60">
+              <span class="spec-badge bg-rose-600 text-white font-bold">VÌ SAO DIJKSTRA THẤT BẠI TRƯỚC CẠNH ÂM?</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Xét 3 đỉnh: \(A \to B\) (chi phí 1), \(A \to C\) (chi phí 4) và \(C \to B\) (chi phí âm: -5):
+              </p>
+              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-base text-slate-800 font-sans">
+                <li>Bước 1: Dijkstra thấy đường sang B mất 1 (nhỏ hơn sang C mất 4) nên <strong>vội vàng chốt luôn khoảng cách tới B là 1</strong>!</li>
+                <li>Bước 2: Sau đó xét C, thấy đi đường \(A \to C \to B\) chỉ mất \(4 + (-5) = -1 < 1\).</li>
+                <li>Hậu quả: <strong>Vì B đã bị chốt rồi nên Dijkstra không sửa lại</strong>! Thuật toán báo sai \(\delta(A, B) = 1\) thay vì \(-1\).</li>
+              </ul>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">FLOYD-WARSHALL XỬ LÝ CHU TRÌNH ÂM NHƯ THẾ NÀO?</span>
+              <p class="spec-text text-slate-800">
+                Floyd-Warshall vẫn tính đúng với cạnh âm. Nhưng nếu có chu trình âm, khoảng cách sẽ giảm vô tận. Thuật toán phát hiện cực kỳ đơn giản: <strong>nếu tồn tại đỉnh \(i\) có \(D[i][i] < 0\)</strong>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Visual Counterexample SVG -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between items-center">
+              <span class="text-sm font-mono text-slate-500 font-bold self-start">SƠ ĐỒ PHẢN VÍ DỤ 3 ĐỈNH (CẠNH ÂM LÀM DIJKSTRA SAI)</span>
+
+              <svg viewBox="0 0 500 320" class="w-full h-full">
+                <!-- Edges -->
+                <line x1="110" y1="160" x2="380" y2="80" stroke="#E11D48" stroke-width="4" />
+                <text x="240" y="105" fill="#BE123C" font-size="16" font-family="JetBrains Mono" font-weight="bold">A → B (w = 1)</text>
+
+                <line x1="110" y1="160" x2="250" y2="260" stroke="#2563EB" stroke-width="3.5" />
+                <text x="145" y="235" fill="#1D4ED8" font-size="16" font-family="JetBrains Mono" font-weight="bold">A → C (w = 4)</text>
+
+                <line x1="250" y1="260" x2="380" y2="80" stroke="#059669" stroke-width="4.5" />
+                <text x="350" y="200" fill="#047857" font-size="16" font-family="JetBrains Mono" font-weight="bold">C → B (w = -5)</text>
+
+                <!-- Nodes -->
+                <circle cx="110" cy="160" r="32" fill="#2563EB" stroke="#1E40AF" stroke-width="3" />
+                <text x="110" y="168" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">A</text>
+
+                <circle cx="380" cy="80" r="32" fill="#FEE2E2" stroke="#E11D48" stroke-width="3.5" />
+                <text x="380" y="88" fill="#9F1239" font-weight="bold" font-size="20" text-anchor="middle">B</text>
+
+                <circle cx="250" cy="260" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" />
+                <text x="250" y="268" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">C</text>
+              </svg>
+
+              <div class="w-full text-center p-3 rounded-xl bg-slate-100 font-mono text-sm">
+                Dijkstra báo sai: <span class="text-rose-700 font-bold">dist[B] = 1</span> | Thực tế tối ưu: <span class="text-emerald-700 font-bold">dist[B] = -1</span> (qua C)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 17 (#17) - ỨNG DỤNG THỰC TẾ (P1): ĐIỀU PHỐI CẤP CỨU (LEETCODE 743)
+         ===================================================================== -->
+    <section class="slide" id="slide-17" data-slide="17">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng Thực tế • LeetCode 743</span>
+          <h2 class="slide-title">Bài toán Ứng dụng (Phần 1): <em>Điều phối Xe Cấp cứu Thời gian thực</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Scenario -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card">
+              <span class="spec-badge bg-rose-100 text-rose-800 font-bold">TÌNH HUỐNG CẤP BÁCH</span>
+              <p class="spec-text font-medium text-slate-800">
+                Có ca tai nạn nghiêm trọng tại <strong>Khu dân cư R4 (Ven sông)</strong>. Cả Bệnh viện H1 và Trạm vệ tinh H2 đều có xe trực sẵn. Xe nào đến nhanh hơn?
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3.5 font-mono text-sm">
+              <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
+                <span class="text-xs text-slate-500 font-bold block mb-1">BỆNH VIỆN TRUNG TÂM H1:</span>
+                <span class="text-slate-800 font-semibold block">H1 → R2 → R3 → R4</span>
+                <span class="text-lg font-bold text-slate-800 block mt-1">15.0 phút</span>
+              </div>
+
+              <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 shadow-sm">
+                <span class="text-xs text-emerald-800 font-bold block mb-1">TRẠM VỆ TINH H2:</span>
+                <span class="text-emerald-900 font-bold block">H2 → R4 (Trực tiếp)</span>
+                <span class="text-lg font-bold text-emerald-700 block mt-1">7.0 phút</span>
+              </div>
+            </div>
+
+            <div class="spec-card border-emerald-300 bg-emerald-50/50">
+              <span class="spec-badge bg-emerald-600 text-white font-bold">QUYẾT ĐỊNH ĐIỀU PHỐI THÔNG MINH</span>
+              <p class="spec-text text-emerald-950 font-semibold">
+                Kích hoạt xe từ <strong>Trạm H2</strong>, tiết kiệm được <strong>8.0 phút vàng cứu sống nạn nhân</strong>!
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Column: Interactive Urban Map SVG -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-between">
+              <div class="flex items-center justify-between text-sm font-mono text-slate-600 pb-2 border-b border-slate-100">
+                <span class="font-bold text-slate-800">MẠNG LƯỚI GIAO THÔNG ĐÔ THỊ 6 ĐỊA ĐIỂM</span>
+                <span class="text-emerald-700 font-bold">Tuyến nhanh nhất: H2 → R4</span>
+              </div>
+
+              <!-- Map SVG -->
+              <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[320px]">
+                <svg id="s17-map-svg" viewBox="0 0 850 480" class="w-full h-full">
+                  <!-- Rendered dynamically by app.js -->
+                </svg>
+              </div>
+
+              <div class="text-sm font-mono text-slate-600 flex items-center justify-between pt-3 border-t border-slate-100">
+                <span>Thời gian phát tín hiệu tới toàn bộ khu dân cư:</span>
+                <span class="text-blue-700 font-bold">15.0 phút (LeetCode 743)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 18 (#18) - ỨNG DỤNG THỰC TẾ (P2): QUY HOẠCH TRẠM Y TẾ (LEETCODE 1334)
+         ===================================================================== -->
+    <section class="slide" id="slide-18" data-slide="18">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng Thực tế • LeetCode 1334</span>
+          <h2 class="slide-title">Bài toán Ứng dụng (Phần 2): <em>Quy hoạch Trạm Y tế Trung tâm</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Objective & Candidate Cards -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card">
+              <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">TIÊU CHÍ "THỜI GIAN VÀNG" (≤ 15 PHÚT)</span>
+              <p class="spec-text font-medium text-slate-800">
+                Sở Y tế cần chọn 1 vị trí đặt trạm mới sao cho có thể tiếp cận được nhiều khu dân cư nhất trong vòng 15 phút và thời gian tới ca bệnh xa nhất là nhỏ nhất (Tâm đồ thị - Jordan Center).
+              </p>
+            </div>
+
+            <!-- Candidate Grid -->
+            <div class="grid grid-cols-2 gap-3 font-mono text-sm" id="s18-hub-cards">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+          </div>
+
+          <!-- Right Column: Final Winner Card & Matrix Insights -->
+          <div class="slide-col">
+            <div class="bento-box p-6 h-full flex flex-col justify-center gap-4">
+              <div class="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-400 shadow-sm">
+                <span class="text-xs font-mono font-bold text-emerald-800 block mb-1">VỊ TRÍ ĐƯỢC CHỌN: KHU DÂN CƯ R1 (PHỐ CỔ)</span>
+                <p class="text-base text-slate-800 leading-relaxed font-sans font-medium">
+                  <strong>Khu R1</strong> phủ sóng được <strong>100% (4/4) khu dân cư</strong> trong vòng 15 phút, với thời gian tiếp cận ca bệnh xa nhất chỉ là <strong>12.0 phút</strong> (so với H1 là 15 phút, H2 là 25 phút).
+                </p>
+              </div>
+
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-mono">
+                <span class="text-slate-500 font-bold block mb-2">THỜI GIAN DI CHUYỂN TỪ R1 ĐẾN CÁC KHU:</span>
+                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700">R1 → R2 (KĐT Mới):</span><span class="text-blue-700 font-bold">3.0 phút</span></div>
+                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700">R1 → R3 (Khu CNC):</span><span class="text-blue-700 font-bold">7.0 phút</span></div>
+                <div class="flex justify-between py-1.5"><span class="text-slate-700">R1 → R4 (Ven sông):</span><span class="text-emerald-700 font-extrabold">12.0 phút (Xa nhất)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 19 (#19) - MỞ RỘNG THỰC TẾ & SO SÁNH
+         ===================================================================== -->
+    <section class="slide" id="slide-19" data-slide="19">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-purple-50 text-purple-700 border border-purple-200">Góc Mở rộng • Công nghệ Thực tế</span>
+          <h2 class="slide-title">Mở rộng Thực tế: <em>Bản đồ Lớn & Các Thuật toán Khác</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: 5 Algorithms Comparison Table -->
+          <div class="slide-col justify-center">
+            <div class="bento-box p-6 overflow-hidden">
+              <span class="text-sm font-mono uppercase tracking-wider text-slate-500 font-bold block mb-3">SO SÁNH 5 THUẬT TOÁN TÌM ĐƯỜNG KINH ĐIỂN</span>
+              <table class="w-full text-left text-xs sm:text-sm font-mono border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <thead class="bg-slate-100 text-slate-700">
+                  <tr>
+                    <th class="p-3">Thuật toán</th>
+                    <th class="p-3">Loại bài toán</th>
+                    <th class="p-3">Cạnh âm?</th>
+                    <th class="p-3">Thời gian</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-slate-800">
+                  <tr><td class="p-3 font-bold text-blue-700">Dijkstra</td><td class="p-3">Một nguồn (SSSP)</td><td class="p-3 text-rose-700 font-bold">Không</td><td class="p-3">O((V+E) log V)</td></tr>
+                  <tr><td class="p-3 font-bold text-indigo-700">Floyd-Warshall</td><td class="p-3">Mọi cặp (APSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3">Θ(V<sup>3</sup>)</td></tr>
+                  <tr><td class="p-3 font-bold text-amber-700">Bellman-Ford</td><td class="p-3">Một nguồn (SSSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3">O(V · E)</td></tr>
+                  <tr><td class="p-3 font-bold text-emerald-700">Johnson</td><td class="p-3">Mọi cặp (APSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3">O(V<sup>2</sup> log V + VE)</td></tr>
+                  <tr><td class="p-3 font-bold text-purple-700">Thuật toán A*</td><td class="p-3">Điểm đến Điểm</td><td class="p-3 text-rose-700 font-bold">Không</td><td class="p-3">O(E) có định hướng</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right Column: Real-world Google Maps scale -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-indigo-200 bg-indigo-50/40">
+              <span class="spec-badge bg-indigo-600 text-white font-bold">VÌ SAO GOOGLE MAPS KHÔNG DÙNG THUẦN DIJKSTRA?</span>
+              <p class="spec-text font-medium text-slate-800 mt-1">
+                Bản đồ toàn cầu có hàng trăm triệu nút giao thông (\(V \approx 10^8\)).
+              </p>
+              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-sm sm:text-base text-slate-700 font-sans">
+                <li><strong>Floyd-Warshall:</strong> Cần tới 40 Petabytes RAM để lưu ma trận (bất khả thi)!</li>
+                <li><strong>Dijkstra thuần túy:</strong> Quét theo hình tròn lan tỏa, mất vài chục giây cho mỗi lượt tra cứu.</li>
+              </ul>
+            </div>
+
+            <div class="spec-card">
+              <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">GIẢI PHÁP THỰC TẾ TRONG CÔNG NGHIỆP</span>
+              <p class="spec-text text-slate-800">
+                Các ứng dụng hiện đại kết hợp <strong>Thuật toán A*</strong> (định hướng Heuristic theo khoảng cách chim bay) cùng kỹ thuật <strong>Contraction Hierarchies (CH)</strong> phân cấp mạng lưới cao tốc để trả về đường đi xuyên quốc gia chỉ trong <strong>dưới 5 mili-giây</strong>!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         SLIDE 20 (#20) - TỔNG KẾT & LỜI CẢM ƠN
+         ===================================================================== -->
+    <section class="slide" id="slide-20" data-slide="20">
+      <div class="slide-container">
+        <header class="slide-header">
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Tổng kết Bài học</span>
+          <h2 class="slide-title">Tổng kết: <em>Khi nào nên chọn Thuật toán nào?</em></h2>
+        </header>
+
+        <div class="slide-body-grid">
+          <!-- Left Column: Selection Rules -->
+          <div class="slide-col gap-4 justify-center">
+            <div class="spec-card border-blue-200 bg-blue-50/40">
+              <span class="spec-badge bg-blue-600 text-white font-bold">CẨM NANG BỎ TÚI</span>
+              <ul class="list-disc pl-5 mt-2 space-y-2 text-base text-slate-800 font-medium">
+                <li><strong>Cần tìm đường từ 1 điểm, cạnh dương:</strong> Chọn ngay <strong>Dijkstra</strong> (kết hợp Min-Heap).</li>
+                <li><strong>Cần tra cứu giữa mọi cặp điểm, đồ thị vừa và nhỏ (\(V \le 500\)):</strong> Chọn <strong>Floyd-Warshall</strong> (code ngắn, tận dụng Cache RAM).</li>
+                <li><strong>Đồ thị có cạnh âm:</strong> Dùng <strong>Bellman-Ford</strong> hoặc <strong>Floyd-Warshall</strong>.</li>
+                <li><strong>Bản đồ số hàng triệu điểm:</strong> Kết hợp <strong>A*</strong> và <strong>Contraction Hierarchies</strong>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Right Column: Thank You -->
+          <div class="slide-col">
+            <div class="bento-box p-8 h-full flex flex-col justify-center items-center text-center">
+              <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4 shadow-inner">
+                <i data-lucide="check-circle" class="w-9 h-9"></i>
+              </div>
+              <h3 class="text-3xl font-extrabold text-slate-900 font-heading mb-2">Xin Trân Trọng Cảm Ơn!</h3>
+              <p class="text-lg text-slate-600 max-w-md mx-auto mb-6">
+                Cảm ơn Thầy/Cô và các bạn đã chú ý lắng nghe bài thuyết trình của nhóm!
+              </p>
+              <div class="flex items-center gap-3">
+                <button class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition-colors cursor-pointer" onclick="goToSlide(2)">
+                  Quay lại Mục lục [Slide 2]
+                </button>
+                <button class="px-5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-sm transition-colors cursor-pointer" onclick="goToSlide(9)">
+                  Xem lại Mô phỏng [Slide 9]
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       FLOATING BOTTOM CONTROL BAR (LIGHT THEME)
+       ========================================================================= -->
+  <aside class="floating-bar-container" id="floating-bar" aria-label="Điều khiển Trình chiếu">
+    <!-- Prev Button -->
+    <button class="bar-btn" id="btn-prev-slide" title="Slide trước (← hoặc PageUp)">
+      <i data-lucide="chevron-left" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Slide Index -->
+    <span class="font-mono text-sm font-bold text-slate-800 px-1" id="slide-indicator">1 / 20</span>
+
+    <!-- Progress Track -->
+    <div class="progress-track hidden sm:block">
+      <div class="progress-fill" id="slide-progress-fill"></div>
+    </div>
+
+    <!-- Next Button -->
+    <button class="bar-btn" id="btn-next-slide" title="Slide sau (→ hoặc Space)">
+      <i data-lucide="chevron-right" class="w-5 h-5"></i>
+    </button>
+
+    <div class="bar-divider"></div>
+
+    <!-- Presentation Timer -->
+    <div class="flex items-center gap-2 font-mono text-sm text-slate-700 px-1 font-semibold">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span id="deck-timer">00:00</span>
+      <button class="bar-btn p-1 text-slate-500 hover:text-slate-800" id="btn-deck-timer-toggle" title="Tạm dừng / Tiếp tục">
+        <i data-lucide="pause" class="w-3.5 h-3.5" id="icon-deck-timer"></i>
+      </button>
+    </div>
+
+    <div class="bar-divider"></div>
+
+    <!-- Timeline Drawer Button [T] -->
+    <button class="bar-btn gap-1.5 text-xs font-mono font-bold" id="btn-open-timeline" title="Mở danh sách Slide [T]">
+      <i data-lucide="list" class="w-4 h-4"></i>
+      <span class="hidden md:inline">Mục lục [T]</span>
+    </button>
+
+    <!-- Fullscreen Button [F] -->
+    <button class="bar-btn p-1.5" id="btn-toggle-fullscreen" title="Toàn màn hình [F]">
+      <i data-lucide="maximize" class="w-4 h-4" id="icon-fullscreen"></i>
+    </button>
+
+    <!-- Help Modal Button [?] -->
+    <button class="bar-btn p-1.5" id="btn-open-help" title="Phím tắt [?]">
+      <i data-lucide="help-circle" class="w-4 h-4"></i>
+    </button>
+  </aside>
+
+  <!-- =========================================================================
+       TIMELINE SIDEBAR DRAWER (LIGHT THEME)
+       ========================================================================= -->
+  <div class="timeline-backdrop" id="timeline-backdrop"></div>
+  <aside class="timeline-drawer" id="timeline-drawer">
+    <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+        <h3 class="font-bold text-base text-slate-900 font-heading">DANH SÁCH 20 SLIDE</h3>
+      </div>
+      <button class="bar-btn p-1.5 text-slate-400 hover:text-slate-800" id="btn-close-timeline">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Timeline Slide List -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-1.5" id="timeline-slide-list">
+      <!-- 20 Slide Items generated by js -->
+    </div>
+  </aside>
+
+  <!-- =========================================================================
+       KEYBOARD SHORTCUTS HELP MODAL
+       ========================================================================= -->
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal-card">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="keyboard" class="w-5 h-5 text-blue-600"></i>
+          <h3 class="text-lg font-bold text-slate-900 font-heading">Phím tắt Thuyết trình</h3>
+        </div>
+        <button class="bar-btn p-1 text-slate-400 hover:text-slate-800" id="btn-close-help">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5 text-sm font-sans text-slate-700">
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Chuyển Slide tiếp theo:</span>
+          <div class="flex gap-1.5"><span class="kbd-badge">→</span><span class="kbd-badge">Space</span></div>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Quay lại Slide trước:</span>
+          <div class="flex gap-1.5"><span class="kbd-badge">←</span></div>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Mục lục Slide:</span>
+          <span class="kbd-badge">T</span>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Toàn màn hình:</span>
+          <span class="kbd-badge">F</span>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Tự động Chạy Mô phỏng (Slide 9, 10):</span>
+          <span class="kbd-badge">P</span>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Bước tiếp Mô phỏng (Slide 9, 10):</span>
+          <span class="kbd-badge">N</span>
+        </div>
+        <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
+          <span class="font-medium">Reset Mô phỏng về đầu:</span>
+          <span class="kbd-badge">R</span>
+        </div>
+        <div class="flex items-center justify-between py-1.5">
+          <span class="font-medium">Mở hướng dẫn này:</span>
+          <span class="kbd-badge">?</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
