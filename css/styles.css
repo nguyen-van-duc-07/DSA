@@ -1,45 +1,29 @@
 /* ==========================================================================
    Full-Screen Slide Deck Presentation Engine Styles
-   Clean & Bright Light Theme (Slate 50 #F8FAFC)
-   Optimized for High-Contrast Projector Displays
+   Editorial Palette: "Academic Atelier" (Warm Ivory, Terracotta, Petrol, Viridian)
+   Unified Font: Be Vietnam Pro | Vertical Slide Transition | Animated Dashed Edges
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap');
-
 :root {
-  --bg-page: #F8FAFC;            /* Slate 50 - Trắng ngà / Xám xanh cực sáng */
-  --bg-card: #FFFFFF;            /* Trắng tinh */
-  --bg-card-subtle: #F1F5F9;     /* Slate 100 */
-  --border-card: #E2E8F0;        /* Slate 200 - Viền mảnh rõ nét */
-  --border-hover: #CBD5E1;       /* Slate 300 */
+  --bg-page: #FAF8F5;            /* Trắng ngà ấm (Warm Alabaster Paper) */
+  --bg-card: #FFFFFF;            /* Trắng tinh khiết */
+  --bg-card-subtle: #F3F0EA;     /* Kem đá nhạt */
+  --border-card: #E6E1D6;        /* Viền đá ấm tinh tế */
+  --border-hover: #CFC8B8;
   
-  --text-main: #0F172A;          /* Slate 900 - Đen xanh đậm, cực kỳ sắc nét */
-  --text-secondary: #334155;     /* Slate 700 - Xám đậm, dễ đọc trên máy chiếu */
-  --text-muted: #64748B;         /* Slate 500 */
+  --text-main: #181615;          /* Đen than chì (Deep Charcoal Ink) */
+  --text-secondary: #3D3935;     /* Xám đá đậm */
+  --text-muted: #78716C;
   
-  /* Màu nhấn theo thuật toán và trạng thái */
-  --accent-dijkstra: #2563EB;    /* Xanh dương Hoàng gia */
-  --accent-dijkstra-bg: #EFF6FF; /* Blue 50 */
-  --accent-dijkstra-border: #BFDBFE;
+  /* Bảng màu nhấn Editorial cao cấp */
+  --accent-dijkstra: #C84B31;    /* Đỏ gạch Terracotta */
+  --accent-floyd: #0F4C5C;       /* Xanh cổ vịt đậm (Deep Petrol Teal) */
+  --accent-success: #1E6F5C;     /* Xanh rừng (Forest Viridian) */
+  --accent-active: #B4690E;      /* Vàng đồng (Antique Ochre) */
+  --accent-danger: #A61C3C;      /* Đỏ rượu vang (Burgundy Crimson) */
 
-  --accent-floyd: #4F46E5;       /* Tím chàm Indigo */
-  --accent-floyd-bg: #EEF2FF;    /* Indigo 50 */
-  --accent-floyd-border: #C7D2FE;
-
-  --accent-success: #059669;     /* Xanh lá Emerald (Tối ưu) */
-  --accent-success-bg: #ECFDF5;
-  --accent-success-border: #A7F3D0;
-
-  --accent-active: #D97706;      /* Cam Amber (Đang xét) */
-  --accent-active-bg: #FFFBEB;
-  --accent-active-border: #FDE68A;
-
-  --accent-danger: #E11D48;      /* Đỏ Rose (Cạnh âm / Cảnh báo) */
-  --accent-danger-bg: #FFF1F2;
-  --accent-danger-border: #FECDD3;
-
-  --shadow-soft: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
-  --shadow-hover: 0 16px 36px -6px rgba(15, 23, 42, 0.1), 0 6px 12px -3px rgba(15, 23, 42, 0.05);
+  --shadow-soft: 0 10px 30px -6px rgba(24, 22, 21, 0.06), 0 4px 8px -2px rgba(24, 22, 21, 0.03);
+  --shadow-hover: 0 18px 38px -8px rgba(24, 22, 21, 0.10), 0 6px 14px -3px rgba(24, 22, 21, 0.05);
 }
 
 * {
@@ -47,6 +31,7 @@
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 html, body {
@@ -55,36 +40,34 @@ html, body {
   overflow: hidden;
   background-color: var(--bg-page);
   color: var(--text-main);
-  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   user-select: none;
 }
 
-h1, .slide-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.025em;
+/* Quy chuẩn đồng bộ 1 font duy nhất cho cả tiêu đề, nội dung, bảng và SVG */
+h1, h2, h3, h4, .font-heading, .slide-title, .slide-tag, .spec-badge, svg text {
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  letter-spacing: -0.02em;
 }
 
-h2, h3, h4, th, .slide-tag, .spec-badge {
-  font-family: 'Be Vietnam Pro', sans-serif;
+/* Inline code trong câu văn giữ nguyên font Be Vietnam Pro để đồng bộ tuyệt đối */
+p code, li code, td code, .spec-card code {
+  font-family: 'Be Vietnam Pro', sans-serif !important;
+  font-weight: 700;
+  color: #9E3620;
+  background-color: #FDF3F0;
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.375rem;
+  border: 1px solid #F5D0C5;
+  font-size: 0.92em;
 }
 
-code, pre, .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+/* Chỉ dùng JetBrains Mono cho cửa sổ Code Python, Terminal và hộp công thức đặc biệt */
+pre, pre code, .terminal-window code, .code-font-only {
+  font-family: 'JetBrains Mono', monospace !important;
 }
 
-svg text {
-  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif !important;
-  user-select: none;
-}
-
-.svg-label-protected {
-  paint-order: stroke fill;
-  stroke: #FFFFFF;
-  stroke-width: 8px;
-  stroke-linejoin: round;
-}
-
-/* Hiệu ứng chuyển màu Pastel thật nhẹ ở góc */
+/* Hiệu ứng ánh sáng nền Editorial ấm áp */
 .ambient-glow {
   position: fixed;
   inset: 0;
@@ -97,10 +80,10 @@ svg text {
   content: '';
   position: absolute;
   top: -15%;
-  left: 15%;
+  left: 10%;
   width: 55vw;
   height: 50vh;
-  background: radial-gradient(circle, rgba(191, 219, 254, 0.45) 0%, rgba(248, 250, 252, 0) 70%);
+  background: radial-gradient(circle, rgba(200, 75, 49, 0.08) 0%, rgba(250, 248, 245, 0) 70%);
   filter: blur(80px);
 }
 
@@ -108,15 +91,15 @@ svg text {
   content: '';
   position: absolute;
   bottom: -15%;
-  right: 15%;
-  width: 50vw;
+  right: 10%;
+  width: 55vw;
   height: 50vh;
-  background: radial-gradient(circle, rgba(199, 210, 254, 0.4) 0%, rgba(248, 250, 252, 0) 70%);
+  background: radial-gradient(circle, rgba(15, 76, 92, 0.08) 0%, rgba(250, 248, 245, 0) 70%);
   filter: blur(90px);
 }
 
 /* ==========================================================================
-   Full-Screen Slide Engine
+   Vertical Slide Transition Engine (Cuộn dọc từ trên xuống dưới)
    ========================================================================== */
 .slide-deck {
   position: relative;
@@ -137,26 +120,55 @@ svg text {
   justify-content: flex-start;
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.985) translateY(12px);
-  transition: opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1), transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(55px) scale(0.985);
+  transition: opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
+              visibility 0.48s;
   pointer-events: none;
   overflow: hidden;
   z-index: 10;
 }
 
+.slide.prev-slide {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-55px) scale(0.985);
+}
+
+.slide.next-slide {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(55px) scale(0.985);
+}
+
 .slide.active {
   opacity: 1;
   visibility: visible;
-  transform: scale(1) translateY(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
   z-index: 20;
 }
 
-/* Staggered Fade-Up for Cards inside Active Slide */
-@keyframes cardFadeUp {
+/* Hiệu ứng xuất hiện tuần tự cho các thẻ trong Slide */
+.slide.active .slide-header {
+  animation: slideDownFade 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.slide.active .spec-card,
+.slide.active .bento-box,
+.slide.active .terminal-window {
+  animation: slideUpFade 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.slide.active .slide-col > *:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .slide-col > *:nth-child(2) { animation-delay: 0.11s; }
+.slide.active .slide-col > *:nth-child(3) { animation-delay: 0.17s; }
+.slide.active .slide-col > *:nth-child(4) { animation-delay: 0.23s; }
+
+@keyframes slideDownFade {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(-18px);
   }
   to {
     opacity: 1;
@@ -164,18 +176,43 @@ svg text {
   }
 }
 
-.slide.active .spec-card,
-.slide.active .bento-box {
-  animation: cardFadeUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.slide.active .slide-col:first-child .spec-card:nth-child(1) { animation-delay: 0.04s; }
-.slide.active .slide-col:first-child .spec-card:nth-child(2) { animation-delay: 0.08s; }
-.slide.active .slide-col:first-child .spec-card:nth-child(3) { animation-delay: 0.12s; }
-.slide.active .slide-col:first-child .spec-card:nth-child(4) { animation-delay: 0.16s; }
-.slide.active .slide-col:last-child > * { animation-delay: 0.10s; }
+/* ==========================================================================
+   Animated Dashed Lines (Hiệu ứng đường nét đứt chuyển động trên đồ thị)
+   ========================================================================== */
+@keyframes dashFlow {
+  from {
+    stroke-dashoffset: 28;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 
-/* Slide Container */
+.animated-dash,
+svg line[stroke-dasharray],
+svg path[stroke-dasharray] {
+  animation: dashFlow 0.9s linear infinite;
+}
+
+.edge-flow-active {
+  stroke-dasharray: 10, 5;
+  animation: dashFlow 0.75s linear infinite;
+}
+
+/* ==========================================================================
+   Slide Layout & Editorial Components
+   ========================================================================== */
 .slide-container {
   width: 100%;
   max-width: 1560px;
@@ -186,7 +223,6 @@ svg text {
   justify-content: space-between;
 }
 
-/* Slide Header */
 .slide-header {
   margin-bottom: 1.25rem;
   flex-shrink: 0;
@@ -196,37 +232,36 @@ svg text {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.85rem;
+  padding: 0.3rem 0.9rem;
   border-radius: 9999px;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-bottom: 0.45rem;
 }
 
 .slide-title {
-  font-size: 2.35rem;
+  font-size: 2.3rem;
   font-weight: 800;
-  color: #0F172A;
-  line-height: 1.25;
+  color: var(--text-main);
+  line-height: 1.28;
 }
 
 @media (min-width: 1536px) {
   .slide-title {
-    font-size: 2.85rem;
+    font-size: 2.75rem;
   }
 }
 
+/* Màu chữ nhấn Gradient Editorial sang trọng */
 .slide-title em {
   font-style: normal;
-  background: linear-gradient(135deg, #2563EB 0%, #4F46E5 55%, #059669 100%);
+  background: linear-gradient(135deg, #C84B31 0%, #0F4C5C 55%, #1E6F5C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* 2-Column Spacious Grid Layout */
 .slide-body-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -244,7 +279,6 @@ svg text {
   min-height: 0;
 }
 
-/* Bento Box & Card Component */
 .bento-box {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
@@ -258,47 +292,47 @@ svg text {
   box-shadow: var(--shadow-hover);
 }
 
-/* Structured Label Card */
 .spec-card {
   background: #FFFFFF;
   border: 1px solid var(--border-card);
+  border-left: 4px solid #D6D1C7;
   border-radius: 1.15rem;
   padding: 1.25rem 1.6rem;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 4px 14px rgba(24, 22, 21, 0.03);
   transition: all 0.25s ease;
 }
 
 .spec-card:hover {
-  border-color: #CBD5E1;
+  border-color: #CFC8B8;
+  border-left-color: var(--accent-dijkstra);
   transform: translateX(4px);
   box-shadow: var(--shadow-soft);
 }
 
 .spec-badge {
   display: inline-block;
-  font-family: 'Be Vietnam Pro', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   padding: 0.25rem 0.65rem;
   border-radius: 0.45rem;
   margin-bottom: 0.45rem;
 }
 
 .spec-text {
-  font-size: 1.2rem;
+  font-size: 1.18rem;
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
 @media (min-width: 1536px) {
   .spec-text {
-    font-size: 1.325rem;
+    font-size: 1.3rem;
   }
 }
 
 /* ==========================================================================
-   Floating Bottom Control Bar (Light Theme)
+   Floating Bottom Control Bar
    ========================================================================== */
 .floating-bar-container {
   position: fixed;
@@ -309,19 +343,19 @@ svg text {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid #CBD5E1;
+  border: 1px solid #D6D1C7;
   padding: 0.5rem 1.25rem;
   border-radius: 9999px;
-  box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 12px 30px -6px rgba(24, 22, 21, 0.12), 0 4px 6px -2px rgba(24, 22, 21, 0.04);
 }
 
 .bar-btn {
   background: transparent;
   border: none;
-  color: #475569;
+  color: #57524E;
   cursor: pointer;
   padding: 0.45rem;
   border-radius: 9999px;
@@ -332,8 +366,8 @@ svg text {
 }
 
 .bar-btn:hover {
-  color: #0F172A;
-  background: #F1F5F9;
+  color: #181615;
+  background: #F3F0EA;
 }
 
 .bar-btn:disabled {
@@ -344,14 +378,13 @@ svg text {
 .bar-divider {
   width: 1px;
   height: 20px;
-  background: #E2E8F0;
+  background: #E6E1D6;
 }
 
-/* Progress Track on Floating Bar */
 .progress-track {
-  width: 100px;
+  width: 110px;
   height: 5px;
-  background: #E2E8F0;
+  background: #E6E1D6;
   border-radius: 9999px;
   overflow: hidden;
 }
@@ -359,13 +392,13 @@ svg text {
 .progress-fill {
   height: 100%;
   width: 5%;
-  background: linear-gradient(90deg, #2563EB, #4F46E5);
+  background: linear-gradient(90deg, #C84B31, #0F4C5C);
   border-radius: 9999px;
   transition: width 0.35s ease;
 }
 
 /* ==========================================================================
-   Timeline Sidebar Drawer (Light Theme)
+   Timeline Sidebar Drawer & Help Modal
    ========================================================================== */
 .timeline-drawer {
   position: fixed;
@@ -375,13 +408,12 @@ svg text {
   height: 100vh;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-left: 1px solid #E2E8F0;
+  border-left: 1px solid #E6E1D6;
   z-index: 200;
   display: flex;
   flex-direction: column;
   transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: -20px 0 50px rgba(15, 23, 42, 0.12);
+  box-shadow: -20px 0 50px rgba(24, 22, 21, 0.12);
 }
 
 .timeline-drawer.open {
@@ -391,7 +423,7 @@ svg text {
 .timeline-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.35);
+  background: rgba(24, 22, 21, 0.35);
   backdrop-filter: blur(4px);
   z-index: 190;
   opacity: 0;
@@ -416,28 +448,25 @@ svg text {
 }
 
 .timeline-item:hover {
-  background: #F1F5F9;
-  border-color: #E2E8F0;
+  background: #F3F0EA;
+  border-color: #E6E1D6;
 }
 
 .timeline-item.active {
-  background: #EFF6FF;
-  border-color: #BFDBFE;
+  background: #FDF3F0;
+  border-color: #F5D0C5;
 }
 
 .timeline-item.active .timeline-num {
-  background: #2563EB;
+  background: #C84B31;
   color: #FFFFFF;
   font-weight: 700;
 }
 
-/* ==========================================================================
-   Help Modal
-   ========================================================================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.4);
+  background: rgba(24, 22, 21, 0.4);
   backdrop-filter: blur(6px);
   z-index: 300;
   display: flex;
@@ -457,10 +486,10 @@ svg text {
   width: 90%;
   max-width: 560px;
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  border: 1px solid #E6E1D6;
   border-radius: 1.5rem;
   padding: 2.25rem;
-  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 25px 60px -15px rgba(24, 22, 21, 0.2);
   transform: scale(0.95);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -476,18 +505,17 @@ svg text {
   min-width: 30px;
   height: 30px;
   padding: 0 0.55rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  background: #F1F5F9;
-  border: 1px solid #CBD5E1;
+  background: #F3F0EA;
+  border: 1px solid #D6D1C7;
   border-radius: 0.45rem;
-  color: #0F172A;
-  box-shadow: 0 1px 0 1px #E2E8F0;
+  color: #181615;
+  box-shadow: 0 1px 0 1px #E6E1D6;
 }
 
 /* ==========================================================================
-   Matrix & Visualizer Elements (Light Theme)
+   Matrix & Visualizer Elements
    ========================================================================== */
 .matrix-cell {
   transition: all 0.25s ease;
@@ -496,43 +524,39 @@ svg text {
 }
 
 .matrix-cell.cell-updated {
-  background-color: #D1FAE5 !important;
-  color: #065F46 !important;
+  background-color: #D6F0E8 !important;
+  color: #145243 !important;
   font-weight: 800;
-  border: 1px solid #10B981;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+  border: 1px solid #1E6F5C;
+  box-shadow: 0 0 10px rgba(30, 111, 92, 0.2);
 }
 
 .matrix-cell.cell-k-focus {
-  background-color: #EEF2FF !important;
-  color: #3730A3 !important;
+  background-color: #E3F1F5 !important;
+  color: #093540 !important;
   font-weight: 700;
 }
 
-/* Terminal Window Mockup in Light Deck */
 .terminal-window {
-  background: #0F172A;
-  border: 1px solid #334155;
+  background: #1C1917;
+  border: 1px solid #44403C;
   border-radius: 1.15rem;
-  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 20px 40px -12px rgba(24, 22, 21, 0.2);
   overflow: hidden;
 }
 
-/* KaTeX Custom Light Styling */
+.svg-label-protected {
+  paint-order: stroke fill;
+  stroke: #FFFFFF;
+  stroke-width: 8px;
+  stroke-linejoin: round;
+}
+
 .katex {
-  color: #1D4ED8 !important;
-  font-size: 1.15em;
+  color: #0F4C5C !important;
+  font-size: 1.12em;
 }
 
-.katex-display {
-  margin: 0.85rem 0 !important;
-  padding: 0.65rem 1rem;
-  background: #F1F5F9;
-  border-radius: 0.75rem;
-  border: 1px solid #E2E8F0;
-}
-
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -541,9 +565,9 @@ svg text {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #D6D1C7;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #A8A29E;
 }

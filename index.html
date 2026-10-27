@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thuật toán Tìm Đường đi Ngắn nhất: Dijkstra & Floyd-Warshall | Slide Deck</title>
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Google Fonts: Be Vietnam Pro (Full Vietnamese Support) & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN Mapped to Bespoke Editorial "Academic Atelier" Palette -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -13,37 +18,85 @@
       theme: {
         extend: {
           colors: {
+            /* Warm Stone & Charcoal Ink */
             slate: {
-              50: '#F8FAFC',
-              100: '#F1F5F9',
-              200: '#E2E8F0',
-              300: '#CBD5E1',
-              400: '#94A3B8',
-              500: '#64748B',
-              600: '#475569',
-              700: '#334155',
-              800: '#1E293B',
-              900: '#0F172A',
+              50: '#FAF8F5',
+              100: '#F3F0EA',
+              200: '#E6E1D6',
+              300: '#D6D1C7',
+              400: '#A8A29E',
+              500: '#78716C',
+              600: '#57524E',
+              700: '#3D3935',
+              800: '#292624',
+              900: '#181615',
             },
+            /* Terracotta Vermilion (Dijkstra Accent) */
             blue: {
-              50: '#EFF6FF',
-              600: '#2563EB',
-              700: '#1D4ED8',
+              50: '#FDF3F0',
+              100: '#FBE4DE',
+              200: '#F5D0C5',
+              300: '#EBA896',
+              400: '#DE7A60',
+              600: '#C84B31',
+              700: '#A83820',
+              800: '#872B18',
+              900: '#6E2213',
             },
+            /* Deep Petrol Teal (Floyd-Warshall Accent) */
             indigo: {
-              50: '#EEF2FF',
-              600: '#4F46E5',
-              700: '#4338CA',
+              50: '#F0F7F9',
+              100: '#DCEEF2',
+              200: '#BFE0E8',
+              300: '#92C7D4',
+              400: '#569FB2',
+              600: '#0F4C5C',
+              700: '#0B3B47',
+              800: '#082D36',
+              900: '#052026',
             },
+            /* Forest Viridian (Optimal / Success Accent) */
             emerald: {
-              50: '#ECFDF5',
-              600: '#059669',
-              700: '#047857',
+              50: '#EFF8F5',
+              100: '#D6F0E8',
+              200: '#B5E2D5',
+              300: '#84CCB9',
+              400: '#4NA892',
+              500: '#28856E',
+              600: '#1E6F5C',
+              700: '#165848',
+              800: '#114539',
+              900: '#0C332A',
+              950: '#071F19',
+            },
+            /* Antique Ochre (Active / Decrease Key) */
+            amber: {
+              50: '#FEF8EC',
+              100: '#FDEFD2',
+              200: '#F5DFB0',
+              300: '#EBC478',
+              500: '#D9822B',
+              600: '#B4690E',
+              700: '#925208',
+              800: '#754006',
+              900: '#5E3305',
+            },
+            /* Burgundy Crimson (Negative Edge / Alert) */
+            rose: {
+              50: '#FDF2F4',
+              100: '#FCE4E8',
+              200: '#F5C2CE',
+              300: '#EA96AA',
+              500: '#C93B5B',
+              600: '#A61C3C',
+              700: '#8A1430',
+              800: '#701026',
+              900: '#590C1E',
             }
           },
           fontFamily: {
             sans: ['"Be Vietnam Pro"', 'sans-serif'],
-            heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Be Vietnam Pro"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
           }
         }
@@ -64,15 +117,16 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
-  <!-- Custom Clean & Bright Light Theme Stylesheet -->
+  <!-- Stylesheet (Hỗ trợ cả đường dẫn css/styles.css và style.css) -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="style.css">
 
   <!-- Generated Simulation Data -->
   <script src="data/trace_data.js"></script>
 </head>
-<body class="bg-slate-50 text-slate-900 overflow-hidden">
+<body class="bg-slate-50 text-slate-900 overflow-hidden font-sans">
 
-  <!-- Ambient Subtle Pastel Glow -->
+  <!-- Ambient Editorial Glow -->
   <div class="ambient-glow" aria-hidden="true"></div>
 
   <!-- =========================================================================
@@ -87,7 +141,7 @@
       <div class="slide-container justify-center items-center text-center relative z-10 max-w-5xl my-auto">
         
         <!-- Badge -->
-        <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white border border-slate-200 text-sm font-mono font-semibold text-slate-700 mb-8 shadow-sm">
+        <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white border border-slate-200 text-sm font-semibold text-slate-700 mb-8 shadow-sm">
           <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
           <span>BÁO CÁO CHUYÊN ĐỀ HỌC PHẦN</span>
           <span class="text-slate-300">•</span>
@@ -95,7 +149,7 @@
         </div>
 
         <!-- Main Title -->
-        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight mb-8 font-heading">
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight mb-8">
           Thuật toán Tìm Đường đi Ngắn nhất:<br>
           <em class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-600 font-extrabold not-italic">
             Dijkstra & Floyd-Warshall
@@ -108,22 +162,22 @@
         </p>
 
         <!-- Meta info -->
-        <div class="flex flex-wrap items-center justify-center gap-6 text-base font-mono text-slate-600 mb-10">
+        <div class="flex flex-wrap items-center justify-center gap-6 text-base text-slate-600 mb-10">
           <div class="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
             <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
             <span class="font-semibold text-slate-800">Nhóm Thuyết trình Thuật toán</span>
           </div>
           <div class="flex items-center gap-2.5 bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm">
-            <i data-lucide="clock" class="w-5 h-5 text-emerald-600"></i>
-            <span class="font-semibold text-slate-800">Thời lượng: 15–20 Phút</span>
+            <i data-lucide="layers" class="w-5 h-5 text-indigo-600"></i>
+            <span class="font-semibold text-slate-800">20 Slide Trực quan Tương tác</span>
           </div>
         </div>
 
         <!-- Start Button -->
-        <button id="hero-start-btn" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg shadow-blue-500/25 hover:scale-105 cursor-pointer">
+        <button id="hero-start-btn" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all shadow-lg shadow-blue-600/25 hover:scale-105 cursor-pointer">
           <span>Bắt đầu Bài Thuyết trình</span>
-          <kbd class="kbd-badge text-xs bg-blue-700 text-white border-blue-500">Space</kbd>
-          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+          <kbd class="kbd-badge text-xs bg-blue-700 text-white border-blue-600">Space</kbd>
+          <i data-lucide="arrow-down" class="w-5 h-5"></i>
         </button>
 
       </div>
@@ -143,11 +197,11 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 flex-grow my-auto">
           <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-blue-400 group" onclick="goToSlide(3)">
             <div>
-              <span class="text-xs font-bold text-blue-600 block mb-2 font-sans">PHẦN 01</span>
+              <span class="text-xs font-bold text-blue-600 block mb-2">PHẦN 01</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Bài toán Tìm đường</h3>
               <p class="text-sm text-slate-600 mt-2 leading-relaxed">Định nghĩa bài toán một nguồn (SSSP) và bài toán mọi cặp đỉnh (APSP).</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 3 - 4</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
@@ -155,83 +209,83 @@
 
           <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-indigo-400 group" onclick="goToSlide(5)">
             <div>
-              <span class="text-xs font-bold text-indigo-600 block mb-2 font-sans">PHẦN 02</span>
+              <span class="text-xs font-bold text-indigo-600 block mb-2">PHẦN 02</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Ý tưởng Cốt lõi</h3>
-              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chiến lược tham lam, nới lỏng cạnh, Min-Heap và quy hoạch động Bellman.</p>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chiến lược tham lam, nới lỏng cạnh, IndexMinPQ và quy hoạch động Bellman.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 5 - 8</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-400 group" onclick="goToSlide(9)">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-300 group" onclick="goToSlide(9)">
             <div>
-              <span class="text-xs font-bold text-emerald-600 block mb-2 font-sans">PHẦN 03</span>
+              <span class="text-xs font-bold text-emerald-600 block mb-2">PHẦN 03</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Minh họa Từng bước (Trace)</h3>
-              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chạy thử đồ thị mẫu 5 đỉnh, xem Min-Heap và ma trận D<sup>(k)</sup> qua từng bước.</p>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Chạy thử đồ thị mẫu 5 đỉnh, xem IndexMinPQ và ma trận D<sup>(k)</sup> qua từng bước.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 9 - 10</span>
-              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform"></i>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
           <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-blue-400 group" onclick="goToSlide(11)">
             <div>
-              <span class="text-xs font-bold text-blue-600 block mb-2 font-sans">PHẦN 04</span>
+              <span class="text-xs font-bold text-blue-600 block mb-2">PHẦN 04</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Cài đặt Python & Chạy thử</h3>
-              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Thiết kế 2 lớp DijkstraSolver và FloydWarshallSolver rõ ràng, mạch lạc.</p>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Thiết kế 2 lớp DijkstraSP và FloydWarshall rõ ràng, mạch lạc.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 11 - 13</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-400 group" onclick="goToSlide(14)">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-300 group" onclick="goToSlide(14)">
             <div>
-              <span class="text-xs font-bold text-amber-600 block mb-2 font-sans">PHẦN 05</span>
+              <span class="text-xs font-bold text-amber-600 block mb-2">PHẦN 05</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Độ phức tạp Thời gian</h3>
               <p class="text-sm text-slate-600 mt-2 leading-relaxed">Đánh giá các trường hợp Best / Average / Worst trên đồ thị thưa và đồ thị dày.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 14</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-400 group" onclick="goToSlide(15)">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-amber-300 group" onclick="goToSlide(15)">
             <div>
-              <span class="text-xs font-bold text-amber-600 block mb-2 font-sans">PHẦN 06</span>
+              <span class="text-xs font-bold text-amber-600 block mb-2">PHẦN 06</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Bộ nhớ & CPU Cache</h3>
-              <p class="text-sm text-slate-600 mt-2 leading-relaxed">So sánh lượng RAM và lý do ma trận liên tục của Floyd chạy cực nhanh.</p>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">So sánh lượng RAM và phân tích tính định vị bộ nhớ (Cache Locality).</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 15</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-rose-400 group" onclick="goToSlide(16)">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-rose-300 group" onclick="goToSlide(16)">
             <div>
-              <span class="text-xs font-bold text-rose-600 block mb-2 font-sans">PHẦN 07</span>
+              <span class="text-xs font-bold text-rose-600 block mb-2">PHẦN 07</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-rose-600 transition-colors">Cạnh âm & Chu trình âm</h3>
               <p class="text-sm text-slate-600 mt-2 leading-relaxed">Trực quan hóa vì sao cạnh âm làm Dijkstra sai và cách Floyd phát hiện chu trình âm.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 16</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-rose-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
           </div>
 
-          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-400 group" onclick="goToSlide(17)">
+          <div class="bento-box p-6 flex flex-col justify-between cursor-pointer hover:border-emerald-300 group" onclick="goToSlide(17)">
             <div>
-              <span class="text-xs font-bold text-emerald-600 block mb-2 font-sans">PHẦN 08</span>
+              <span class="text-xs font-bold text-emerald-600 block mb-2">PHẦN 08</span>
               <h3 class="text-xl font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Ứng dụng Thực tế & Tổng kết</h3>
-              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Hệ thống cấp cứu (LeetCode 743 & 1334), liên hệ Google Maps và kết luận.</p>
+              <p class="text-sm text-slate-600 mt-2 leading-relaxed">Điều phối cấp cứu, trạm y tế lấy cảm hứng từ LC 1334, liên hệ định tuyến hiện đại và kết luận.</p>
             </div>
-            <div class="flex items-center justify-between text-xs font-sans text-slate-500 pt-4 border-t border-slate-100">
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-100">
               <span class="font-semibold text-slate-700">Slide 17 - 20</span>
               <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform"></i>
             </div>
@@ -256,14 +310,14 @@
             <div class="spec-card">
               <span class="spec-badge bg-blue-100 text-blue-800">BÀI TOÁN (SSSP)</span>
               <p class="spec-text font-medium text-slate-800">
-                Tìm đường đi có tổng chi phí nhỏ nhất từ <strong>duy nhất 1 đỉnh xuất phát <strong class="text-blue-700 font-semibold">s</strong></strong> tới tất cả các đỉnh khác trong mạng lưới.
+                Tìm đường đi có tổng chi phí nhỏ nhất từ <strong>duy nhất 1 đỉnh xuất phát <span class="text-blue-700 font-bold">s</span></strong> tới tất cả các đỉnh khác trong mạng lưới.
               </p>
             </div>
 
             <div class="spec-card">
               <span class="spec-badge bg-slate-100 text-slate-700">ĐẦU VÀO (INPUT)</span>
               <p class="spec-text text-slate-700">
-                Đồ thị danh sách kề <strong>O(V + E)</strong> và đỉnh nguồn bắt đầu <strong class="text-blue-700 font-semibold">s</strong>.
+                Đồ thị danh sách kề <strong>O(V + E)</strong> và đỉnh nguồn bắt đầu <strong class="text-blue-700">s</strong>.
               </p>
             </div>
 
@@ -289,45 +343,45 @@
               
               <svg viewBox="0 0 540 380" class="w-full h-full">
                 <defs>
-                  <marker id="s3-arrow" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#2563EB" />
+                  <marker id="s3-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#C84B31" />
                   </marker>
                 </defs>
 
-                <!-- Directed Edges stopping at node circle boundaries -->
-                <line x1="245" y1="104" x2="175" y2="171" stroke="#2563EB" stroke-width="3.5" marker-end="url(#s3-arrow)" />
-                <line x1="295" y1="104" x2="365" y2="171" stroke="#2563EB" stroke-width="3.5" marker-end="url(#s3-arrow)" />
-                <line x1="137" y1="220" x2="104" y2="283" stroke="#2563EB" stroke-width="2.5" marker-end="url(#s3-arrow)" />
-                <line x1="163" y1="220" x2="196" y2="283" stroke="#2563EB" stroke-width="2.5" marker-end="url(#s3-arrow)" />
-                <line x1="377" y1="220" x2="344" y2="283" stroke="#2563EB" stroke-width="2.5" marker-end="url(#s3-arrow)" />
-                <line x1="403" y1="220" x2="436" y2="283" stroke="#2563EB" stroke-width="2.5" marker-end="url(#s3-arrow)" />
+                <!-- Directed Edges with animated flow -->
+                <line x1="245" y1="104" x2="173" y2="173" stroke="#C84B31" stroke-width="3.5" class="edge-flow-active" marker-end="url(#s3-arrow)" />
+                <line x1="295" y1="104" x2="367" y2="173" stroke="#C84B31" stroke-width="3.5" marker-end="url(#s3-arrow)" />
+                <line x1="137" y1="220" x2="103" y2="285" stroke="#C84B31" stroke-width="2.5" marker-end="url(#s3-arrow)" />
+                <line x1="163" y1="220" x2="197" y2="285" stroke="#C84B31" stroke-width="2.5" marker-end="url(#s3-arrow)" />
+                <line x1="377" y1="220" x2="343" y2="285" stroke="#C84B31" stroke-width="2.5" marker-end="url(#s3-arrow)" />
+                <line x1="403" y1="220" x2="437" y2="285" stroke="#C84B31" stroke-width="2.5" marker-end="url(#s3-arrow)" />
 
                 <!-- Source Node s and Header Pill -->
-                <rect x="180" y="14" width="180" height="28" rx="14" fill="#EFF6FF" stroke="#BFDBFE" stroke-width="1.5" />
-                <text x="270" y="33" fill="#1D4ED8" font-size="13" font-weight="bold" text-anchor="middle">Nguồn (dist = 0)</text>
+                <rect x="180" y="14" width="180" height="28" rx="14" fill="#FDF3F0" stroke="#F5D0C5" stroke-width="1.5" />
+                <text x="270" y="33" fill="#A83820" font-size="13" font-weight="bold" text-anchor="middle">Nguồn (dist = 0)</text>
 
-                <circle cx="270" cy="80" r="34" fill="#2563EB" stroke="#1E40AF" stroke-width="4" />
+                <circle cx="270" cy="80" r="34" fill="#C84B31" stroke="#872B18" stroke-width="4" />
                 <text x="270" y="87" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">s</text>
 
                 <!-- Layer 1 -->
-                <circle cx="150" cy="195" r="28" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" />
-                <text x="150" y="202" fill="#1E40AF" font-weight="bold" font-size="16" text-anchor="middle">v1</text>
+                <circle cx="150" cy="195" r="28" fill="#FDF3F0" stroke="#C84B31" stroke-width="3" />
+                <text x="150" y="202" fill="#872B18" font-weight="bold" font-size="16" text-anchor="middle">v1</text>
 
-                <circle cx="390" cy="195" r="28" fill="#EFF6FF" stroke="#2563EB" stroke-width="3" />
-                <text x="390" y="202" fill="#1E40AF" font-weight="bold" font-size="16" text-anchor="middle">v2</text>
+                <circle cx="390" cy="195" r="28" fill="#FDF3F0" stroke="#C84B31" stroke-width="3" />
+                <text x="390" y="202" fill="#872B18" font-weight="bold" font-size="16" text-anchor="middle">v2</text>
 
                 <!-- Layer 2 -->
-                <circle cx="90" cy="310" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
-                <text x="90" y="316" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u1</text>
+                <circle cx="90" cy="310" r="24" fill="#FFFFFF" stroke="#78716C" stroke-width="3" />
+                <text x="90" y="316" fill="#3D3935" font-weight="bold" font-size="15" text-anchor="middle">u1</text>
 
-                <circle cx="210" cy="310" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
-                <text x="210" y="316" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u2</text>
+                <circle cx="210" cy="310" r="24" fill="#FFFFFF" stroke="#78716C" stroke-width="3" />
+                <text x="210" y="316" fill="#3D3935" font-weight="bold" font-size="15" text-anchor="middle">u2</text>
 
-                <circle cx="330" cy="310" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
-                <text x="330" y="316" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u3</text>
+                <circle cx="330" cy="310" r="24" fill="#FFFFFF" stroke="#78716C" stroke-width="3" />
+                <text x="330" y="316" fill="#3D3935" font-weight="bold" font-size="15" text-anchor="middle">u3</text>
 
-                <circle cx="450" cy="310" r="24" fill="#FFFFFF" stroke="#64748B" stroke-width="3" />
-                <text x="450" y="316" fill="#334155" font-weight="bold" font-size="15" text-anchor="middle">u4</text>
+                <circle cx="450" cy="310" r="24" fill="#FFFFFF" stroke="#78716C" stroke-width="3" />
+                <text x="450" y="316" fill="#3D3935" font-weight="bold" font-size="15" text-anchor="middle">u4</text>
               </svg>
 
               <div class="w-full text-center p-3 rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
@@ -362,7 +416,7 @@
             <div class="spec-card">
               <span class="spec-badge bg-slate-100 text-slate-700">ĐẦU VÀO & ĐẦU RA</span>
               <p class="spec-text text-slate-700">
-                Đầu vào là ma trận kề <strong>V × V</strong>; đầu ra là ma trận khoảng cách <code>D[V][V]</code> và ma trận đỉnh kế tiếp <code>Next[V][V]</code>.
+                Đầu vào là ma trận kề <strong>V × V</strong>; đầu ra là ma trận khoảng cách <code>D[V][V]</code> và ma trận truy vết <code>_parent[V][V]</code>.
               </p>
             </div>
 
@@ -377,10 +431,10 @@
           <!-- Right Column: Comparison Table -->
           <div class="slide-col">
             <div class="bento-box p-6 h-full flex flex-col justify-center">
-              <h3 class="text-base uppercase tracking-wider text-slate-600 font-bold mb-4 font-sans">BẢNG SO SÁNH NHANH GIỮA HAI BÀI TOÁN</h3>
+              <h3 class="text-base uppercase tracking-wider text-slate-600 font-bold mb-4">BẢNG SO SÁNH NHANH GIỮA HAI BÀI TOÁN</h3>
               
               <div class="overflow-hidden rounded-xl border border-slate-200 shadow-sm">
-                <table class="w-full text-left text-base font-sans">
+                <table class="w-full text-left text-base">
                   <thead class="bg-slate-100 text-xs text-slate-700 uppercase">
                     <tr>
                       <th class="p-4 border-b border-slate-200">Tiêu chí</th>
@@ -401,7 +455,7 @@
                     </tr>
                     <tr>
                       <td class="p-4 font-semibold text-slate-600">Cấu trúc dữ liệu</td>
-                      <td class="p-4 text-sm font-medium">Danh sách kề + Min-Heap</td>
+                      <td class="p-4 text-sm font-medium">Danh sách kề + <code>IndexMinPQ</code></td>
                       <td class="p-4 text-sm font-medium">Ma trận 2D <strong>V × V</strong></td>
                     </tr>
                     <tr>
@@ -434,10 +488,10 @@
             <div class="spec-card border-blue-200 bg-blue-50/40">
               <span class="spec-badge bg-blue-600 text-white font-bold">Ý TƯỞNG 1: LUÔN ƯU TIÊN ĐỈNH GẦN NHẤT (THAM LAM)</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Tại mỗi bước, ta luôn lấy ra đỉnh <strong class="text-amber-700 font-semibold">u</strong> chưa chốt có khoảng cách tạm thời <code>dist[u]</code> nhỏ nhất và <strong>chốt luôn đỉnh này</strong>!
+                Tại mỗi bước, ta luôn lấy ra đỉnh <strong class="text-blue-700 font-semibold">u</strong> chưa chốt có khoảng cách tạm thời <code>dist[u]</code> nhỏ nhất và <strong>chốt luôn đỉnh này</strong>!
               </p>
               <p class="text-base text-slate-700 mt-2">
-                Vì tất cả các cạnh đều có trọng số dương, đi qua bất kỳ đỉnh trung gian nào khác cũng chỉ làm đường đi dài hơn. Do đó giá trị <code>dist[u]</code> này chắc chắn là ngắn nhất.
+                <strong>Bất biến:</strong> Khi <code>u</code> được lấy ra khỏi Min-Heap, <code>dist[u]</code> đã tối ưu. Mọi đường khác tới <code>u</code> phải đi qua một đỉnh chưa xử lý có nhãn không nhỏ hơn <code>dist[u]</code>; vì mọi cạnh đều có <code>w ≥ 0</code>, đi tiếp không thể tạo đường ngắn hơn.
               </p>
             </div>
 
@@ -446,8 +500,8 @@
               <p class="spec-text text-slate-800 font-medium">
                 Dựa trên Bất đẳng thức tam giác: nếu đi vòng qua <strong>u</strong> tới <strong>v</strong> mà ngắn hơn đường cũ tới <strong>v</strong>, ta lập tức cập nhật lại:
               </p>
-              <div class="p-3.5 rounded-xl bg-slate-100 font-mono text-emerald-700 text-sm sm:text-base font-bold my-2 text-center">
-                if dist[u] + w(u, v) < dist[v]:<br>
+              <div class="p-3.5 rounded-xl bg-slate-100 code-font-only text-emerald-700 text-sm sm:text-base font-bold my-2 text-center border border-slate-200">
+                if dist[u] + w(u, v) &lt; dist[v]:<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;dist[v] = dist[u] + w(u, v)
               </div>
             </div>
@@ -460,41 +514,46 @@
               
               <svg viewBox="0 0 560 360" class="w-full h-full">
                 <defs>
-                  <marker id="s5-arrow-blue" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#2563EB" />
+                  <marker id="s5-arrow-blue" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#C84B31" />
                   </marker>
-                  <marker id="s5-arrow-green" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
+                  <marker id="s5-arrow-green" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#1E6F5C" />
+                  </marker>
+                  <marker id="s5-arrow-red" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#A61C3C" />
                   </marker>
                 </defs>
 
-                <!-- Source Node s -->
-                <circle cx="110" cy="95" r="32" fill="#2563EB" stroke="#1E40AF" stroke-width="4" />
-                <text x="110" y="103" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">s</text>
-
-                <!-- Node u -->
-                <circle cx="450" cy="95" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
-                <text x="450" y="102" fill="#1E40AF" font-weight="bold" font-size="19" text-anchor="middle">u</text>
-
-                <!-- Target Node v -->
-                <circle cx="280" cy="240" r="32" fill="#ECFDF5" stroke="#059669" stroke-width="4" />
-                <text x="280" y="247" fill="#065F46" font-weight="bold" font-size="19" text-anchor="middle">v</text>
-
                 <!-- Edge s -> u -->
-                <line x1="142" y1="95" x2="412" y2="95" stroke="#2563EB" stroke-width="4" marker-end="url(#s5-arrow-blue)" />
-                <rect x="232" y="56" width="96" height="26" rx="6" fill="#FFFFFF" stroke="#BFDBFE" stroke-width="1.5" />
-                <text x="280" y="73" fill="#1D4ED8" font-size="14" font-weight="bold" text-anchor="middle">dist[u] = 3</text>
+                <line x1="142" y1="95" x2="415" y2="95" stroke="#C84B31" stroke-width="4" marker-end="url(#s5-arrow-blue)" />
+                <rect x="230" y="54" width="100" height="28" rx="8" fill="#FFFFFF" stroke="#F5D0C5" stroke-width="1.5" />
+                <text x="280" y="73" fill="#A83820" font-size="14" font-weight="bold" text-anchor="middle">dist[u] = 3</text>
 
-                <!-- Edge s -> v (dashed) -->
-                <line x1="134" y1="116" x2="256" y2="219" stroke="#E11D48" stroke-width="2.5" stroke-dasharray="5,5" />
-                <text x="165" y="185" fill="#BE123C" font-size="14" font-weight="bold" text-anchor="end" class="svg-label-protected">Đường cũ = 9</text>
+                <!-- Edge s -> v (Animated dashed line) -->
+                <line x1="134" y1="116" x2="253" y2="217" stroke="#A61C3C" stroke-width="3" stroke-dasharray="7,5" class="animated-dash" marker-end="url(#s5-arrow-red)" />
+                <rect x="48" y="166" width="122" height="28" rx="8" fill="#FDF2F4" stroke="#F5C2CE" stroke-width="1.5" />
+                <text x="109" y="185" fill="#8A1430" font-size="14" font-weight="bold" text-anchor="middle">Đường cũ = 9</text>
 
                 <!-- Edge u -> v -->
-                <line x1="426" y1="116" x2="309" y2="215" stroke="#059669" stroke-width="4.5" marker-end="url(#s5-arrow-green)" />
-                <text x="395" y="185" fill="#047857" font-size="14" font-weight="bold" text-anchor="start" class="svg-label-protected">w(u, v) = 4</text>
+                <line x1="426" y1="116" x2="307" y2="217" stroke="#1E6F5C" stroke-width="4.5" class="edge-flow-active" marker-end="url(#s5-arrow-green)" />
+                <rect x="385" y="166" width="115" height="28" rx="8" fill="#EFF8F5" stroke="#B5E2D5" stroke-width="1.5" />
+                <text x="442" y="185" fill="#165848" font-size="14" font-weight="bold" text-anchor="middle">w(u, v) = 4</text>
+
+                <!-- Source Node s -->
+                <circle cx="110" cy="95" r="32" fill="#C84B31" stroke="#872B18" stroke-width="4" />
+                <text x="110" y="102" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">s</text>
+
+                <!-- Node u -->
+                <circle cx="450" cy="95" r="32" fill="#FDF3F0" stroke="#C84B31" stroke-width="3.5" />
+                <text x="450" y="102" fill="#872B18" font-weight="bold" font-size="19" text-anchor="middle">u</text>
+
+                <!-- Target Node v -->
+                <circle cx="280" cy="240" r="32" fill="#EFF8F5" stroke="#1E6F5C" stroke-width="4" />
+                <text x="280" y="247" fill="#114539" font-weight="bold" font-size="19" text-anchor="middle">v</text>
 
                 <!-- Result Box under Node v -->
-                <rect x="130" y="296" width="300" height="40" rx="12" fill="#059669" />
+                <rect x="130" y="296" width="300" height="40" rx="12" fill="#1E6F5C" />
                 <text x="280" y="321" fill="#FFFFFF" font-size="14" font-weight="bold" text-anchor="middle">3 + 4 = 7 &lt; 9 (Rút ngắn!)</text>
               </svg>
 
@@ -532,10 +591,10 @@
 
             <div class="spec-card border-indigo-200 bg-indigo-50/40">
               <span class="spec-badge bg-indigo-600 text-white font-bold">CẤU TRÚC 3 MẢNG ĐỒNG BỘ: keys[], pq[], qp[]</span>
-              <div class="mt-2 space-y-1.5 text-xs sm:text-sm text-slate-700 font-sans">
-                <div>• <code class="text-indigo-700 font-bold">keys[i]</code>: Độ ưu tiên / khoảng cách ngắn nhất hiện tại của đỉnh <strong>i</strong>.</div>
-                <div>• <code class="text-indigo-700 font-bold">pq[k]</code>: Binary Heap (1-indexed) lưu chỉ số các đỉnh theo trật tự Min-Heap.</div>
-                <div>• <code class="text-indigo-700 font-bold">qp[i]</code>: Mảng chỉ mục ngược lưu vị trí của đỉnh <strong>i</strong> trong heap <code>pq</code> (<span class="font-mono text-indigo-800">qp[pq[k]] = k</span>, <code>-1</code> nếu không có).</div>
+              <div class="mt-2 space-y-2 text-sm sm:text-base text-slate-700">
+                <div>• <code>keys[i]</code>: Độ ưu tiên / khoảng cách ngắn nhất hiện tại của đỉnh <strong>i</strong>.</div>
+                <div>• <code>pq[k]</code>: Binary Heap (1-indexed) lưu chỉ số các đỉnh theo trật tự Min-Heap.</div>
+                <div>• <code>qp[i]</code>: Mảng chỉ mục ngược lưu vị trí của đỉnh <strong>i</strong> trong heap <code>pq</code> (<strong>qp[pq[k]] = k</strong>, bằng <strong>-1</strong> nếu không có).</div>
               </div>
             </div>
           </div>
@@ -546,28 +605,28 @@
               <span class="text-sm text-slate-500 font-bold self-start">CƠ CHẾ VẬN HÀNH CỦA IndexMinPQ TRONG O(log V)</span>
 
               <div class="w-full flex-1 flex flex-col justify-center gap-3.5 my-auto">
-                <div class="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between">
+                <div class="p-4 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-blue-600 font-bold block">1. KIỂM TRA ĐỈNH TỒN TẠI TỨC THỜI:</span>
-                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">contains(i) ➔ qp[i] != -1</span>
+                    <span class="text-xs text-blue-600 font-bold block mb-1">1. KIỂM TRA ĐỈNH TỒN TẠI TỨC THỜI:</span>
+                    <span class="text-base font-bold text-slate-900">contains(i) ➔ kiểm tra qp[i] != -1</span>
                   </div>
-                  <span class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold font-mono">O(1)</span>
+                  <span class="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold">O(1)</span>
                 </div>
 
-                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between">
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-amber-700 font-bold block">2. NỚI LỎNG VÀ GIẢM KHÓA TRỰC TIẾP:</span>
-                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">decrease_key(i, key) ➔ _swim(qp[i])</span>
+                    <span class="text-xs text-amber-700 font-bold block mb-1">2. NỚI LỎNG VÀ GIẢM KHÓA TRỰC TIẾP:</span>
+                    <span class="text-base font-bold text-slate-900">decrease_key(i, key) ➔ _swim(qp[i])</span>
                   </div>
-                  <span class="px-2.5 py-1 rounded-lg bg-amber-600 text-white text-xs font-bold font-mono">O(log V)</span>
+                  <span class="px-3 py-1 rounded-lg bg-amber-600 text-white text-xs font-bold">O(log V)</span>
                 </div>
 
-                <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between">
                   <div>
-                    <span class="text-xs text-emerald-700 font-bold block">3. TRÍCH XUẤT ĐỈNH NHỎ NHẤT:</span>
-                    <span class="text-sm sm:text-base font-bold text-slate-900 font-mono">del_min() ➔ _sink(1), qp[min] = -1</span>
+                    <span class="text-xs text-emerald-700 font-bold block mb-1">3. TRÍCH XUẤT ĐỈNH NHỎ NHẤT:</span>
+                    <span class="text-base font-bold text-slate-900">del_min() ➔ _sink(1), gán qp[min] = -1</span>
                   </div>
-                  <span class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold font-mono">O(log V)</span>
+                  <span class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold">O(log V)</span>
                 </div>
               </div>
 
@@ -619,39 +678,40 @@
 
               <svg viewBox="0 0 560 340" class="w-full h-full">
                 <defs>
-                  <marker id="s7-arrow-indigo" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#4F46E5" />
+                  <marker id="s7-arrow-indigo" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#0F4C5C" />
                   </marker>
                 </defs>
 
                 <!-- Intermediate Node k Header -->
-                <text x="280" y="26" fill="#4F46E5" font-size="13" font-weight="bold" text-anchor="middle">Đỉnh trung gian k</text>
+                <rect x="200" y="8" width="160" height="26" rx="13" fill="#F0F7F9" stroke="#BFE0E8" stroke-width="1.5" />
+                <text x="280" y="25" fill="#0F4C5C" font-size="13" font-weight="bold" text-anchor="middle">Đỉnh trung gian k</text>
 
-                <!-- Direct Path i -> j (dashed) -->
-                <line x1="122" y1="200" x2="438" y2="200" stroke="#94A3B8" stroke-width="3" stroke-dasharray="6,6" />
-                <rect x="180" y="220" width="200" height="26" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5" />
-                <text x="280" y="238" fill="#64748B" font-size="14" font-weight="bold" text-anchor="middle">Đường cũ: D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[i][j]</tspan></text>
+                <!-- Direct Path i -> j (animated dashed) -->
+                <line x1="122" y1="205" x2="438" y2="205" stroke="#A8A29E" stroke-width="3" stroke-dasharray="7,5" class="animated-dash" />
+                <rect x="175" y="224" width="210" height="28" rx="8" fill="#FFFFFF" stroke="#D6D1C7" stroke-width="1.5" />
+                <text x="280" y="243" fill="#57524E" font-size="14" font-weight="bold" text-anchor="middle">Đường cũ: D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[i][j]</tspan></text>
 
                 <!-- Via k Paths -->
-                <path d="M 115 178 Q 180 95 246 88" stroke="#4F46E5" stroke-width="4" fill="none" marker-end="url(#s7-arrow-indigo)" />
-                <rect x="42" y="90" width="118" height="26" rx="6" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.5" />
-                <text x="155" y="108" fill="#4338CA" font-size="14" font-weight="bold" text-anchor="end">D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[i][k]</tspan></text>
+                <path d="M 114 182 Q 180 100 242 86" stroke="#0F4C5C" stroke-width="4" fill="none" class="edge-flow-active" marker-end="url(#s7-arrow-indigo)" />
+                <rect x="42" y="92" width="118" height="28" rx="8" fill="#FFFFFF" stroke="#BFE0E8" stroke-width="1.5" />
+                <text x="101" y="111" fill="#0B3B47" font-size="14" font-weight="bold" text-anchor="middle">D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[i][k]</tspan></text>
 
-                <path d="M 314 88 Q 380 95 445 178" stroke="#4F46E5" stroke-width="4" fill="none" marker-end="url(#s7-arrow-indigo)" />
-                <rect x="398" y="90" width="118" height="26" rx="6" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.5" />
-                <text x="405" y="108" fill="#4338CA" font-size="14" font-weight="bold" text-anchor="start">D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[k][j]</tspan></text>
+                <path d="M 316 86 Q 380 100 443 180" stroke="#0F4C5C" stroke-width="4" fill="none" class="edge-flow-active" marker-end="url(#s7-arrow-indigo)" />
+                <rect x="400" y="92" width="118" height="28" rx="8" fill="#FFFFFF" stroke="#BFE0E8" stroke-width="1.5" />
+                <text x="459" y="111" fill="#0B3B47" font-size="14" font-weight="bold" text-anchor="middle">D<tspan dy="-4" font-size="10">(k-1)</tspan><tspan dy="4" font-size="14">[k][j]</tspan></text>
 
                 <!-- Node i -->
-                <circle cx="90" cy="200" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
-                <text x="90" y="208" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">i</text>
+                <circle cx="90" cy="205" r="32" fill="#FDF3F0" stroke="#C84B31" stroke-width="3.5" />
+                <text x="90" y="212" fill="#872B18" font-weight="bold" font-size="20" text-anchor="middle">i</text>
 
                 <!-- Intermediate Node k -->
-                <circle cx="280" cy="75" r="36" fill="#4F46E5" stroke="#312E81" stroke-width="4" />
-                <text x="280" y="83" fill="#FFFFFF" font-weight="bold" font-size="22" text-anchor="middle">k</text>
+                <circle cx="280" cy="80" r="36" fill="#0F4C5C" stroke="#082D36" stroke-width="4" />
+                <text x="280" y="88" fill="#FFFFFF" font-weight="bold" font-size="22" text-anchor="middle">k</text>
 
                 <!-- Node j -->
-                <circle cx="470" cy="200" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
-                <text x="470" y="208" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">j</text>
+                <circle cx="470" cy="205" r="32" fill="#FDF3F0" stroke="#C84B31" stroke-width="3.5" />
+                <text x="470" y="212" fill="#872B18" font-weight="bold" font-size="20" text-anchor="middle">j</text>
               </svg>
 
               <div class="w-full text-center p-2.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs sm:text-sm font-semibold text-indigo-900">
@@ -681,7 +741,7 @@
               <p class="spec-text font-medium text-slate-800 mt-1">
                 Tại bước thứ <strong>k</strong>, khoảng cách mới giữa cặp <strong>(i, j)</strong> được tính bằng cách so sánh 2 phương án:
               </p>
-              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 font-mono text-indigo-700 text-sm sm:text-base font-bold my-2 text-center shadow-sm">
+              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 code-font-only text-indigo-700 text-sm sm:text-base font-bold my-2 text-center shadow-sm">
                 $$D^{(k)}[i][j] = \min \left( D^{(k-1)}[i][j], \; D^{(k-1)}[i][k] + D^{(k-1)}[k][j] \right)$$
               </div>
             </div>
@@ -692,7 +752,7 @@
                 Tại sao không cần mảng 3 chiều <strong>O(V<sup>3</sup>)</strong> mà ghi đè trực tiếp lên ma trận <strong>V × V</strong> vẫn đúng?
               </p>
               <p class="text-sm sm:text-base text-slate-700 mt-1.5 leading-relaxed">
-                Vì khoảng cách từ <strong>i → k</strong> và từ <strong>k → j</strong> đi qua chính <strong>k</strong> không thể tự rút ngắn chính nó. Do đó <strong>hàng k và cột k hoàn toàn không thay đổi giá trị trong bước k</strong>! Ta thoải mái ghi đè kết quả in-place (<strong>O(V<sup>2</sup>)</strong>).
+                Khi <strong>D[k][k] ≥ 0</strong> (không có chu trình âm qua <strong>k</strong>), đi qua <strong>k</strong> không thể tự rút ngắn các khoảng cách từ/đến <strong>k</strong>. Vì vậy <strong>hàng k và cột k không đổi trong bước k</strong>, nên có thể cập nhật in-place (<strong>O(V<sup>2</sup>)</strong>).
               </p>
             </div>
           </div>
@@ -703,26 +763,26 @@
               <span class="text-sm text-slate-500 font-bold self-start">MINH HỌA: HÀNG k VÀ CỘT k KHÔNG THAY ĐỔI TRONG BƯỚC k</span>
 
               <div class="w-full flex-1 flex flex-col justify-center items-center my-auto">
-                <div class="grid grid-cols-4 gap-2 text-center font-mono text-sm sm:text-base p-4 bg-slate-50 rounded-2xl border border-slate-200 max-w-sm w-full shadow-inner">
-                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[1][1]</div>
-                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[1][k]</div>
-                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[1][j]</div>
-                  <div class="p-3 rounded-lg bg-white border border-slate-200">...</div>
+                <div class="grid grid-cols-4 gap-2 text-center text-sm sm:text-base p-4 bg-slate-50 rounded-2xl border border-slate-200 max-w-sm w-full shadow-inner font-bold">
+                  <div class="p-3 rounded-lg bg-white border border-slate-200 text-slate-600">D[1][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">D[1][k]</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200 text-slate-600">D[1][j]</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200 text-slate-400">...</div>
 
-                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[k][1]</div>
-                  <div class="p-3 rounded-lg bg-indigo-600 font-bold text-white shadow-md">0 (k)</div>
-                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[k][j]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">D[k][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-600 text-white shadow-md">0 (k)</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">D[k][j]</div>
                   <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">...</div>
 
-                  <div class="p-3 rounded-lg bg-white border border-slate-200">D[i][1]</div>
-                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 font-bold text-indigo-800">D[i][k]</div>
-                  <div class="p-3 rounded-lg bg-emerald-100 border border-emerald-400 font-bold text-emerald-900">Cập nhật!</div>
-                  <div class="p-3 rounded-lg bg-white border border-slate-200">...</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200 text-slate-600">D[i][1]</div>
+                  <div class="p-3 rounded-lg bg-indigo-100 border border-indigo-300 text-indigo-800">D[i][k]</div>
+                  <div class="p-3 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-900">Cập nhật!</div>
+                  <div class="p-3 rounded-lg bg-white border border-slate-200 text-slate-400">...</div>
                 </div>
               </div>
 
               <div class="w-full text-center p-2.5 rounded-xl bg-slate-100 text-xs sm:text-sm font-semibold text-slate-700">
-                Ô xanh lá D[i][j] được tính từ 2 ô màu tím D[i][k] và D[k][j] vốn cố định
+                Ô xanh lá D[i][j] được tính từ 2 ô D[i][k] và D[k][j] vốn cố định trong bước k
               </div>
             </div>
           </div>
@@ -740,7 +800,7 @@
             <span class="slide-tag bg-blue-50 text-blue-700 border border-blue-200">Mô phỏng Trực quan • DijkstraSP & IndexMinPQ</span>
             <h2 class="slide-title">Minh họa từng bước: <em>DijkstraSP & IndexMinPQ trên Đồ thị 5 Đỉnh</em></h2>
           </div>
-          <div class="flex items-center gap-2 font-mono text-sm">
+          <div class="flex items-center gap-2 text-sm">
             <span class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-sm font-bold text-blue-700">Bước: <span id="s9-step-indicator">0 / 5</span></span>
           </div>
         </header>
@@ -748,23 +808,23 @@
         <div class="slide-body-grid">
           <!-- Left Column: Big SVG Graph & Play Controls -->
           <div class="slide-col justify-between bento-box p-5 bg-white relative">
-            <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100 font-sans">
+            <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100">
               <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="eye" class="w-4 h-4 text-blue-600"></i> Đồ thị 5 Đỉnh (Nguồn: A = Đỉnh 0)</span>
               <span class="text-slate-400 text-xs">Phím tắt: P (Play), N (Next), R (Reset)</span>
             </div>
 
-            <!-- SVG Graph (Expanded) -->
+            <!-- SVG Graph -->
             <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[360px]">
               <svg id="s9-graph-svg" viewBox="0 0 900 480" class="w-full h-full">
                 <defs>
-                  <marker id="s9-arrowhead" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#64748B" />
+                  <marker id="s9-arrowhead" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#78716C" />
                   </marker>
-                  <marker id="s9-arrowhead-active" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
+                  <marker id="s9-arrowhead-active" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#1E6F5C" />
                   </marker>
-                  <marker id="s9-arrowhead-amber" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#D97706" />
+                  <marker id="s9-arrowhead-amber" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#B4690E" />
                   </marker>
                 </defs>
                 <g id="s9-edges-layer"></g>
@@ -775,16 +835,16 @@
             <!-- Controls -->
             <div class="flex items-center justify-between pt-3 border-t border-slate-100">
               <div class="flex items-center gap-2">
-                <button id="s9-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors font-sans">Reset [R]</button>
-                <button id="s9-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
-                <button id="s9-btn-play" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all font-sans">
+                <button id="s9-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer">Reset [R]</button>
+                <button id="s9-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                <button id="s9-btn-play" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-blue-600/20 transition-all cursor-pointer">
                   <i data-lucide="play" class="w-4 h-4" id="s9-play-icon"></i>
                   <span id="s9-play-text">Tự động Chạy [P]</span>
                 </button>
-                <button id="s9-btn-next" class="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors font-sans">Bước tiếp [N] →</button>
+                <button id="s9-btn-next" class="px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-bold transition-colors cursor-pointer">Bước tiếp [N] →</button>
               </div>
 
-              <div class="flex items-center gap-3 text-xs text-slate-600 font-semibold font-sans">
+              <div class="flex items-center gap-3 text-xs text-slate-600 font-semibold">
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Trong IndexMinPQ</span>
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span> decrease_key</span>
                 <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600"></span> Đã chốt</span>
@@ -796,11 +856,11 @@
           <div class="slide-col gap-3.5 justify-between">
             <!-- Narrative Box -->
             <div class="bento-box p-4 border-l-4 border-l-blue-600">
-              <div class="flex items-center justify-between text-xs font-sans mb-1.5">
+              <div class="flex items-center justify-between text-xs mb-1.5">
                 <span class="text-slate-500 font-bold uppercase">DIỄN GIẢI TỪNG BƯỚC</span>
                 <span id="s9-action-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">KHỞI TẠO</span>
               </div>
-              <p id="s9-desc-text" class="text-base text-slate-800 leading-relaxed font-sans min-h-[50px]">
+              <p id="s9-desc-text" class="text-base text-slate-800 leading-relaxed min-h-[50px]">
                 Bước 0: Khởi tạo nguồn s = A (đỉnh 0): gán _dist_to[A] = 0.0, gọi pq.insert(A, 0.0).
               </p>
             </div>
@@ -808,21 +868,21 @@
             <!-- IndexMinPQ Elements -->
             <div class="bento-box p-4">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs text-slate-500 font-bold block font-sans">HÀNG ĐỢI ĐỊNH CHỈ MỤC (INDEXMINPQ):</span>
-                <span class="text-xs text-slate-400 font-mono">qp[i] != -1</span>
+                <span class="text-xs text-slate-500 font-bold block">HÀNG ĐỢI ĐỊNH CHỈ MỤC (INDEXMINPQ):</span>
+                <span class="text-xs text-slate-400 font-semibold">qp[i] != -1</span>
               </div>
-              <div id="s9-heap-container" class="flex flex-wrap gap-2 min-h-[42px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-sm items-center">
+              <div id="s9-heap-container" class="flex flex-wrap gap-2 min-h-[42px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm items-center">
                 <!-- Pills generated by js -->
               </div>
             </div>
 
             <!-- Distance & Edge Table -->
             <div class="bento-box p-4 overflow-hidden">
-              <span class="text-xs text-slate-500 font-bold block mb-2 font-sans">BẢNG KHOẢNG CÁCH _dist_to[] VÀ CẠNH ĐẾN _edge_to[]:</span>
-              <table class="w-full text-center text-sm font-mono border border-slate-200 rounded-xl overflow-hidden">
+              <span class="text-xs text-slate-500 font-bold block mb-2">BẢNG KHOẢNG CÁCH _dist_to[] VÀ CẠNH ĐẾN _edge_to[]:</span>
+              <table class="w-full text-center text-sm border border-slate-200 rounded-xl overflow-hidden">
                 <thead class="bg-slate-100 text-slate-700">
                   <tr>
-                    <th class="p-2 font-bold font-sans">Đỉnh (v)</th>
+                    <th class="p-2 font-bold">Đỉnh (v)</th>
                     <th class="p-2 font-bold text-blue-700">0 (A)</th>
                     <th class="p-2 font-bold">1 (B)</th>
                     <th class="p-2 font-bold">2 (C)</th>
@@ -832,7 +892,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-200 bg-white">
                   <tr>
-                    <td class="p-2 font-bold text-slate-600 bg-slate-50 font-mono text-xs">_dist_to</td>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50 text-xs">_dist_to</td>
                     <td id="s9-d-A" class="p-2 text-emerald-700 font-extrabold text-base">0.0</td>
                     <td id="s9-d-B" class="p-2 text-slate-400">∞</td>
                     <td id="s9-d-C" class="p-2 text-slate-400">∞</td>
@@ -840,7 +900,7 @@
                     <td id="s9-d-E" class="p-2 text-slate-400">∞</td>
                   </tr>
                   <tr>
-                    <td class="p-2 font-bold text-slate-600 bg-slate-50 font-mono text-xs">_edge_to</td>
+                    <td class="p-2 font-bold text-slate-600 bg-slate-50 text-xs">_edge_to</td>
                     <td id="s9-p-A" class="p-2 text-slate-400 text-xs">-</td>
                     <td id="s9-p-B" class="p-2 text-slate-400 text-xs">-</td>
                     <td id="s9-p-C" class="p-2 text-slate-400 text-xs">-</td>
@@ -852,8 +912,8 @@
             </div>
 
             <!-- Path Reconstructed Display -->
-            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm font-mono flex items-center justify-between">
-              <span class="text-emerald-800 font-bold font-sans">LỘ TRÌNH ĐẾN ĐÍCH E:</span>
+            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-sm flex items-center justify-between">
+              <span class="text-emerald-800 font-bold">LỘ TRÌNH ĐẾN ĐÍCH E:</span>
               <span id="s9-path-display" class="font-extrabold text-emerald-700 text-base">Đang thực thi...</span>
             </div>
           </div>
@@ -871,13 +931,13 @@
             <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Mô phỏng Trực quan • Floyd-Warshall</span>
             <h2 class="slide-title">Minh họa từng bước: <em>Floyd-Warshall qua từng Đỉnh Trung gian k</em></h2>
           </div>
-          <span id="s10-k-badge" class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-sans text-sm font-bold shadow-sm">k = 0 / 5</span>
+          <span id="s10-k-badge" class="px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm font-bold shadow-sm">k = 0 / 5</span>
         </header>
 
         <div class="slide-body-grid">
           <!-- Left Column: Graph View with Highlighted Intermediate k -->
           <div class="slide-col justify-between bento-box p-5 bg-white">
-            <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100 font-sans">
+            <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100">
               <span class="flex items-center gap-2 font-bold text-slate-800"><i data-lucide="network" class="w-4 h-4 text-indigo-600"></i> Cầu nối Đỉnh trung gian <strong>k</strong></span>
               <span id="s10-active-k-label" class="text-indigo-700 font-extrabold">k = Chưa xét</span>
             </div>
@@ -886,11 +946,11 @@
             <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[340px]">
               <svg id="s10-graph-svg" viewBox="0 0 900 480" class="w-full h-full">
                 <defs>
-                  <marker id="s10-arrowhead" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#64748B" />
+                  <marker id="s10-arrowhead" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#78716C" />
                   </marker>
-                  <marker id="s10-arrowhead-active" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#4F46E5" />
+                  <marker id="s10-arrowhead-active" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#0F4C5C" />
                   </marker>
                 </defs>
                 <g id="s10-edges-layer"></g>
@@ -901,16 +961,16 @@
             <!-- Controls -->
             <div class="flex items-center justify-between pt-3 border-t border-slate-100">
               <div class="flex items-center gap-2">
-                <button id="s10-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors font-sans">Reset</button>
-                <button id="s10-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
-                <button id="s10-btn-play" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-indigo-500/20 transition-all font-sans">
+                <button id="s10-btn-reset" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer">Reset</button>
+                <button id="s10-btn-prev" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"><i data-lucide="skip-back" class="w-4 h-4"></i></button>
+                <button id="s10-btn-play" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-indigo-600/20 transition-all cursor-pointer">
                   <i data-lucide="play" class="w-4 h-4" id="s10-play-icon"></i>
                   <span id="s10-play-text">Tự động Chạy</span>
                 </button>
-                <button id="s10-btn-next" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-colors font-sans">Xét đỉnh kế k →</button>
+                <button id="s10-btn-next" class="px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition-colors cursor-pointer">Xét đỉnh kế k →</button>
               </div>
 
-              <span id="s10-update-count-text" class="text-sm font-sans text-emerald-700 font-extrabold">0 ô cập nhật</span>
+              <span id="s10-update-count-text" class="text-sm text-emerald-700 font-extrabold">0 ô cập nhật</span>
             </div>
           </div>
 
@@ -918,8 +978,8 @@
           <div class="slide-col gap-3.5 justify-between">
             <!-- Narrative Box -->
             <div class="bento-box p-4 border-l-4 border-l-indigo-600">
-              <span class="text-xs text-slate-500 font-bold block mb-1 font-sans">MÔ TẢ BƯỚC QUY HOẠCH ĐỘNG</span>
-              <p id="s10-desc-text" class="text-base text-slate-800 leading-relaxed font-sans min-h-[50px]">
+              <span class="text-xs text-slate-500 font-bold block mb-1">MÔ TẢ BƯỚC QUY HOẠCH ĐỘNG</span>
+              <p id="s10-desc-text" class="text-base text-slate-800 leading-relaxed min-h-[50px]">
                 Khởi tạo ma trận D<sup>(0)</sup>: Các giá trị là khoảng cách nối trực tiếp giữa hai đỉnh, nếu không có đường đi thì đặt là vô cùng (∞).
               </p>
             </div>
@@ -928,20 +988,20 @@
             <div class="bento-box p-4 overflow-hidden">
               <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
-                  <button id="s10-tab-dist" class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all font-sans">_dist (Khoảng cách)</button>
-                  <button id="s10-tab-parent" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition-all font-sans">_parent (Đỉnh trước)</button>
+                  <button id="s10-tab-dist" class="px-3 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-sm transition-all cursor-pointer">_dist (Khoảng cách)</button>
+                  <button id="s10-tab-parent" class="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition-all cursor-pointer">_parent (Đỉnh trước)</button>
                 </div>
-                <span id="s10-matrix-legend" class="text-xs text-emerald-700 font-bold font-sans">Ô xanh lá = Rút ngắn</span>
+                <span id="s10-matrix-legend" class="text-xs text-emerald-700 font-bold">Ô xanh lá = Rút ngắn</span>
               </div>
               <div id="s10-matrix-container" class="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
-                <!-- Rendered dynamically by app.js using _dist or _parent -->
+                <!-- Rendered dynamically by app.js -->
               </div>
             </div>
 
             <!-- Formula Box -->
-            <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-xs sm:text-sm font-sans flex items-center justify-between">
+            <div class="p-3.5 rounded-xl bg-slate-100 border border-slate-200 text-xs sm:text-sm flex items-center justify-between">
               <span class="text-slate-600 font-bold">CÔNG THỨC:</span>
-              <span class="text-indigo-800 font-extrabold font-mono">D<sup>(k)</sup>[i][j] = min(D<sup>(k-1)</sup>[i][j], D<sup>(k-1)</sup>[i][k] + D<sup>(k-1)</sup>[k][j])</span>
+              <span class="text-indigo-800 font-extrabold">D<sup>(k)</sup>[i][j] = min(D<sup>(k-1)</sup>[i][j], D<sup>(k-1)</sup>[i][k] + D<sup>(k-1)</sup>[k][j])</span>
             </div>
           </div>
         </div>
@@ -962,14 +1022,14 @@
           <!-- Left Column: Code Window with Tabs -->
           <div class="slide-col">
             <div class="terminal-window h-full flex flex-col">
-              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm text-slate-300">
                 <div class="flex items-center gap-2">
-                  <button id="s11-btn-edge" onclick="s11_switchTab('edge')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">edge.py</button>
-                  <button id="s11-btn-minpq" onclick="s11_switchTab('minpq')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all">minpq.py</button>
+                  <button id="s11-btn-edge" onclick="s11_switchTab('edge')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all cursor-pointer">edge.py</button>
+                  <button id="s11-btn-minpq" onclick="s11_switchTab('minpq')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer">minpq.py</button>
                 </div>
-                <span class="text-xs text-blue-300 font-bold font-sans">OOP Chuẩn Algorithms</span>
+                <span class="text-xs text-blue-300 font-bold">OOP Chuẩn Algorithms</span>
               </div>
-              <pre id="s11-code-edge" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DirectedEdge:
+              <pre id="s11-code-edge" class="p-4 text-xs sm:text-sm flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DirectedEdge:
     def __init__(self, v: int, w: int, weight: float):
         self._v = v
         self._w = w
@@ -996,7 +1056,7 @@ class EdgeWeightedDigraph:
     def edges(self) -> list[DirectedEdge]:
         return [e for v in range(self.V) for e in self._adj[v]]</code></pre>
 
-              <pre id="s11-code-minpq" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class IndexMinPQ:
+              <pre id="s11-code-minpq" class="p-4 text-xs sm:text-sm flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class IndexMinPQ:
     def __init__(self, max_n: int):
         self.max_n = max_n
         self.n = 0
@@ -1039,7 +1099,15 @@ class EdgeWeightedDigraph:
             if j < self.n and self._greater(j, j + 1): j += 1
             if not self._greater(k, j): break
             self._exch(k, j)
-            k = j</code></pre>
+            k = j
+
+    def _greater(self, i: int, j: int) -> bool:
+        return self.keys[self.pq[i]] > self.keys[self.pq[j]]
+
+    def _exch(self, i: int, j: int):
+        self.pq[i], self.pq[j] = self.pq[j], self.pq[i]
+        self.qp[self.pq[i]] = i
+        self.qp[self.pq[j]] = j</code></pre>
             </div>
           </div>
 
@@ -1084,14 +1152,14 @@ class EdgeWeightedDigraph:
           <!-- Left Column: Code Window with Tabs -->
           <div class="slide-col">
             <div class="terminal-window h-full flex flex-col">
-              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+              <div class="flex items-center justify-between px-4 py-2.5 bg-slate-800 border-b border-slate-700 text-sm text-slate-300">
                 <div class="flex items-center gap-2">
-                  <button id="s12-btn-dijkstra" onclick="s12_switchTab('dijkstra')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all">dijkstra_v2.py</button>
-                  <button id="s12-btn-floyd" onclick="s12_switchTab('floyd')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all">floyd_v2.py</button>
+                  <button id="s12-btn-dijkstra" onclick="s12_switchTab('dijkstra')" class="px-3 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition-all cursor-pointer">dijkstra_v2.py</button>
+                  <button id="s12-btn-floyd" onclick="s12_switchTab('floyd')" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-700 text-slate-300 hover:text-white transition-all cursor-pointer">floyd_v2.py</button>
                 </div>
-                <span class="text-xs text-indigo-300 font-bold font-sans">IndexMinPQ & _parent Matrix</span>
+                <span class="text-xs text-indigo-300 font-bold">IndexMinPQ & _parent Matrix</span>
               </div>
-              <pre id="s12-code-dijkstra" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DijkstraSP:
+              <pre id="s12-code-dijkstra" class="p-4 text-xs sm:text-sm flex-1 overflow-auto leading-relaxed text-slate-100"><code class="language-python">class DijkstraSP:
     def __init__(self, G: EdgeWeightedDigraph, s: int):
         self._s = s
         self._edge_to = [None] * G.V
@@ -1129,7 +1197,7 @@ class EdgeWeightedDigraph:
         path.reverse()
         return path</code></pre>
 
-              <pre id="s12-code-floyd" class="p-4 text-xs sm:text-sm font-mono flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class FloydWarshall:
+              <pre id="s12-code-floyd" class="p-4 text-xs sm:text-sm flex-1 overflow-auto leading-relaxed text-slate-100 hidden"><code class="language-python">class FloydWarshall:
     def __init__(self, G: EdgeWeightedDigraph):
         self.V = G.V
         self._dist = [[float('inf')] * self.V for _ in range(self.V)]
@@ -1157,6 +1225,8 @@ class EdgeWeightedDigraph:
         return any(self._dist[i][i] < 0 for i in range(self.V))
 
     def path_to(self, u: int, v: int) -> list[int] | None:
+        if self.has_negative_cycle():
+            raise ValueError("Không thể truy vết đường đi khi đồ thị có chu trình âm")
         if self._dist[u][v] == float('inf'): return None
         path, curr = [], v
         while curr != -1:
@@ -1188,7 +1258,7 @@ class EdgeWeightedDigraph:
             <div class="spec-card border-emerald-200 bg-emerald-50/30">
               <span class="spec-badge bg-emerald-600 text-white font-bold">3. TRUY VẾT & PHÁT HIỆN CHU TRÌNH ÂM</span>
               <p class="spec-text text-slate-800">
-                Phương thức <code>path_to(u, v)</code> lần ngược từ <code>v</code> về <code>u</code> qua <code>_parent</code>. Kiểm tra chu trình âm cực nhanh qua đường chéo chính <code>_dist[i][i] &lt; 0</code>.
+                Phương thức <code>path_to(u, v)</code> chặn trước trường hợp có chu trình âm và lần ngược từ <code>v</code> về <code>u</code> qua <code>_parent</code>. Kiểm tra chu trình âm qua đường chéo chính <code>_dist[i][i] &lt; 0</code>.
               </p>
             </div>
           </div>
@@ -1214,7 +1284,7 @@ class EdgeWeightedDigraph:
               <p class="spec-text text-emerald-950 font-semibold mt-1">
                 Cả DijkstraSP (IndexMinPQ) và FloydWarshall (_parent) trên đồ thị 5 đỉnh đều cho cùng khoảng cách và lộ trình từ 0 (A) đến 4 (E):
               </p>
-              <div class="p-3 rounded-xl bg-white border border-emerald-200 font-mono text-emerald-700 text-base font-extrabold text-center mt-2 shadow-sm">
+              <div class="p-3 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-base font-extrabold text-center mt-2 shadow-sm">
                 0 → 2 → 1 → 3 → 4 (A → C → B → D → E, Chi phí: 10.0)
               </div>
             </div>
@@ -1222,7 +1292,7 @@ class EdgeWeightedDigraph:
             <div class="spec-card">
               <span class="spec-badge bg-blue-100 text-blue-800 font-bold">INDEXMINPQ TIẾT KIỆM BỘ NHỚ TUYỆT ĐỐI</span>
               <p class="spec-text text-slate-800">
-                Không sinh bất kỳ đỉnh rác nào! Các đỉnh B (5.0➔3.0), D (9.0➔7.0), E (11.0➔10.0) được cập nhật tại chỗ bằng <code>decrease_key()</code>.
+                Không sinh bất kỳ đỉnh rác nào! Các đỉnh B (5.0 ➔ 3.0), D (9.0 ➔ 7.0), E (11.0 ➔ 10.0) được cập nhật tại chỗ bằng <code>decrease_key()</code>.
               </p>
             </div>
 
@@ -1237,13 +1307,13 @@ class EdgeWeightedDigraph:
           <!-- Right Column: Terminal Window Mockup -->
           <div class="slide-col">
             <div class="terminal-window h-full flex flex-col">
-              <div class="flex items-center gap-2 px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm font-mono text-slate-300">
+              <div class="flex items-center gap-2 px-5 py-3 bg-slate-800 border-b border-slate-700 text-sm text-slate-300">
                 <span class="w-3 h-3 rounded-full bg-rose-500"></span>
                 <span class="w-3 h-3 rounded-full bg-amber-500"></span>
                 <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
                 <span class="ml-2 font-bold text-white">Console Output — dijkstra_v2.py & floyd_v2.py</span>
               </div>
-              <pre class="p-4 text-xs font-mono text-emerald-400 flex-1 overflow-auto bg-slate-900 leading-relaxed font-medium">--- ĐƯỜNG ĐI NGẮN NHẤT TỪ ĐỈNH 0 (A) THEO DIJKSTRASP ---
+              <pre class="p-4 text-xs text-emerald-300 flex-1 overflow-auto bg-slate-900 leading-relaxed font-medium">--- ĐƯỜNG ĐI NGẮN NHẤT TỪ ĐỈNH 0 (A) THEO DIJKSTRASP ---
 0 to 0 ( 0.00): 
 0 to 1 ( 3.00): 0 -> 2 2.00  2 -> 1 1.00
 0 to 2 ( 2.00): 0 -> 2 2.00
@@ -1278,11 +1348,6 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
         </div>
       </div>
     </section>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- =====================================================================
          SLIDE 14 (#14) - ĐỘ PHỨC TẠP THỜI GIAN
@@ -1298,9 +1363,9 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
           <!-- Left Column: Table -->
           <div class="slide-col justify-center">
             <div class="bento-box p-6 overflow-hidden">
-              <span class="text-sm uppercase tracking-wider text-slate-500 font-bold block mb-4 font-sans">BẢNG SO SÁNH TIỆM CẬN (BEST / AVERAGE / WORST)</span>
-              <table class="w-full text-left text-base font-sans border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                <thead class="bg-slate-100 text-xs text-slate-700 uppercase font-sans">
+              <span class="text-sm uppercase tracking-wider text-slate-500 font-bold block mb-4">BẢNG SO SÁNH TIỆM CẬN (BEST / AVERAGE / WORST)</span>
+              <table class="w-full text-left text-base border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <thead class="bg-slate-100 text-xs text-slate-700 uppercase">
                   <tr>
                     <th class="p-3.5 border-b border-slate-200">Cấu hình Cài đặt</th>
                     <th class="p-3.5 border-b border-slate-200">Tốt nhất (Best)</th>
@@ -1308,29 +1373,29 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
                     <th class="p-3.5 border-b border-slate-200">Xấu nhất (Worst)</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 font-mono text-sm sm:text-base text-slate-800">
+                <tbody class="divide-y divide-slate-200 text-sm sm:text-base text-slate-800">
                   <tr>
-                    <td class="p-3.5 font-sans font-semibold text-slate-600">Dijkstra (Mảng phẳng)</td>
-                    <td class="p-3.5">O(V<sup>2</sup>)</td>
-                    <td class="p-3.5">O(V<sup>2</sup>)</td>
-                    <td class="p-3.5">O(V<sup>2</sup>)</td>
+                    <td class="p-3.5 font-semibold text-slate-600">Dijkstra (Mảng phẳng, 1 nguồn)</td>
+                    <td class="p-3.5 font-semibold">O(V<sup>2</sup>)</td>
+                    <td class="p-3.5 font-semibold">O(V<sup>2</sup>)</td>
+                    <td class="p-3.5 font-semibold">O(V<sup>2</sup>)</td>
                   </tr>
                   <tr class="bg-blue-50/60 text-blue-900">
-                    <td class="p-3.5 font-sans font-bold text-blue-700">Dijkstra (Min-Heap)</td>
+                    <td class="p-3.5 font-bold text-blue-700">Dijkstra (IndexMinPQ, 1 nguồn)</td>
                     <td class="p-3.5 text-emerald-700 font-bold">Ω(V log V)</td>
                     <td class="p-3.5 font-bold text-blue-700">O((V+E) log V)</td>
                     <td class="p-3.5 font-bold text-blue-700">O((V+E) log V)</td>
                   </tr>
                   <tr class="bg-indigo-50/60 text-indigo-900">
-                    <td class="p-3.5 font-sans font-bold text-indigo-700">Floyd-Warshall</td>
+                    <td class="p-3.5 font-bold text-indigo-700">Floyd-Warshall (Mọi cặp)</td>
                     <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
                     <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
                     <td class="p-3.5 font-bold text-indigo-700">Θ(V<sup>3</sup>)</td>
                   </tr>
                 </tbody>
               </table>
-              <p class="text-sm text-slate-600 mt-4 font-sans leading-relaxed">
-                * Thuật toán Floyd-Warshall luôn chạy đúng <strong>V<sup>3</sup></strong> phép tính trong mọi trường hợp vì 3 vòng lặp phải duyệt hết để so sánh, không có điều kiện dừng sớm.
+              <p class="text-sm text-slate-600 mt-4 leading-relaxed">
+                * Floyd-Warshall có độ phức tạp <strong>Θ(V<sup>3</sup>)</strong>. Với bài toán mọi cặp, chạy Dijkstra <strong>V</strong> lần tốn <strong>O(V(V+E) log V)</strong> để đặt lên bàn cân với Floyd-Warshall <strong>Θ(V<sup>3</sup>)</strong>.
               </p>
             </div>
           </div>
@@ -1340,22 +1405,22 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
             <div class="spec-card border-blue-200 bg-blue-50/40">
               <span class="spec-badge bg-blue-600 text-white font-bold">KHI ĐỒ THỊ THƯA (SPARSE: E ≈ V)</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Như mạng lưới đường bộ, giao thông (<strong>V ≈ 100.000, E ≈ 300.000</strong>):
+                Nếu cần khoảng cách giữa mọi cặp trên đồ thị thưa (<strong>E ≈ V</strong>):
               </p>
-              <div class="flex items-center justify-between text-base font-sans mt-2 p-3 bg-white rounded-xl border border-blue-200 shadow-sm">
-                <span class="font-bold text-slate-700">Dijkstra: O(V log V)</span>
-                <span class="text-emerald-700 font-bold">ÁP ĐẢO HOÀN TOÀN</span>
+              <div class="flex items-center justify-between text-base mt-2 p-3 bg-white rounded-xl border border-blue-200 shadow-sm">
+                <span class="font-bold text-slate-700">V lần Dijkstra: O(V(V+E) log V)</span>
+                <span class="text-emerald-700 font-bold">THƯỜNG CÓ LỢI TRÊN ĐỒ THỊ THƯA</span>
               </div>
             </div>
 
             <div class="spec-card border-indigo-200 bg-indigo-50/40">
               <span class="spec-badge bg-indigo-600 text-white font-bold">KHI ĐỒ THỊ DÀY ĐẶC (DENSE: E ≈ V<sup>2</sup>)</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Khi hầu như giữa hai đỉnh nào cũng có cạnh nối trực tiếp:
+                Với đồ thị dày đặc (<strong>E ≈ V<sup>2</sup></strong>), khi cần khoảng cách giữa mọi cặp:
               </p>
-              <div class="flex items-center justify-between text-base font-sans mt-2 p-3 bg-white rounded-xl border border-indigo-200 shadow-sm">
+              <div class="flex items-center justify-between text-base mt-2 p-3 bg-white rounded-xl border border-indigo-200 shadow-sm">
                 <span class="font-bold text-slate-700">Floyd-Warshall: O(V<sup>3</sup>)</span>
-                <span class="text-indigo-700 font-bold">THẮNG NHỜ VÒNG LẶP ĐƠN GIẢN</span>
+                <span class="text-indigo-700 font-bold">THƯỜNG CÓ LỢI THẾ TIỆM CẬN</span>
               </div>
             </div>
           </div>
@@ -1379,14 +1444,14 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
             <div class="spec-card">
               <span class="spec-badge bg-blue-100 text-blue-800 font-bold">BỘ NHỚ CỦA DIJKSTRA: O(V + E)</span>
               <p class="spec-text text-slate-800">
-                Rất tiết kiệm trên đồ thị thưa. Danh sách kề chỉ lưu đúng số cạnh thực tế, Min-Heap chứa tối đa <strong>E</strong> phần tử.
+                Rất tiết kiệm trên đồ thị thưa. Danh sách kề lưu đúng số cạnh thực tế; với <strong>IndexMinPQ</strong>, Min-Heap chứa tối đa <strong>V</strong> đỉnh.
               </p>
             </div>
 
             <div class="spec-card">
               <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">BỘ NHỚ CỦA FLOYD-WARSHALL: O(V<sup>2</sup>)</span>
               <p class="spec-text text-slate-800">
-                Bắt buộc cấp phát mảng 2 chiều kích thước <strong>V × V</strong>. Với <strong>V = 500</strong>, ma trận chỉ chiếm khoảng <strong>1 MB RAM</strong> — hoàn toàn nhẹ nhàng trên máy tính hiện đại!
+                Ma trận có kích thước <strong>V × V</strong>. Với <strong>V = 500</strong> là <strong>250.000 ô</strong>; mảng số liên tục 4 byte/ô dùng khoảng <strong>1 MB dữ liệu thô</strong>, còn Python list-of-list tốn nhiều hơn do overhead.
               </p>
             </div>
           </div>
@@ -1394,20 +1459,20 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
           <!-- Right Column: Visual Cache Locality Explanation -->
           <div class="slide-col">
             <div class="bento-box p-6 h-full flex flex-col justify-center">
-              <span class="text-sm uppercase tracking-wider text-emerald-700 font-bold mb-3 font-sans">VÌ SAO FLOYD-WARSHALL CHẠY CỰC NHANH KHI V ≤ 500?</span>
+              <span class="text-sm uppercase tracking-wider text-emerald-700 font-bold mb-3">VÌ SAO FLOYD-WARSHALL CHẠY NHANH TRÊN QUY MÔ NHỎ (V ≤ 500)?</span>
               
-              <div class="space-y-4 text-base text-slate-700 font-sans mt-2">
+              <div class="space-y-4 text-base text-slate-700 mt-2">
                 <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-200">
-                  <span class="text-indigo-900 font-bold block mb-1 font-sans">Floyd-Warshall: Tận dụng hoàn hảo Cache L1/L2</span>
+                  <span class="text-indigo-900 font-bold block mb-1">Floyd-Warshall: Có thể tận dụng Cache L1/L2</span>
                   <p class="leading-relaxed">
-                    Ba vòng lặp tuần tự duyệt qua các ô nhớ mảng 2 chiều nằm sát nhau trong RAM. Khi nạp 1 ô, CPU kéo theo cả dòng nhớ kế bên vào Cache, giúp <strong>tỉ lệ Cache Hit đạt trên 95%</strong>!
+                    Ba vòng lặp duyệt tuần tự có cấu trúc điều khiển rất đơn giản và tận dụng tốt tính định vị bộ nhớ (spatial locality), đặc biệt khi biểu diễn bằng mảng liền khối trong C/C++/NumPy (trong Python list-of-list, mỗi hàng là một list riêng biệt).
                   </p>
                 </div>
 
                 <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <span class="text-blue-900 font-bold block mb-1 font-sans">Dijkstra: Hiện tượng nhảy con trỏ ngẫu nhiên</span>
+                  <span class="text-blue-900 font-bold block mb-1">Dijkstra: Hiện tượng nhảy con trỏ ngẫu nhiên</span>
                   <p class="leading-relaxed">
-                    Cấu trúc cây nhị phân trong Heap và danh sách kề phải liên tục nhảy địa chỉ nhớ ngẫu nhiên, gây hiện tượng <strong>Cache Miss</strong> liên tục khi đồ thị dày đặc.
+                    Cấu trúc cây nhị phân trong Heap và danh sách kề phải liên tục nhảy địa chỉ nhớ ngẫu nhiên khi thực hiện <code>_swim</code> / <code>_sink</code>, gây nhiều <strong>Cache Miss</strong> hơn khi đồ thị dày đặc.
                   </p>
                 </div>
               </div>
@@ -1435,17 +1500,17 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
               <p class="spec-text font-medium text-slate-800 mt-1">
                 Xét 3 đỉnh: <strong>A → B</strong> (chi phí 1), <strong>A → C</strong> (chi phí 4) và <strong>C → B</strong> (chi phí âm: -5):
               </p>
-              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-base text-slate-800 font-sans">
-                <li>Bước 1: Dijkstra thấy đường sang B mất 1 (nhỏ hơn sang C mất 4) nên <strong>vội vàng chốt luôn khoảng cách tới B là 1</strong>!</li>
-                <li>Bước 2: Sau đó xét C, thấy đi đường <strong>A → C → B</strong> chỉ mất <strong>4 + (-5) = -1 &lt; 1</strong>.</li>
-                <li>Hậu quả: <strong>Vì B đã bị chốt rồi nên Dijkstra không sửa lại</strong>! Thuật toán báo sai <code>dist[B] = 1</code> trong khi thực tế tối ưu là <code>-1</code>.</li>
+              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-sm sm:text-base text-slate-800">
+                <li>Bước 1: Dijkstra kinh điển có tập <code>visited</code> thấy đường sang B mất 1 (nhỏ hơn sang C mất 4), nên <strong>chốt vĩnh viễn dist[B] = 1</strong>.</li>
+                <li>Bước 2: Sau đó xét C, thấy đường <strong>A → C → B</strong> chỉ mất <strong>4 + (-5) = -1 &lt; 1</strong>.</li>
+                <li>Dijkstra kinh điển giữ B đã chốt nên trả <code>dist[B] = 1</code> sai. Code <code>DijkstraSP</code> ở slide 12 không có <code>visited</code>: B có thể được chèn lại và cập nhật thành <code>-1</code>. Đây là sửa nhãn, không bảo đảm Dijkstra đúng với cạnh âm; có chu trình âm đi tới được thì vòng lặp có thể không kết thúc.</li>
               </ul>
             </div>
 
             <div class="spec-card">
               <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">FLOYD-WARSHALL XỬ LÝ CHU TRÌNH ÂM NHƯ THẾ NÀO?</span>
               <p class="spec-text text-slate-800">
-                Floyd-Warshall vẫn tính đúng với cạnh âm. Nhưng nếu có chu trình âm, khoảng cách sẽ giảm vô tận. Thuật toán phát hiện cực kỳ đơn giản: <strong>nếu tồn tại đỉnh i có <code>D[i][i] &lt; 0</code></strong>.
+                Floyd-Warshall vẫn tính đúng với cạnh âm. Nhưng nếu có chu trình âm, khoảng cách sẽ giảm vô tận. Thuật toán phát hiện cực kỳ đơn giản: <strong>nếu tồn tại đỉnh i có <code>_dist[i][i] &lt; 0</code></strong>.
               </p>
             </div>
           </div>
@@ -1457,45 +1522,45 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
 
               <svg viewBox="0 0 540 340" class="w-full h-full">
                 <defs>
-                  <marker id="s16-arrow-red" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#E11D48" />
+                  <marker id="s16-arrow-red" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#A61C3C" />
                   </marker>
-                  <marker id="s16-arrow-blue" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#2563EB" />
+                  <marker id="s16-arrow-blue" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#C84B31" />
                   </marker>
-                  <marker id="s16-arrow-green" markerWidth="9" markerHeight="7" refX="6" refY="3.5" orient="auto">
-                    <polygon points="0 0, 9 3.5, 0 7" fill="#059669" />
+                  <marker id="s16-arrow-green" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#1E6F5C" />
                   </marker>
                 </defs>
 
-                <!-- Edge A -> B -->
-                <line x1="131" y1="162" x2="393" y2="90" stroke="#E11D48" stroke-width="4" marker-end="url(#s16-arrow-red)" />
-                <rect x="185" y="86" width="140" height="26" rx="6" fill="#FFFFFF" stroke="#FECDD3" stroke-width="1.5" />
-                <text x="255" y="104" fill="#BE123C" font-size="14" font-weight="bold" text-anchor="middle">A → B (w = 1)</text>
+                <!-- Edge A -> B (dashed wrong greedy choice) -->
+                <line x1="131" y1="162" x2="395" y2="90" stroke="#A61C3C" stroke-width="3.5" stroke-dasharray="7,5" class="animated-dash" marker-end="url(#s16-arrow-red)" />
+                <rect x="175" y="76" width="145" height="28" rx="8" fill="#FDF2F4" stroke="#F5C2CE" stroke-width="1.5" />
+                <text x="247" y="95" fill="#8A1430" font-size="14" font-weight="bold" text-anchor="middle">A → B (w = 1)</text>
 
                 <!-- Edge A -> C -->
-                <line x1="128" y1="186" x2="237" y2="251" stroke="#2563EB" stroke-width="3.5" marker-end="url(#s16-arrow-blue)" />
-                <rect x="35" y="230" width="135" height="26" rx="6" fill="#FFFFFF" stroke="#BFDBFE" stroke-width="1.5" />
-                <text x="165" y="248" fill="#1D4ED8" font-size="14" font-weight="bold" text-anchor="end">A → C (w = 4)</text>
+                <line x1="128" y1="186" x2="239" y2="252" stroke="#C84B31" stroke-width="3.5" marker-end="url(#s16-arrow-blue)" />
+                <rect x="35" y="232" width="135" height="28" rx="8" fill="#FDF3F0" stroke="#F5D0C5" stroke-width="1.5" />
+                <text x="102" y="251" fill="#A83820" font-size="14" font-weight="bold" text-anchor="middle">A → C (w = 4)</text>
 
                 <!-- Edge C -> B -->
-                <line x1="291" y1="245" x2="405" y2="109" stroke="#059669" stroke-width="4.5" marker-end="url(#s16-arrow-green)" />
-                <rect x="365" y="174" width="145" height="26" rx="6" fill="#FFFFFF" stroke="#A7F3D0" stroke-width="1.5" />
-                <text x="370" y="192" fill="#047857" font-size="14" font-weight="bold" text-anchor="start">C → B (w = -5)</text>
+                <line x1="291" y1="245" x2="407" y2="107" stroke="#1E6F5C" stroke-width="4.5" class="edge-flow-active" marker-end="url(#s16-arrow-green)" />
+                <rect x="368" y="172" width="148" height="28" rx="8" fill="#EFF8F5" stroke="#B5E2D5" stroke-width="1.5" />
+                <text x="442" y="191" fill="#165848" font-size="14" font-weight="bold" text-anchor="middle">C → B (w = -5)</text>
 
                 <!-- Nodes -->
-                <circle cx="100" cy="170" r="32" fill="#2563EB" stroke="#1E40AF" stroke-width="3.5" />
+                <circle cx="100" cy="170" r="32" fill="#C84B31" stroke="#872B18" stroke-width="3.5" />
                 <text x="100" y="178" fill="#FFFFFF" font-weight="bold" font-size="20" text-anchor="middle">A</text>
 
-                <circle cx="430" cy="80" r="32" fill="#FEE2E2" stroke="#E11D48" stroke-width="3.5" />
-                <text x="430" y="88" fill="#9F1239" font-weight="bold" font-size="20" text-anchor="middle">B</text>
+                <circle cx="430" cy="80" r="32" fill="#FCE4E8" stroke="#A61C3C" stroke-width="3.5" />
+                <text x="430" y="88" fill="#701026" font-weight="bold" font-size="20" text-anchor="middle">B</text>
 
-                <circle cx="270" cy="270" r="32" fill="#EFF6FF" stroke="#2563EB" stroke-width="3.5" />
-                <text x="270" y="278" fill="#1E40AF" font-weight="bold" font-size="20" text-anchor="middle">C</text>
+                <circle cx="270" cy="270" r="32" fill="#FDF3F0" stroke="#C84B31" stroke-width="3.5" />
+                <text x="270" y="278" fill="#872B18" font-weight="bold" font-size="20" text-anchor="middle">C</text>
               </svg>
 
               <div class="w-full text-center p-3 rounded-xl bg-slate-100 text-sm font-semibold text-slate-700">
-                Dijkstra báo sai: <span class="text-rose-700 font-bold">dist[B] = 1</span> | Thực tế tối ưu: <span class="text-emerald-700 font-bold">dist[B] = -1</span> (qua C)
+                Dijkstra kinh điển (có visited): <span class="text-rose-700 font-bold">dist[B] = 1</span> | Tối ưu thực tế: <span class="text-emerald-700 font-bold">dist[B] = -1</span> (qua C)
               </div>
             </div>
           </div>
@@ -1504,12 +1569,12 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
     </section>
 
     <!-- =====================================================================
-         SLIDE 17 (#17) - ỨNG DỤNG THỰC TẾ (P1): ĐIỀU PHỐI CẤP CỨU (LEETCODE 743)
+         SLIDE 17 (#17) - ỨNG DỤNG DIJKSTRA: ĐIỀU PHỐI CẤP CỨU (LIÊN HỆ LEETCODE 743)
          ===================================================================== -->
     <section class="slide" id="slide-17" data-slide="17">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng Thực tế • LeetCode 743</span>
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng Dijkstra • So sánh hai nguồn</span>
           <h2 class="slide-title">Bài toán Ứng dụng (Phần 1): <em>Điều phối Xe Cấp cứu Thời gian thực</em></h2>
         </header>
 
@@ -1523,17 +1588,17 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
               </p>
             </div>
 
-            <div class="grid grid-cols-2 gap-3.5 font-mono text-sm">
+            <div class="grid grid-cols-2 gap-3.5 text-sm">
               <div class="p-4 rounded-xl bg-white border border-slate-200 shadow-sm">
                 <span class="text-xs text-slate-500 font-bold block mb-1">BỆNH VIỆN TRUNG TÂM H1:</span>
                 <span class="text-slate-800 font-semibold block">H1 → R2 → R3 → R4</span>
-                <span class="text-lg font-bold text-slate-800 block mt-1">15.0 phút</span>
+                <span class="text-lg font-extrabold text-slate-800 block mt-1">15.0 phút</span>
               </div>
 
               <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-300 shadow-sm">
                 <span class="text-xs text-emerald-800 font-bold block mb-1">TRẠM VỆ TINH H2:</span>
                 <span class="text-emerald-900 font-bold block">H2 → R4 (Trực tiếp)</span>
-                <span class="text-lg font-bold text-emerald-700 block mt-1">7.0 phút</span>
+                <span class="text-lg font-extrabold text-emerald-700 block mt-1">7.0 phút</span>
               </div>
             </div>
 
@@ -1545,24 +1610,24 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
             </div>
           </div>
 
-          <!-- Right Column: Interactive Urban Map SVG -->
+          <!-- Right Column: Interactive Urban Map SVG (Zero Overlap) -->
           <div class="slide-col">
             <div class="bento-box p-6 h-full flex flex-col justify-between">
-              <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100 font-sans">
+              <div class="flex items-center justify-between text-sm text-slate-600 pb-2 border-b border-slate-100">
                 <span class="font-bold text-slate-800">MẠNG LƯỚI GIAO THÔNG ĐÔ THỊ 6 ĐỊA ĐIỂM</span>
-                <span class="text-emerald-700 font-bold">Tuyến nhanh nhất: H2 → R4</span>
+                <span class="text-emerald-700 font-bold">Tuyến nhanh nhất: H2 → R4 (7m)</span>
               </div>
 
               <!-- Map SVG -->
-              <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[320px]">
-                <svg id="s17-map-svg" viewBox="0 0 850 480" class="w-full h-full">
-                  <!-- Rendered dynamically by app.js -->
+              <div class="w-full flex-1 flex items-center justify-center my-auto min-h-[340px]">
+                <svg id="s17-map-svg" viewBox="0 0 860 470" class="w-full h-full">
+                  <!-- Rendered dynamically by app.js with crystal-clear coordinates -->
                 </svg>
               </div>
 
-              <div class="text-sm text-slate-600 flex items-center justify-between pt-3 border-t border-slate-100 font-sans">
-                <span>Thời gian phát tín hiệu tới toàn bộ khu dân cư:</span>
-                <span class="text-blue-700 font-bold">15.0 phút (LeetCode 743)</span>
+              <div class="text-sm text-slate-600 flex items-center justify-between pt-3 border-t border-slate-100">
+                <span>Trong LeetCode 743, thời gian lan truyền từ H1 tới mọi khu dân cư:</span>
+                <span class="text-blue-700 font-bold">max(dist[v]) = 15.0 phút</span>
               </div>
             </div>
           </div>
@@ -1571,12 +1636,12 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
     </section>
 
     <!-- =====================================================================
-         SLIDE 18 (#18) - ỨNG DỤNG THỰC TẾ (P2): QUY HOẠCH TRẠM Y TẾ (LEETCODE 1334)
+         SLIDE 18 (#18) - BÀI TOÁN TRẠM Y TẾ LẤY CẢM HỨNG TỪ LEETCODE 1334
          ===================================================================== -->
     <section class="slide" id="slide-18" data-slide="18">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng Thực tế • LeetCode 1334</span>
+          <span class="slide-tag bg-emerald-50 text-emerald-700 border border-emerald-200">Ứng dụng lấy cảm hứng từ LeetCode 1334</span>
           <h2 class="slide-title">Bài toán Ứng dụng (Phần 2): <em>Quy hoạch Trạm Y tế Trung tâm</em></h2>
         </header>
 
@@ -1586,12 +1651,12 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
             <div class="spec-card">
               <span class="spec-badge bg-indigo-100 text-indigo-800 font-bold">TIÊU CHÍ "THỜI GIAN VÀNG" (≤ 15 PHÚT)</span>
               <p class="spec-text font-medium text-slate-800">
-                Sở Y tế cần chọn 1 vị trí đặt trạm mới sao cho có thể tiếp cận được nhiều khu dân cư nhất trong vòng 15 phút và thời gian tới ca bệnh xa nhất là nhỏ nhất (Tâm đồ thị - Jordan Center).
+                Đây là biến thể lấy cảm hứng từ LeetCode 1334 (đề gốc chọn thành phố có ít láng giềng nhất trong ngưỡng). Ở đây, chọn trạm tiếp cận nhiều khu dân cư nhất trong 15 phút và giảm thời gian tới ca bệnh xa nhất (tâm đồ thị - Jordan Center).
               </p>
             </div>
 
             <!-- Candidate Grid -->
-            <div class="grid grid-cols-2 gap-3 text-sm font-sans" id="s18-hub-cards">
+            <div class="grid grid-cols-2 gap-3 text-sm" id="s18-hub-cards">
               <!-- Rendered dynamically by app.js -->
             </div>
           </div>
@@ -1600,17 +1665,17 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
           <div class="slide-col">
             <div class="bento-box p-6 h-full flex flex-col justify-center gap-4">
               <div class="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-400 shadow-sm">
-                <span class="text-xs font-bold text-emerald-800 block mb-1 font-sans">VỊ TRÍ ĐƯỢC CHỌN: KHU DÂN CƯ R1 (PHỐ CỔ)</span>
-                <p class="text-base text-slate-800 leading-relaxed font-sans font-medium">
+                <span class="text-xs font-bold text-emerald-800 block mb-1">VỊ TRÍ ĐƯỢC CHỌN: KHU DÂN CƯ R1 (PHỐ CỔ)</span>
+                <p class="text-base text-slate-800 leading-relaxed font-medium">
                   <strong>Khu R1</strong> phủ sóng được <strong>100% (4/4) khu dân cư</strong> trong vòng 15 phút, với thời gian tiếp cận ca bệnh xa nhất chỉ là <strong>12.0 phút</strong> (so với H1 là 15 phút, H2 là 25 phút).
                 </p>
               </div>
 
-              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-mono">
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-sm">
                 <span class="text-slate-500 font-bold block mb-2">THỜI GIAN DI CHUYỂN TỪ R1 ĐẾN CÁC KHU:</span>
-                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700">R1 → R2 (KĐT Mới):</span><span class="text-blue-700 font-bold">3.0 phút</span></div>
-                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700">R1 → R3 (Khu CNC):</span><span class="text-blue-700 font-bold">7.0 phút</span></div>
-                <div class="flex justify-between py-1.5"><span class="text-slate-700">R1 → R4 (Ven sông):</span><span class="text-emerald-700 font-extrabold">12.0 phút (Xa nhất)</span></div>
+                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700 font-medium">R1 → R2 (KĐT Mới):</span><span class="text-blue-700 font-bold">3.0 phút</span></div>
+                <div class="flex justify-between border-b border-slate-200 py-1.5"><span class="text-slate-700 font-medium">R1 → R3 (Khu CNC):</span><span class="text-blue-700 font-bold">7.0 phút</span></div>
+                <div class="flex justify-between py-1.5"><span class="text-slate-700 font-medium">R1 → R4 (Ven sông):</span><span class="text-emerald-700 font-extrabold">12.0 phút (Xa nhất)</span></div>
               </div>
             </div>
           </div>
@@ -1624,7 +1689,7 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
     <section class="slide" id="slide-19" data-slide="19">
       <div class="slide-container">
         <header class="slide-header">
-          <span class="slide-tag bg-purple-50 text-purple-700 border border-purple-200">Góc Mở rộng • Công nghệ Thực tế</span>
+          <span class="slide-tag bg-indigo-50 text-indigo-700 border border-indigo-200">Góc Mở rộng • Công nghệ Thực tế</span>
           <h2 class="slide-title">Mở rộng Thực tế: <em>Bản đồ Lớn & Các Thuật toán Khác</em></h2>
         </header>
 
@@ -1632,8 +1697,8 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
           <!-- Left Column: 5 Algorithms Comparison Table -->
           <div class="slide-col justify-center">
             <div class="bento-box p-6 overflow-hidden">
-              <span class="text-sm font-sans uppercase tracking-wider text-slate-500 font-bold block mb-3">SO SÁNH 5 THUẬT TOÁN TÌM ĐƯỜNG KINH ĐIỂN</span>
-              <table class="w-full text-left text-xs sm:text-sm font-sans border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <span class="text-sm uppercase tracking-wider text-slate-500 font-bold block mb-3">SO SÁNH 5 THUẬT TOÁN TÌM ĐƯỜNG KINH ĐIỂN</span>
+              <table class="w-full text-left text-xs sm:text-sm border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <thead class="bg-slate-100 text-slate-700">
                   <tr>
                     <th class="p-3">Thuật toán</th>
@@ -1647,29 +1712,29 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
                   <tr><td class="p-3 font-bold text-indigo-700">Floyd-Warshall</td><td class="p-3">Mọi cặp (APSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3 font-medium">Θ(V<sup>3</sup>)</td></tr>
                   <tr><td class="p-3 font-bold text-amber-700">Bellman-Ford</td><td class="p-3">Một nguồn (SSSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3 font-medium">O(V · E)</td></tr>
                   <tr><td class="p-3 font-bold text-emerald-700">Johnson</td><td class="p-3">Mọi cặp (APSP)</td><td class="p-3 text-emerald-700 font-bold">Có</td><td class="p-3 font-medium">O(V<sup>2</sup> log V + VE)</td></tr>
-                  <tr><td class="p-3 font-bold text-purple-700">Thuật toán A*</td><td class="p-3">Điểm đến Điểm</td><td class="p-3 text-rose-700 font-bold">Không</td><td class="p-3 font-medium">O(E) có định hướng</td></tr>
+                  <tr><td class="p-3 font-bold text-slate-900">Thuật toán A*</td><td class="p-3">Điểm đến Điểm</td><td class="p-3 text-rose-700 font-bold">Không</td><td class="p-3 font-medium">O(E) có định hướng</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Right Column: Real-world Google Maps scale -->
+          <!-- Right Column: Real-world routing scale -->
           <div class="slide-col gap-4 justify-center">
             <div class="spec-card border-indigo-200 bg-indigo-50/40">
-              <span class="spec-badge bg-indigo-600 text-white font-bold">VÌ SAO GOOGLE MAPS KHÔNG DÙNG THUẦN DIJKSTRA?</span>
+              <span class="spec-badge bg-indigo-600 text-white font-bold">VÌ SAO HỆ THỐNG ĐỊNH TUYẾN HIỆN ĐẠI CẦN KỸ THUẬT TĂNG TỐC?</span>
               <p class="spec-text font-medium text-slate-800 mt-1">
-                Bản đồ toàn cầu có hàng trăm triệu nút giao thông (<strong>V ≈ 10<sup>8</sup></strong>).
+                Mạng lưới giao thông quy mô toàn cầu có thể có rất nhiều nút; phép tính minh họa dưới đây giả sử <strong>V ≈ 10<sup>8</sup></strong>.
               </p>
-              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-sm sm:text-base text-slate-700 font-sans">
-                <li><strong>Floyd-Warshall:</strong> Cần tới 40 Petabytes RAM để lưu ma trận (bất khả thi)!</li>
-                <li><strong>Dijkstra thuần túy:</strong> Quét theo hình tròn lan tỏa, mất vài chục giây cho mỗi lượt tra cứu.</li>
+              <ul class="list-disc pl-5 mt-2 space-y-1.5 text-sm sm:text-base text-slate-700">
+                <li><strong>Floyd-Warshall:</strong> Với <strong>V ≈ 10<sup>8</sup></strong> và giả sử 4 byte/ô, ma trận cần khoảng <strong>40 PB dữ liệu thô</strong> (chưa tính overhead).</li>
+                <li><strong>Dijkstra thuần túy:</strong> Có thể phải mở rộng rất nhiều nút trước khi tới đích, nên kém hiệu quả trên mạng lớn.</li>
               </ul>
             </div>
 
             <div class="spec-card">
               <span class="spec-badge bg-emerald-100 text-emerald-800 font-bold">GIẢI PHÁP THỰC TẾ TRONG CÔNG NGHIỆP</span>
               <p class="spec-text text-slate-800">
-                Các ứng dụng hiện đại kết hợp <strong>Thuật toán A*</strong> (định hướng Heuristic theo khoảng cách chim bay) cùng kỹ thuật <strong>Contraction Hierarchies (CH)</strong> phân cấp mạng lưới cao tốc để trả về đường đi xuyên quốc gia chỉ trong <strong>dưới 5 mili-giây</strong>!
+                Các hệ thống định tuyến hiện đại, chẳng hạn <strong>OSRM</strong>, hỗ trợ các phương pháp như <strong>Contraction Hierarchies (CH)</strong> và <strong>Multi-Level Dijkstra (MLD)</strong> để tăng tốc truy vấn trên mạng đường lớn; thuật toán cụ thể và hiệu năng phụ thuộc hệ thống và dữ liệu.
               </p>
             </div>
           </div>
@@ -1693,10 +1758,10 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
             <div class="spec-card border-blue-200 bg-blue-50/40">
               <span class="spec-badge bg-blue-600 text-white font-bold">CẨM NANG BỎ TÚI</span>
               <ul class="list-disc pl-5 mt-2 space-y-2 text-base text-slate-800 font-medium">
-                <li><strong>Cần tìm đường từ 1 điểm, cạnh dương:</strong> Chọn ngay <strong>Dijkstra</strong> (kết hợp Min-Heap).</li>
-                <li><strong>Cần tra cứu giữa mọi cặp điểm, đồ thị vừa và nhỏ (V ≤ 500):</strong> Chọn <strong>Floyd-Warshall</strong> (code ngắn, tận dụng Cache RAM).</li>
+                <li><strong>Cần tìm đường từ 1 điểm, cạnh không âm (w ≥ 0):</strong> Chọn ngay <strong>Dijkstra</strong> (kết hợp <code>IndexMinPQ</code>).</li>
+                <li><strong>Cần tra cứu giữa mọi cặp điểm, đồ thị vừa và nhỏ (V ≤ 500):</strong> Chọn <strong>Floyd-Warshall</strong> khi ma trận <strong>V × V</strong> phù hợp với bộ nhớ.</li>
                 <li><strong>Đồ thị có cạnh âm:</strong> Dùng <strong>Bellman-Ford</strong> hoặc <strong>Floyd-Warshall</strong>.</li>
-                <li><strong>Bản đồ số hàng triệu điểm:</strong> Kết hợp <strong>A*</strong> và <strong>Contraction Hierarchies</strong>.</li>
+                <li><strong>Bản đồ số quy mô lớn:</strong> Các hệ thống định tuyến có thể dùng <strong>A*</strong>, <strong>Contraction Hierarchies (CH)</strong>, <strong>Multi-Level Dijkstra (MLD)</strong> hoặc các biến thể.</li>
               </ul>
             </div>
           </div>
@@ -1707,7 +1772,7 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
               <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4 shadow-inner">
                 <i data-lucide="check-circle" class="w-9 h-9"></i>
               </div>
-              <h3 class="text-3xl font-extrabold text-slate-900 font-heading mb-2">Xin Trân Trọng Cảm Ơn!</h3>
+              <h3 class="text-3xl font-extrabold text-slate-900 mb-2">Xin Trân Trọng Cảm Ơn!</h3>
               <p class="text-lg text-slate-600 max-w-md mx-auto mb-6">
                 Cảm ơn Thầy/Cô và các bạn đã chú ý lắng nghe bài thuyết trình của nhóm!
               </p>
@@ -1728,16 +1793,16 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
   </main>
 
   <!-- =========================================================================
-       FLOATING BOTTOM CONTROL BAR (LIGHT THEME)
+       FLOATING BOTTOM CONTROL BAR (CLEAN - NO TIMER)
        ========================================================================= -->
   <aside class="floating-bar-container" id="floating-bar" aria-label="Điều khiển Trình chiếu">
     <!-- Prev Button -->
-    <button class="bar-btn" id="btn-prev-slide" title="Slide trước (← hoặc PageUp)">
-      <i data-lucide="chevron-left" class="w-5 h-5"></i>
+    <button class="bar-btn" id="btn-prev-slide" title="Slide trước (↑, ← hoặc Cuộn lên)">
+      <i data-lucide="chevron-up" class="w-5 h-5"></i>
     </button>
 
     <!-- Slide Index -->
-    <span class="font-mono text-sm font-bold text-slate-800 px-1" id="slide-indicator">1 / 20</span>
+    <span class="text-sm font-bold text-slate-800 px-1" id="slide-indicator">1 / 20</span>
 
     <!-- Progress Track -->
     <div class="progress-track hidden sm:block">
@@ -1745,25 +1810,14 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
     </div>
 
     <!-- Next Button -->
-    <button class="bar-btn" id="btn-next-slide" title="Slide sau (→ hoặc Space)">
-      <i data-lucide="chevron-right" class="w-5 h-5"></i>
+    <button class="bar-btn" id="btn-next-slide" title="Slide sau (↓, → hoặc Cuộn xuống)">
+      <i data-lucide="chevron-down" class="w-5 h-5"></i>
     </button>
 
     <div class="bar-divider"></div>
 
-    <!-- Presentation Timer -->
-    <div class="flex items-center gap-2 font-mono text-sm text-slate-700 px-1 font-semibold">
-      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-      <span id="deck-timer">00:00</span>
-      <button class="bar-btn p-1 text-slate-500 hover:text-slate-800" id="btn-deck-timer-toggle" title="Tạm dừng / Tiếp tục">
-        <i data-lucide="pause" class="w-3.5 h-3.5" id="icon-deck-timer"></i>
-      </button>
-    </div>
-
-    <div class="bar-divider"></div>
-
     <!-- Timeline Drawer Button [T] -->
-    <button class="bar-btn gap-1.5 text-xs font-bold font-sans" id="btn-open-timeline" title="Mở danh sách Slide [T]">
+    <button class="bar-btn gap-1.5 text-xs font-bold" id="btn-open-timeline" title="Mở danh sách Slide [T]">
       <i data-lucide="list" class="w-4 h-4"></i>
       <span class="hidden md:inline">Mục lục [T]</span>
     </button>
@@ -1780,14 +1834,14 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
   </aside>
 
   <!-- =========================================================================
-       TIMELINE SIDEBAR DRAWER (LIGHT THEME)
+       TIMELINE SIDEBAR DRAWER
        ========================================================================= -->
   <div class="timeline-backdrop" id="timeline-backdrop"></div>
   <aside class="timeline-drawer" id="timeline-drawer">
     <div class="p-5 border-b border-slate-200 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
-        <h3 class="font-bold text-base text-slate-900 font-heading">DANH SÁCH 20 SLIDE</h3>
+        <h3 class="font-bold text-base text-slate-900">DANH SÁCH 20 SLIDE</h3>
       </div>
       <button class="bar-btn p-1.5 text-slate-400 hover:text-slate-800" id="btn-close-timeline">
         <i data-lucide="x" class="w-5 h-5"></i>
@@ -1808,21 +1862,21 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
         <div class="flex items-center gap-2">
           <i data-lucide="keyboard" class="w-5 h-5 text-blue-600"></i>
-          <h3 class="text-lg font-bold text-slate-900 font-heading">Phím tắt Thuyết trình</h3>
+          <h3 class="text-lg font-bold text-slate-900">Phím tắt Thuyết trình</h3>
         </div>
         <button class="bar-btn p-1 text-slate-400 hover:text-slate-800" id="btn-close-help">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
-      <div class="space-y-3.5 text-sm font-sans text-slate-700">
+      <div class="space-y-3.5 text-sm text-slate-700">
         <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
           <span class="font-medium">Chuyển Slide tiếp theo:</span>
-          <div class="flex gap-1.5"><span class="kbd-badge">→</span><span class="kbd-badge">Space</span></div>
+          <div class="flex gap-1.5"><span class="kbd-badge">↓</span><span class="kbd-badge">→</span><span class="kbd-badge">Space</span></div>
         </div>
         <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
           <span class="font-medium">Quay lại Slide trước:</span>
-          <div class="flex gap-1.5"><span class="kbd-badge">←</span></div>
+          <div class="flex gap-1.5"><span class="kbd-badge">↑</span><span class="kbd-badge">←</span></div>
         </div>
         <div class="flex items-center justify-between py-1.5 border-b border-slate-100">
           <span class="font-medium">Lăn chuột lên / xuống:</span>
@@ -1856,7 +1910,8 @@ Khoảng cách 0 (A) -> 4 (E): 10.0 | Lộ trình: 0 -> 2 -> 1 -> 3 -> 4 (A -> C
     </div>
   </div>
 
-  <!-- Application Logic -->
+  <!-- Application Logic (Hỗ trợ cả đường dẫn js/app.js và app.js) -->
   <script src="js/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
